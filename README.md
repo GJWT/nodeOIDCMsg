@@ -1,6 +1,6 @@
 This is not an officially supported Google Product.
 
-# 0Auth and Open Id Connect Message Protocol - Node JS
+# JWTs for Node
 
 This is a module that implements the protocol messages in OAuth2 and OpenID Connect.
 
