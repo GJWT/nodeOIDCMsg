@@ -4,7 +4,7 @@ var path = require('path');
 var expect = require('chai').expect;
 var assert = require('chai').assert;
 var ms = require('ms');
-var ImplicitAccessToken = require('../node_modules/src/models/tokenProfiles/implicitAccessToken');
+var ImplicitAccessToken = require('../src/models/tokenProfiles/implicitAccessToken');
 
 function loadKey(filename) {
   return fs.readFileSync(path.join(__dirname, filename));

@@ -2,7 +2,7 @@ var jwt = require('../index');
 var expect = require('chai').expect;
 var atob = require('atob');
 
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('encoding', function() {
     var clockTimestamp = 1000000000;

@@ -1,6 +1,6 @@
 var jwt = require('../');
 var clockTimestamp = 1000000000;
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('issue 70 - public key start with BEING PUBLIC KEY', function () {
 
