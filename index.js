@@ -189,7 +189,7 @@ setTimeout(function () {
 
   //kb.doLocalJwk("/Users/anjuthomas/Documents/jwk.json");
 
-
+/*
   var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jwtid");
   basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
   basicIdToken.setNoneAlgorithm(true);
