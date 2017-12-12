@@ -2,7 +2,7 @@ var jwt = require('../index');
 var expect = require('chai').expect;
 var path = require('path');
 var assert = require('chai').assert;
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('iat', function () {
 

@@ -4,7 +4,7 @@ var path = require('path');
 var expect = require('chai').expect;
 var assert = require('chai').assert;
 var ms = require('ms');
-var FacebookIdToken = require('../node_modules/src/models/tokenProfiles/facebookIdToken');
+var FacebookIdToken = require('../src/models/tokenProfiles/facebookIdToken');
 
 function loadKey(filename) {
   return fs.readFileSync(path.join(__dirname, filename));

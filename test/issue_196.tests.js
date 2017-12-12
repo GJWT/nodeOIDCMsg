@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var jwt = require('./..');
 var atob = require('atob');
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 var clockTimestamp = 1000000000;
 
 describe('issue 196', function () {

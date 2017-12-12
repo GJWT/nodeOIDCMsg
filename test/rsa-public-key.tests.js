@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var pub = fs.readFileSync(path.join(__dirname, 'pub.pem'), 'utf8');
 var clockTimestamp = 1000000000;
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('public key start with BEGIN RSA PUBLIC KEY', function () {
 
