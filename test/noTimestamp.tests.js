@@ -3,12 +3,12 @@ var jwt = require('../index');
 var expect = require('chai').expect;
 var fs = require('fs');
 var jwt = require('../index');
-var JsonWebTokenError = require('../node_modules/src/controllers/messageTypes/jwt/jsonwebtoken/lib/JsonWebTokenError');
+var JsonWebTokenError = require('../src/controllers/messageTypes/jwt/jsonwebtoken/lib/JsonWebTokenError');
 var expect = require('chai').expect;
 var assert = require('chai').assert;  
 
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
-var RefreshToken = require('../node_modules/src/models/tokenProfiles/refreshToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
+var RefreshToken = require('../src/models/tokenProfiles/refreshToken');
 
 
 describe('noTimestamp', function() {

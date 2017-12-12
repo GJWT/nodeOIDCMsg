@@ -1,7 +1,7 @@
 var jwt = require('../index');
 var expect = require('chai').expect;
-var jws = require('../node_modules/src/controllers/messageTypes/jwt/lib/jws');
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var jws = require('../src/controllers/messageTypes/jwt/lib/jws');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('signing a token asynchronously', function() {
     var clockTimestamp = 1000000000;  

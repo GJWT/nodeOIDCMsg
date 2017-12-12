@@ -3,7 +3,7 @@ var jwt = require('../index');
 var expect = require('chai').expect;
 var assert = require('chai').assert;
 
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('HS256', function() {
 

@@ -1,17 +1,16 @@
   /* Main */
 
-  var clockTimestamp = 1000000000; 
-  var BasicIdToken = require('./node_modules/src/models/tokenProfiles/basicIdToken');  
   //var GoogleIdToken = require('./node_modules/src/models/tokenProfiles/googleIdToken');
   //var RefreshToken = require('./node_modules/src/models/tokenProfiles/refreshToken');
-  var clockTimestamp = 1000000000; 
-  var expect = require('chai').expect;
-  var atob = require('atob');
+
   var assert = require('chai').assert;  
+  var atob = require('atob');
+  var BasicIdToken = require('./src/models/tokenProfiles/basicIdToken');  
+  var conv = require('binstring');  
+  var expect = require('chai').expect;
+  var jwtDecoder = require('./src/controllers/messageTypes/jwt/jsonwebtoken/decode');    
+  var KeyBundle = require('./src/models/keystore-dependency/keyBundle');    
   var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-  var jwtDecoder = require('./node_modules/src/controllers/messageTypes/jwt/jsonwebtoken/decode');  
-  var conv = require('binstring');
-  var KeyBundle = require('./node_modules/src/models/keystore-dependency/keyBundle');  
   
   var clockTimestamp = 1511783267;
 

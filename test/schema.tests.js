@@ -1,7 +1,7 @@
 var jwt = require('../index');
 var expect = require('chai').expect;
 var fs = require('fs');
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('schema', function() {
 

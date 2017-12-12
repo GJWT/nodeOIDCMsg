@@ -1,7 +1,7 @@
 var jwt = require('../index');
 var expect = require('chai').expect;
-var JsonWebTokenError = require('../node_modules/src/controllers/messageTypes/jwt/jsonwebtoken/lib/JsonWebTokenError');
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var JsonWebTokenError = require('../src/controllers/messageTypes/jwt/jsonwebtoken/lib/JsonWebTokenError');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 
 describe('non_object_values values', function() {
 

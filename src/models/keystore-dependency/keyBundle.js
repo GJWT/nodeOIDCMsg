@@ -244,7 +244,6 @@ keyBundle.update = function() {
     }
   }
   return res;
-
 };
 
 /**

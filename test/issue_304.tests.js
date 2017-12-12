@@ -1,6 +1,6 @@
 var jwt = require('../index');
 var expect = require('chai').expect;
-var BasicIdToken = require('../node_modules/src/models/tokenProfiles/basicIdToken');
+var BasicIdToken = require('../src/models/tokenProfiles/basicIdToken');
 var assert = require('chai').assert;
 
 describe('issue 304 - verifying values other than strings', function() {
