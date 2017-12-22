@@ -543,7 +543,8 @@ KeyBundle.prototype.dumpJwks = function(kbl, target, private = false) {
 
 KeyBundle.prototype.rsaInit =
     function(spec) {
-  var arg = {} var arr = ['name', 'path', 'size'];
+  var arg = {};
+  var arr = ['name', 'path', 'size'];
   for (var i = 0; i < arr.length; i++) {
     var param = arr[i];
     try {
@@ -552,7 +553,8 @@ KeyBundle.prototype.rsaInit =
       console.log('KeyError')
     }
   }
-  var kb = new KeyBundle(null, null, 'RSA', spec['use']) var key = null;
+  var kb = new KeyBundle(null, null, 'RSA', spec['use']);
+  var key = null;
   for (var i = 0; i < spec['use'].length; i++) {
     var use = spec['use'][i];
     key = this.createAndStoreRSAKeyPair(arg['name'], arg['path'], arg['size']);
@@ -594,4 +596,6 @@ KeyBundle.prototype.rsaInit =
     });
   }
   return privKey;
-} module.exports = KeyBundle;
+};
+
+module.exports = KeyBundle;
