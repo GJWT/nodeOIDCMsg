@@ -5,13 +5,9 @@ var decode            = require('./decode');
 var timespan          = require('./lib/timespan');
 var jws               = require('../lib/jws');
 var xtend             = require('xtend');
-var jwtVerifier       = require('./verify')
+var jwtVerifier       = require('./verify');
 var jwkToPem          = require('jwk-to-pem');
 var forge = require('node-forge');
-
-
-
-var jwtDecoder = JWTDecoder.prototype;
 
 function JWTDecoder(){
 };
@@ -25,7 +21,7 @@ function JWTDecoder(){
       signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
     * @throws JsonWebToken error if inputted claims does not match expected claims
 */ 
-jwtDecoder.decode = function (jwtSig, secretOrPublicKey, tokenProfile, otherOptions, callback) {
+JWTDecoder.prototype.decode = function (jwtSig, secretOrPublicKey, tokenProfile, otherOptions, callback) {
   // Verifications of other options and jwt string signature
   jwtVerifier.verifyOptions(jwtSig, secretOrPublicKey, otherOptions, callback);
 
@@ -65,7 +61,7 @@ jwtDecoder.decode = function (jwtSig, secretOrPublicKey, tokenProfile, otherOpti
 };
 
 /* Initialize callback */
-jwtDecoder.initCallback = function(callback){
+JWTDecoder.prototype.initCallback = function(callback){
   var done;
   
   if (callback) {
@@ -80,7 +76,7 @@ jwtDecoder.initCallback = function(callback){
 }
 
 /* Algorithms check based on decoded header */
-jwtDecoder.verifyHeaderAlgorithm = function(otherOptions, header, done){
+JWTDecoder.prototype.verifyHeaderAlgorithm = function(otherOptions, header, done){
   if (otherOptions && otherOptions.algorithms){
     if (!~otherOptions.algorithms.indexOf(header.alg)) {
       return done(new JsonWebTokenError('invalid algorithm'));
@@ -93,7 +89,7 @@ jwtDecoder.verifyHeaderAlgorithm = function(otherOptions, header, done){
 }
 
 /* Verifies signed Jwt */
-jwtDecoder.validateJws = function(jwtSig, algorithm, secretOrPublicKey, baseEncoding, done){
+JWTDecoder.prototype.validateJws = function(jwtSig, algorithm, secretOrPublicKey, baseEncoding, done){
   var valid;
   
   try {
@@ -107,7 +103,7 @@ jwtDecoder.validateJws = function(jwtSig, algorithm, secretOrPublicKey, baseEnco
 }
 
 /* Parse payload */
-jwtDecoder.parsePayload = function(payload){
+JWTDecoder.prototype.parsePayload = function(payload){
   if(typeof payload === 'string') {
     try {
       var obj = JSON.parse(payload);
@@ -118,42 +114,71 @@ jwtDecoder.parsePayload = function(payload){
   }
 }
 
-jwtDecoder.verifyJwtSignature = function(token, secretOrPublicKey, tokenProfile, otherOptions, certs, baseEncoding, callback){
+JWTDecoder.prototype.verifyJwtSign = function(token, secretOrPublicKey, tokenProfile, otherOptions, baseEncoding, callback){
   var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
-  try {
-    if (!jwt.signature) {
-      return Promise.reject('No signature to verify');
-    } else {
-        if (JSON.parse(certs).keys.length <= 0) {
-          return Promise.reject('No certs.');
-        } else {
-          // find the cert
-          const header = jwt.header;
-          if (header.kid) {
-            // a kid is being used
-            const kids = JSON.parse(certs).keys.filter(key => key.kid === header.kid);
-            if (kids.length > 0) {
-              // we have a key
-              return jws.verify(token, jwt.header.alg, jwkToPem(kids[0]), baseEncoding);
-            } else {
-              // no matching kid 
-            }
-          } else {
-            // try using the first key
-            const first = JSON.parse(certs).keys[0];
-            var pemFromX509 = this.convertX509ToPem(first);
-            console.log(pemFromX509);
-            return jws.verify(token, jwt.header.alg, pemFromX509, baseEncoding);
-            //return jws.verify(token, jwt.header.alg, jwkToPem(first), baseEncoding);
-            }
-        }
+  if (!jwt.signature) {
+    return false;
+  } else {
+    var valid = null;
+    try {
+      valid = jws.verify(token, jwt.header.alg, secretOrPublicKey, baseEncoding);
+    } catch (e) {
+      return done(e);
     }
-  } catch (error) {
-    return Promise.reject(error);
+            
+    if (!valid) {
+      console.log('invalid signature');
+      return false;
+    } else {
+      return true;
+    }
   }
 }
 
-jwtDecoder.convertX509ToPem = function(jwk){
+JWTDecoder.prototype.verifyJwtSignature = function(token, secretOrPublicKey, tokenProfile, otherOptions, certs, baseEncoding, callback){
+  var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
+  if (!jwt.signature) {
+    return false;
+  } else {
+    if (JSON.parse(certs).keys.length <= 0) {
+      return false;
+    } else {
+      // find the cert
+      const header = jwt.header;
+      if (header.kid) {
+        // a kid is being used
+        const kids = JSON.parse(certs).keys.filter(key => key.kid === header.kid);
+        if (kids.length > 0) {
+          // we have a key
+          return jws.verify(token, jwt.header.alg, jwkToPem(kids[0]), baseEncoding);
+        } else {
+          // no matching kid 
+          return false;
+        }
+      } else {
+        // try using the first key
+        const first = JSON.parse(certs).keys[0];
+        var pemFromX509 = this.convertX509ToPem(first);
+        console.log(pemFromX509);
+        var valid = null;
+        try {
+          valid = jws.verify(token, jwt.header.alg, pemFromX509, baseEncoding);
+        } catch (e) {
+          return done(e);
+        }
+            
+        if (!valid) {
+          console.log('invalid signature');
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+}
+
+JWTDecoder.prototype.convertX509ToPem = function(jwk){
   // this string format is base64-encoded DER bytes
    var certString = jwk.x5c[0];
   // base64-decode DER bytes
@@ -169,5 +194,4 @@ jwtDecoder.convertX509ToPem = function(jwk){
   return pem;
 }
 
-
-module.exports = jwtDecoder;
+module.exports = JWTDecoder.prototype;
