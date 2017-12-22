@@ -9,8 +9,6 @@ var jwtVerifier       = require('./verify')
 var jwkToPem          = require('jwk-to-pem');
 var forge = require('node-forge');
 
-
-
 var jwtDecoder = JWTDecoder.prototype;
 
 function JWTDecoder(){
@@ -118,14 +116,34 @@ jwtDecoder.parsePayload = function(payload){
   }
 }
 
+jwtDecoder.verifyJwtSign = function(token, secretOrPublicKey, tokenProfile, otherOptions, baseEncoding, callback){
+  var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
+    if (!jwt.signature) {
+      return false;
+    } else {
+      var valid = null;
+      try {
+        valid = jws.verify(token, jwt.header.alg, secretOrPublicKey, baseEncoding);
+      } catch (e) {
+        return done(e);
+      }
+            
+      if (!valid){
+        console.log('invalid signature');
+        return false;
+      } else {
+        return true;
+      }
+    }
+}
+
 jwtDecoder.verifyJwtSignature = function(token, secretOrPublicKey, tokenProfile, otherOptions, certs, baseEncoding, callback){
   var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
-  try {
     if (!jwt.signature) {
-      return Promise.reject('No signature to verify');
+      return false;
     } else {
         if (JSON.parse(certs).keys.length <= 0) {
-          return Promise.reject('No certs.');
+          return false;
         } else {
           // find the cert
           const header = jwt.header;
@@ -137,20 +155,31 @@ jwtDecoder.verifyJwtSignature = function(token, secretOrPublicKey, tokenProfile,
               return jws.verify(token, jwt.header.alg, jwkToPem(kids[0]), baseEncoding);
             } else {
               // no matching kid 
+              return false;
             }
           } else {
             // try using the first key
             const first = JSON.parse(certs).keys[0];
             var pemFromX509 = this.convertX509ToPem(first);
             console.log(pemFromX509);
-            return jws.verify(token, jwt.header.alg, pemFromX509, baseEncoding);
+            //return jws.verify(token, jwt.header.alg, secretOrPublicKey, baseEncoding);
             //return jws.verify(token, jwt.header.alg, jwkToPem(first), baseEncoding);
+            var valid = null;
+            try {
+              valid = jws.verify(token, jwt.header.alg, pemFromX509, baseEncoding);
+            } catch (e) {
+              return done(e);
             }
+            
+            if (!valid){
+              console.log('invalid signature');
+              return false;
+            } else {
+              return true;
+            }
+          }
         }
     }
-  } catch (error) {
-    return Promise.reject(error);
-  }
 }
 
 jwtDecoder.convertX509ToPem = function(jwk){
@@ -168,6 +197,5 @@ jwtDecoder.convertX509ToPem = function(jwk){
   var pem = forge.pki.publicKeyToPem(publicKey);
   return pem;
 }
-
 
 module.exports = jwtDecoder;
