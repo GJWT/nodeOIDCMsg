@@ -1,5 +1,7 @@
 
 var async = require('asyncawait/async');
+
+var async = require('asyncawait/async');
 var await = require('asyncawait/await');
 var forge = require('node-forge');
 var fs = require('fs');
@@ -12,6 +14,8 @@ var ECKey = require('./keys/ECKey.js');
 var SYMKey = require('./keys/SYMKey.js');
 var NodeRSA = require('node-rsa');
 var path = require('path');
+var getPem = require('rsa-pem-from-mod-exp');
+
 
 /**
    *  Contains a set of keys that have a common origin.
@@ -31,8 +35,16 @@ var path = require('path');
    * :param keyUsage: What the key loaded from file should be used for.
       Only applicable for DER files
    */
-function KeyBundle(
-    keys, source, fileFormat, keyUsage, cacheTime, verifySSL, keyType, encEnc) {
+
+function KeyBundle(){
+  console.log("test");
+};
+
+KeyBundle.prototype.init = async (function(
+    keys, source, fileFormat, keyUsage,
+    cacheTime, verifySSL, keyType,
+    encEnc) {
+  console.log("constructor");
   fileFormat = fileFormat || 'jwk';
   keyUsage = keyUsage || 'None';
   cacheTime = cacheTime || 300;
@@ -55,6 +67,9 @@ function KeyBundle(
   this.formattedKeysList = [];
   var self = this;
 
+  var test = null;
+  //test = await (this.doLocalJwk(this.source));  
+  
   if (keys) {
     if (typeof keys === 'object' && keys !== null && !(keys instanceof Array) &&
         !(keys instanceof Date)) {
@@ -85,22 +100,27 @@ function KeyBundle(
     if (!this.remote) {
       var formatArr = ['jwks', 'jwk'];
       if (formatArr.indexOf(this.fileFormat) !== -1) {
-        this.doLocalJwk(this.source);
+        test = await (self.doLocalJwk(self.source));
+
       } else if (this.fileFormat === 'der') {
-        this.doLocalDer(this.source, this.keyType, this.keyUsage);
+        var test2 = this.doLocalDer(this.source, this.keyType, this.keyUsage);
       }
     }
   }
-};
+  return test;
+});
 
 var MAP = {'dec': 'enc', 'enc': 'enc', 'ver': 'sig', 'sig': 'sig'};
-var K2C = {'RSA': RSAKey, 'EC': ECKey, 'oct': SYMKey};
+var K2C = {"RSA": RSAKey, "EC": ECKey, "oct": SYMKey};
 
-KeyBundle.prototype.getCurrentTime = function() {
+KeyBundle.prototype.getCurrentTime = function(){
   return Date.now();
 };
 
 KeyBundle.prototype.doKeys = function(keyData) {
+  if (!this.keys){
+    this.keys = [];
+  }
   if (typeof keyData === 'string') {
     this.keys.push(keyData);
   } else {
@@ -117,7 +137,7 @@ KeyBundle.prototype.getKty = function(typ) {
     var keysList = [];
     for (var index = 0; index < this.keys.length; index++) {
       var key = this.keys[index];
-      if (key.kty === typ) {
+      if (key.kty === typ){ 
         keysList.push(key);
       }
     }
@@ -150,28 +170,11 @@ KeyBundle.prototype.getKeysOld = function() {
   if (this.formattedKeysList.length !== 0) {
     return this.formattedKeysList;
   } else if (this.source !== '') {
-    var HttpClient =
-        function() {
-      this.get = function(aUrl, aCallback) {
-        var anHttpRequest = new XMLHttpRequest();
-        anHttpRequest.onreadystatechange =
-            function() {
-          if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200) {
-            aCallback(anHttpRequest.responseText);
-          }
-        }
-
-            anHttpRequest.open('GET', aUrl, true);
-        anHttpRequest.send(null);
-      }
-    }
-
-    var client = new HttpClient();
-    client.get(this.source, function(response) {
+    this.getHttpRequestResponse(this.source, args).then (function (response) { 
       // do something with response
       var keys = JSON.parse(response).keys;
       return this.getKeyList(keys);
-    });
+    }).catch(function (err) { console.log('Something went wrong: ' + err)});
   } else {
     return this.getKeyList(this.keys);
   }
@@ -272,7 +275,7 @@ KeyBundle.prototype.removeOutdated = function(after, when) {
   var now = this.getCurrentTime();
   if (when) {
     now = when;
-  }
+  } 
   if (!(after instanceof float)) {
     try {
       after = float(after);
@@ -281,7 +284,7 @@ KeyBundle.prototype.removeOutdated = function(after, when) {
     }
   }
   var kl = [];
-  for (var i = 0; i < this.keys.length; i++) {
+  for (var i = 0; i < this.keys.length; i++){
     var k = this.keys[i];
     if (k.inactiveSince && k.inactiveSince + after < now) {
       continue;
@@ -294,14 +297,19 @@ KeyBundle.prototype.removeOutdated = function(after, when) {
 
 KeyBundle.prototype.doLocalJwk = function(filePath) {
   var self = this;
-  fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
-    if (!err) {
-      var keys = JSON.parse(data).keys;
-      self.doKeys(keys);
-    } else {
-      console.log(err);
-    }
-    this.lastUpdated = self.getCurrentTime();
+  return new Promise(function (resolve, reject) {
+    fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
+      if (err) {
+        console.log(err);        
+        reject(err);
+      } else {
+        var keys = JSON.parse(data).keys;
+        self.doKeys(keys);
+        resolve(this.keys);
+        resolve(data);
+        this.lastUpdated = self.getCurrentTime();        
+      }
+    });
   });
 };
 
@@ -322,28 +330,8 @@ KeyBundle.prototype.doRemote = function() {
   if (this.etag) {
     args['headers'] = {'If-None-Match': this.etag};
   }
-  var HttpClient =
-      function() {
-    this.get = function(aUrl, aCallback) {
-      var anHttpRequest = new XMLHttpRequest();
-      anHttpRequest.onreadystatechange =
-          function() {
-        if (anHttpRequest.readyState === 4 && anHttpRequest.status === 200) {
-          aCallback(anHttpRequest.response);
-        }
-      }
 
-          anHttpRequest.open('GET', aUrl, true);
-      anHttpRequest.setRequestHeader(
-          'Content-type', 'application/json; charset=utf-8');
-      anHttpRequest.setRequestHeader('Content-length', args.length);
-      anHttpRequest.setRequestHeader('Connection', 'close');
-      anHttpRequest.send(JSON.stringify(args));
-    }
-  }
-
-  var client = new HttpClient();
-  client.get(this.source, function(response) {
+  this.getHttpRequestResponse(this.source, args).then (function (response) { 
     if (response.status === 304) {
       this.timeOut = this.getCurrentTime() + this.cacheTime;
       this.lastUpdated = this.getCurrentTime();
@@ -353,9 +341,10 @@ KeyBundle.prototype.doRemote = function() {
         console.log('No \'keys\' keyword in JWKS');
       }
     } else if (response.status === 200) {
-      this.timeOut = this.getCurrentTime() + this.cacheTime;
+      this.timeOut = this.getCurrentTime() +
+          this.cacheTime;
       this.impJwks = this.parseRemoteResponse(response);
-
+    
       if (!(typeof this.impJwks === 'object' && this.impJwks !== null &&
             !(this.impJwks instanceof Array) &&
             !(this.impJwks instanceof Date)) &&
@@ -377,10 +366,9 @@ KeyBundle.prototype.doRemote = function() {
     } else {
       console.log('Update Failed');
     }
-  });
-  this.lastUpdated = this.getCurrentTime();
-  return true;
-
+    this.lastUpdated = this.getCurrentTime();
+    return true;    
+  }).catch(function (err) { console.log(err)});
 };
 
 KeyBundle.prototype.upToDate = function() {
@@ -393,7 +381,8 @@ KeyBundle.prototype.upToDate = function() {
         }
       }
     }
-  } else if (this.remote) {
+  }
+  else if (this.remote) {
     if (this.update()) {
       res = true;
     }
@@ -487,13 +476,14 @@ KeyBundle.prototype.harmonizeUsage = function(fileName, typ, use) {
 };
 
 /**
- * Create a KeyBundle based on the content in a local file
- * :param filename: Name of the file
- * :param typ: Type of content
- * :param usage: What the key should be used for
- * :return: The created KeyBundle
- */
-KeyBundle.prototype.keybundleFromLocalFile = function(fileName, typ, usage) {
+  * Create a KeyBundle based on the content in a local file
+  * :param filename: Name of the file
+  * :param typ: Type of content
+  * :param usage: What the key should be used for
+  * :return: The created KeyBundle
+  */
+KeyBundle.prototype.keybundleFromLocalFile = function(
+        fileName, typ, usage) {
   if (typ.toLowerCase() === 'jwks') {
     kb = KeyBundle(null, filename, 'jwks', usage);
   } else if (typ.toLowerCase() === 'der') {
@@ -513,25 +503,25 @@ KeyBundle.prototype.keybundleFromLocalFile = function(fileName, typ, usage) {
 KeyBundle.prototype.dumpJwks = function(kbl, target, private = false) {
   private = private || false;
   var keys = [];
-  for (var i = 0; i < kbl.length; i++) {
+  for (var i = 0; i < kbl.length; i++){
     var kb = kbl[i];
-    for (var i = 0; i < kb.keys(); i++) {
+    for (var i = 0; i < kb.keys(); i++){
       var k = kb[i];
-      if (k.kty !== 'oct' && !k.inactiveSince) {
+      if (k.kty !== 'oct' && ! k.inactiveSince){
         keys += [key]
       }
     }
   }
-  res = {'keys': keys};
+  res = {"keys": keys};
 
-  try {
+  try{
     var file = new File(target);
     file.open('w')
-  } catch (err) {
+  }catch(err){
     var pathArr = target.split('/');
     var head = pathArr[0];
     shell.mkdir('-p', head);
-
+    
     var file = new File(target);
     file.open('w')
   }
@@ -541,61 +531,109 @@ KeyBundle.prototype.dumpJwks = function(kbl, target, private = false) {
   file.close();
 };
 
-KeyBundle.prototype.rsaInit =
-    function(spec) {
-  var arg = {};
-  var arr = ['name', 'path', 'size'];
-  for (var i = 0; i < arr.length; i++) {
+KeyBundle.prototype.rsaInit = function(spec) {
+  var arg = {}
+  var arr = ["name", "path", "size"];
+  for (var i =0; i < arr.length; i++){
     var param = arr[i];
-    try {
-      arg[param] = spec[param]
-    } catch (err) {
-      console.log('KeyError')
+      try{
+          arg[param] = spec[param]
+      }catch(err){
+        console.log("KeyError")
+      }
     }
-  }
-  var kb = new KeyBundle(null, null, 'RSA', spec['use']);
+  var kb = new KeyBundle(null, null, "RSA", spec["use"])
   var key = null;
-  for (var i = 0; i < spec['use'].length; i++) {
-    var use = spec['use'][i];
+  for (var i = 0; i < spec["use"].length; i++){
+    var use = spec["use"][i];
     key = this.createAndStoreRSAKeyPair(arg['name'], arg['path'], arg['size']);
-    key.kty = 'rsa';
+    key.kty = "rsa";
     key.use = use;
     kb.keys.push(new RSAKey(use, key));
   }
   return kb;
 }
 
-    KeyBundle.prototype.createAndStoreRSAKeyPair = function(
-                                                       name, filePath, size) {
-  name = name || 'oicmsg';
-  filePath = filePath || '.';
+KeyBundle.prototype.createAndStoreRSAKeyPair = function(name, filePath, size) {
+  name = name || "oicmsg";
+  filePath = filePath || ".";
   size = size || 2048;
   var pair = forge.pki.rsa.generateKeyPair(size, 0x10001);
   var privKey = pair.privateKey;
   var pubKey = pair.publicKey;
-  // var key = new NodeRSA({b: size});
-  try {
-    shell.mkdir('-p', filePath);
-  } catch (err) {
-    console.log('OSError')
+  //var key = new NodeRSA({b: size});
+  try{
+    shell.mkdir('-p', filePath);    
+  }catch(err){
+    console.log("OSError")
   }
 
-  if (name) {
+  if (name){
     var pathName = path.join(filePath, name);
-    fs.open(pathName, 'w', function(err, file) {
+    fs.open(pathName, 'w', function (err, file) {
       if (err) throw err;
-      fs.write(forge.pki.privateKeyToPem(privKey));
+      fs.write(forge.pki.privateKeyToPem(privKey));      
       console.log('Saved!');
     });
-
-    var pathNamePub = path.join(pathName, '.pub')
-    fs.open(pathNamePub, 'w', function(err, file) {
+    
+    var pathNamePub = path.join(pathName, ".pub")
+    fs.open(pathNamePub, 'w', function (err, file) {
       if (err) throw err;
       fs.write(forge.pki.publicKeyToPem(pubKey));
       console.log('Saved!');
     });
   }
   return privKey;
-};
+}  
+
+KeyBundle.prototype.fetchPubKey = function(response, kid){
+  var keys = JSON.parse(response).keys;
+  for (var i = 0; i < keys.length; i++){
+      if (keys[i].kid == kid){
+        var pubKeyPem = getPem(keys[i].n, keys[i].e);
+        console.log(pubKeyPem);     
+        var key = new NodeRSA(keys[i]);
+        var pubKey = key.exportKey('pkcs8-public-pem');
+        var keyPair = key.generateKeyPair([2048], keys[i].e);
+        return pubKeyPem;
+      }
+  }
+}
+ 
+KeyBundle.prototype.getHttpRequestResponse = async (function(url, args){
+  var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+  
+        anHttpRequest.open( "GET", aUrl, true );            
+        
+        if (args){
+          anHttpRequest.setRequestHeader(
+            'Content-type', 'application/json; charset=utf-8');
+          anHttpRequest.setRequestHeader('Content-length', args.length);
+          anHttpRequest.setRequestHeader('Connection', 'close');
+          anHttpRequest.send(JSON.stringify(args));
+        }else{
+          anHttpRequest.send( null );          
+        }
+  }
+}
+  return new Promise(function (resolve, reject) {
+      var client = new HttpClient();
+      client.get(url, function(response, err) {
+        if (response){
+          resolve(response);
+        } else{
+          reject(err);
+        }
+      });
+    });
+});
+
+
 
 module.exports = KeyBundle;
