@@ -67,9 +67,7 @@ KeyBundle.prototype.init = async (function(
   this.formattedKeysList = [];
   var self = this;
 
-  var test = null;
-  //test = await (this.doLocalJwk(this.source));  
-  
+  var result = null;  
   if (keys) {
     if (typeof keys === 'object' && keys !== null && !(keys instanceof Array) &&
         !(keys instanceof Date)) {
@@ -100,14 +98,14 @@ KeyBundle.prototype.init = async (function(
     if (!this.remote) {
       var formatArr = ['jwks', 'jwk'];
       if (formatArr.indexOf(this.fileFormat) !== -1) {
-        test = await (self.doLocalJwk(self.source));
+        result = await (self.doLocalJwk(self.source));
 
       } else if (this.fileFormat === 'der') {
-        var test2 = this.doLocalDer(this.source, this.keyType, this.keyUsage);
+        result = this.doLocalDer(this.source, this.keyType, this.keyUsage);
       }
     }
   }
-  return test;
+  return result;
 });
 
 var MAP = {'dec': 'enc', 'enc': 'enc', 'ver': 'sig', 'sig': 'sig'};
