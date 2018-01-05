@@ -169,7 +169,6 @@ KeyBundle.prototype.getKeysOld = function() {
     return this.formattedKeysList;
   } else if (this.source !== '') {
     this.getHttpRequestResponse(this.source, args).then (function (response) { 
-      // do something with response
       var keys = JSON.parse(response).keys;
       return this.getKeyList(keys);
     }).catch(function (err) { console.log('Something went wrong: ' + err)});
@@ -224,7 +223,7 @@ KeyBundle.prototype.markAsInactive = function(kid) {
  * Replaced keys will be marked as inactive and not removed.
  */
 KeyBundle.prototype.update = function() {
-  res = true;
+  var res = true;
   if (this.source) {
     var keys = this.keys;
     this.keys = [];
@@ -245,7 +244,7 @@ KeyBundle.prototype.update = function() {
       return false;
     }
 
-    now = this.getCurrentTime();
+    var now = this.getCurrentTime();
     for (var index = 0; index < this.keys.length; index++) {
       var key = this.keys[index];
       if (this.keys.indexOf(key) === -1) {
@@ -298,14 +297,14 @@ KeyBundle.prototype.doLocalJwk = function(filePath) {
   return new Promise(function (resolve, reject) {
     fs.readFile(filePath, {encoding: 'utf-8'}, function(err, data) {
       if (err) {
-        console.log(err);        
+        console.log(err);
         reject(err);
       } else {
         var keys = JSON.parse(data).keys;
         self.doKeys(keys);
         resolve(this.keys);
         resolve(data);
-        this.lastUpdated = self.getCurrentTime();        
+        this.lastUpdated = self.getCurrentTime();
       }
     });
   });
@@ -379,8 +378,7 @@ KeyBundle.prototype.upToDate = function() {
         }
       }
     }
-  }
-  else if (this.remote) {
+  } else if (this.remote) {
     if (this.update()) {
       res = true;
     }
@@ -550,7 +548,7 @@ KeyBundle.prototype.rsaInit = function(spec) {
     kb.keys.push(new RSAKey(use, key));
   }
   return kb;
-}
+};
 
 KeyBundle.prototype.createAndStoreRSAKeyPair = function(name, filePath, size) {
   name = name || "oicmsg";
@@ -559,7 +557,6 @@ KeyBundle.prototype.createAndStoreRSAKeyPair = function(name, filePath, size) {
   var pair = forge.pki.rsa.generateKeyPair(size, 0x10001);
   var privKey = pair.privateKey;
   var pubKey = pair.publicKey;
-  //var key = new NodeRSA({b: size});
   try{
     shell.mkdir('-p', filePath);    
   }catch(err){
@@ -582,56 +579,52 @@ KeyBundle.prototype.createAndStoreRSAKeyPair = function(name, filePath, size) {
     });
   }
   return privKey;
-}  
+};  
 
 KeyBundle.prototype.fetchPubKey = function(response, kid){
   var keys = JSON.parse(response).keys;
   for (var i = 0; i < keys.length; i++){
-      if (keys[i].kid == kid){
-        var pubKeyPem = getPem(keys[i].n, keys[i].e);
-        console.log(pubKeyPem);     
-        var key = new NodeRSA(keys[i]);
-        var pubKey = key.exportKey('pkcs8-public-pem');
-        var keyPair = key.generateKeyPair([2048], keys[i].e);
-        return pubKeyPem;
-      }
+    if (keys[i].kid == kid){
+      var pubKeyPem = getPem(keys[i].n, keys[i].e);
+      console.log(pubKeyPem);     
+      var key = new NodeRSA(keys[i]);
+      var pubKey = key.exportKey('pkcs8-public-pem');
+      var keyPair = key.generateKeyPair([2048], keys[i].e);
+      return pubKeyPem;
+    }
   }
-}
+};
  
 KeyBundle.prototype.getHttpRequestResponse = async (function(url, args){
   var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
-        var anHttpRequest = new XMLHttpRequest();
-        anHttpRequest.onreadystatechange = function() { 
-            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-                aCallback(anHttpRequest.responseText);
-        }
-  
-        anHttpRequest.open( "GET", aUrl, true );            
-        
-        if (args){
-          anHttpRequest.setRequestHeader(
-            'Content-type', 'application/json; charset=utf-8');
-          anHttpRequest.setRequestHeader('Content-length', args.length);
-          anHttpRequest.setRequestHeader('Connection', 'close');
-          anHttpRequest.send(JSON.stringify(args));
-        }else{
-          anHttpRequest.send( null );          
-        }
+      var anHttpRequest = new XMLHttpRequest();
+      anHttpRequest.onreadystatechange = function() { 
+        if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+          aCallback(anHttpRequest.responseText);
+      }
+      anHttpRequest.open( "GET", aUrl, true );            
+      if (args){
+        anHttpRequest.setRequestHeader(
+          'Content-type', 'application/json; charset=utf-8');
+        anHttpRequest.setRequestHeader('Content-length', args.length);
+        anHttpRequest.setRequestHeader('Connection', 'close');
+        anHttpRequest.send(JSON.stringify(args));
+      } else {
+        anHttpRequest.send(null);          
+      }
+    }
   }
-}
   return new Promise(function (resolve, reject) {
-      var client = new HttpClient();
-      client.get(url, function(response, err) {
-        if (response){
-          resolve(response);
-        } else{
-          reject(err);
-        }
-      });
+    var client = new HttpClient();
+    client.get(url, function(response, err) {
+      if (response){
+        resolve(response);
+      } else {
+        reject(err);
+      }
     });
+  });
 });
-
-
 
 module.exports = KeyBundle;
