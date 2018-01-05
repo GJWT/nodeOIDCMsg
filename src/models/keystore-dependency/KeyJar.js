@@ -2,10 +2,7 @@ var KeyBundle = require('./keyBundle');
 var fs = require('fs');
 var shell = require('shelljs');
 var URL = require('url-parse');
-
 var RSAKey = require('./keys/RSAKey.js');
-var ECKey = require('./keys/ECKey.js');
-var SYMKey = require('./keys/SYMKey.js');
 
 function KeyJar(caCerts, verifySSL, keyBundleCls, removeAfter) {
   this.spec2key = {};
@@ -546,7 +543,7 @@ KeyJar.prototype.properPath = function(path) {
  * :return: 2-tuple: result of urlsplit and a dictionary with parameter name as
  * key and url and value
  */
-KeyJar.prototype.key_setup = function(vault, kwargs) {
+KeyJar.prototype.keySetUp = function(vault, kwargs) {
   var vault_path = proper_path(vault);
   if (!fs.lstatSync(vault_path).isFile()){
     shell.mkdir('-p', localPath);
@@ -593,38 +590,26 @@ KeyJar.prototype.keyExport = function(baseurl, localPath, vault, keyjar, kwargs)
   } else {
     path = path;
   }
-
   localPath = this.properPath(path + '/' + localPath)
-
-                  if (!fs.existsSync(localPath)) {
+  if (!fs.existsSync(localPath)) {
     shell.mkdir('-p', localPath);
   }
-
-  // var kb = keySetUp(vault, kwargs)
-
   var kb = new KeyBundle();
   try {
     keyjar[''] += [kb];
   } catch (err) {
     keyjar[''] = kb;
   }
-
   var exportFileName = localPath + 'jwks';
-
-  // var file = new File(exportFileName);
-  // file.write(kb)
   fs.writeFile(exportFileName, kb, function(err) {
     if (err) {
       return console.log(err);
     }
-
     console.log('The file was saved!');
   });
   url = 'http://' + url.hostname +
       exportFileName.substring(1, exportFileName.length);
-
-  return url
-
+  return url;
 };
 
 /**
@@ -666,7 +651,6 @@ KeyJar.prototype.getJwtDecryptKeys = function(jwt, kwargs) {
  * :return: list of usable keys
  */
 KeyJar.prototype.getJwtVerifyKeys = function(key, jso, header, jwt, kwargs) {
-  // throw new Error('Unsupported Operation Exception');
   keys = [];
   var _keyType = '';
   try {
@@ -675,7 +659,7 @@ KeyJar.prototype.getJwtVerifyKeys = function(key, jso, header, jwt, kwargs) {
     _keyType = '';
   }
 
-  var kid = '';
+  var _kid = '';
   try {
     _kid = jwt.headers['kid'];
   } catch (err) {
@@ -691,7 +675,7 @@ KeyJar.prototype.getJwtVerifyKeys = function(key, jso, header, jwt, kwargs) {
 
   _payload = jwt.payload();
 
-  var iss = '';
+  var _iss = '';
   try {
     _iss = _payload['iss'];
   } catch (err) {

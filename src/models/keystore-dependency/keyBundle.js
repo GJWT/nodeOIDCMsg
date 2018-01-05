@@ -42,15 +42,13 @@ function KeyBundle(){
 
 KeyBundle.prototype.init = async (function(
     keys, source, fileFormat, keyUsage,
-    cacheTime, verifySSL, keyType,
-    encEnc) {
+    cacheTime, verifySSL, keyType) {
   console.log("constructor");
   fileFormat = fileFormat || 'jwk';
   keyUsage = keyUsage || 'None';
   cacheTime = cacheTime || 300;
   verifySSL = keyUsage || 'None';
   keyType = keyType || 'RSA';
-  encEnc = encEnc || 'A128CBC-HS256';
   source = source || '';
   this.keys = [];
   this.remote = false;
@@ -109,7 +107,6 @@ KeyBundle.prototype.init = async (function(
 });
 
 var MAP = {'dec': 'enc', 'enc': 'enc', 'ver': 'sig', 'sig': 'sig'};
-var K2C = {"RSA": RSAKey, "EC": ECKey, "oct": SYMKey};
 
 KeyBundle.prototype.getCurrentTime = function(){
   return Date.now();
