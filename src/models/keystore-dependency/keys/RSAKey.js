@@ -1,4 +1,3 @@
-
 var Key = require('./Key');
 
 /**
@@ -8,8 +7,7 @@ RSAKey.prototype = new Key();
 RSAKey.prototype = Object.create(Key.prototype);
 RSAKey.prototype.constructor = RSAKey;
 
-function RSAKey(
-    use, key, kty, alg, kid, x5c, x5t, x5u, n, e, d, p, q, dp, dq, di, qi,
+function RSAKey(use, key, kty, alg, kid, x5c, x5t, x5u, n, e, d, p, q, dp, dq, di, qi,
     kwargs) {
   var key = Key.call(this, kty, alg, use, kid, key, x5c, x5t, x5u, kwargs);
   this.members.push(['n', 'e', 'd', 'p', 'q']);
@@ -50,9 +48,7 @@ RSAKey.prototype.deserialize = function() {
     try {
       for (var i = 0; i < this.longs; i++) {
         var param = this.longs[i];
-
         // var item = getAttr(param);
-
         if (!item || item instanceof Number) {
           continue;
         } else {
@@ -78,11 +74,10 @@ RSAKey.prototype.deserialize = function() {
         this.key = RSA.construct(lst);
       }
     } catch (err) {
-      console.log('Deserialization Not Possible')
+      console.log('Deserialization Not Possible');
     }
   } else if (this.x5c) {
     var derCert = base64.b64decode(self.x5c[0].encode('ascii'));
-
     if (this.x5t) {
       if (!b64d(self.x5t.encode('ascii')) == hashlib.sha1(der_cert).digest()) {
         console.log('Deserialization not possible');
@@ -94,7 +89,7 @@ RSAKey.prototype.deserialize = function() {
       pass
     }
   } else {
-    console.log('Deserialization not possible')
+    console.log('Deserialization not possible');
   }
 };
 
@@ -104,16 +99,15 @@ RSAKey.prototype.serialize = function(private) {
     console.log('Serialization not possible');
   }
   var res = this.common();
-  var set = new Set(this.publicMembers.concat(this.longs)) var publicLongs =
-      Array.from(set);  //
+  var set = new Set(this.publicMembers.concat(this.longs));
+  var publicLongs = Array.from(set);
   for (var i = 0; i < publicLongs.length; i++) {
     var param = publicLongs[i];
-    /*var item = getAttr(param);
+    var item = getAttr(param);
     if (item){
-        res[param] = longToBase64(item); //TODO
-    }*/
+        res[param] = longToBase64(item); 
+    }
   }
-
   if (private) {
     for (var i = 0; i < this.longs.length; i++) {
       var param = this.longs[i];
@@ -121,30 +115,28 @@ RSAKey.prototype.serialize = function(private) {
       if (!private && lst.indexOf(param)) {
         continue;
       }
-      // var item = getAttr(param);
+      var item = getAttr(param);
       if (item) {
         res[param] = longToBase64(item);
       }
     }
   }
-
   return res;
 };
 
-RSAKey.prototype.split =
-    function() {
+RSAKey.prototype.split = function() {
   this.n = this.key.n;
   this.e = this.key.e;
   try {
     this.d = this.key.d;
   } catch (err) {
-    console.log('Attribute Error')
+    console.log('Attribute Error');
   }
   var lst = ['p', 'q'];
   for (var i = 0; i < lst.length; i++) {
     var param = lst[i];
     try {
-      var val = this.key.p
+      var val = this.key.p;
     } catch (err) {
       console.log('AttributeError');
     }
@@ -156,43 +148,40 @@ RSAKey.prototype.split =
       }
     }
   }
-}
+};
 
-    /**
-     *  Load the key from a file.
-     *  :param filename: File name
-     */
-    RSAKey.prototype.load =
-        function(filename) {
+/**
+ *  Load the key from a file.
+ *  :param filename: File name
+ */
+RSAKey.prototype.load = function(filename) {
   this.key = rsaLoad(filename);
   this.split();
   return this;
-}
+};
 
-        /**
-         *   Use this RSA key
-         *   :param key: An RSA key instance
-         */
-        RSAKey.prototype.loadKey =
-            function(key) {
+/**
+  *   Use this RSA key
+  *   :param key: An RSA key instance
+  */
+RSAKey.prototype.loadKey = function(key) {
   this.key = key;
   this.split();
   return this;
-}
+};
 
-            /**
-             * Make sure there is a key instance present that can be used for
-             * encrypting/signing.
-             */
-            RSAKey.prototype.encryptionKey =
-                function(kwargs) {
+/**
+  * Make sure there is a key instance present that can be used for
+  * encrypting/signing.
+  */
+RSAKey.prototype.encryptionKey = function(kwargs) {
   if (!this.key) {
     this.deserialize();
   }
   return this.key;
-}
+};
 
-                RSAKey.prototype.getP = function() {
+RSAKey.prototype.getP = function() {
   return this.p;
 };
 

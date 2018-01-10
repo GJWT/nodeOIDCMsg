@@ -29,14 +29,13 @@ function ECKey(kty, alg, use, kid, key, crv, x, y, d, curve, kwargs) {
   } else if (this.key && (!this.crv && !this.curve)) {
     this.loadKey(key);
   }
-}
+};
 
 /**
  *  Starting with information gathered from the on-the-wire representation
  *  of an elliptic curve key initiate an Elliptic Curve.
  */
-ECKey.prototype.deserialize =
-    function() {
+ECKey.prototype.deserialize = function() {
   try {
     if (!(this.x instanceof Number)) {
       this.x = deser(this.x);
@@ -55,23 +54,21 @@ ECKey.prototype.deserialize =
         this.d = deser(this.d);
       }
     } catch (err) {
-      console.log('Deserialization not possible')
+      console.log('Deserialization not possible');
     }
   }
-}
+};
 
-    ECKey.prototype.getKey =
-        function(private, kwargs) {
+ECKey.prototype.getKey = function(private, kwargs) {
   private = private || false;
   if (private) {
     return this.d;
   } else {
     return this.x, this.y;
   }
-}
+};
 
-        ECKey.prototype.serialize =
-            function(private, kwargs) {
+ECKey.prototype.serialize = function(private, kwargs) {
   private = private || false;
   if (!this.crv && !this.curve) {
     console.log('Serialization Not Possible');
@@ -84,27 +81,24 @@ ECKey.prototype.deserialize =
     'y': longToBase64(this.y)
   })
 
-      if (private && this.d) {
+  if (private && this.d) {
     res['d'] = longToBase64(this.d);
   }
   return res;
-}
+};
 
-            ECKey.prototype.loadKey =
-                function(key) {
+ECKey.prototype.loadKey = function(key) {
   this.curve = key;
   this.d, this.x, this.y = key.keyPair();
   return this;
-}
+};
 
-                ECKey.prototype.decryptionKey =
-                    function() {
+ECKey.prototype.decryptionKey = function() {
   return this.getKey(true);
-}
+};
 
-                    ECKey.prototype.encryptionKey =
-                        function(private, kwargs) {
-  return this.getKey(private)
-}
+ECKey.prototype.encryptionKey = function(private, kwargs) {
+  return this.getKey(private);
+};
 
-                        module.exports = ECKey;
+module.exports = ECKey;

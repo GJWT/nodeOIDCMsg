@@ -31,33 +31,29 @@ function SYMKey(kty, alg, use, kid, key, x5c, x5t, x5u, k, mtrl, kwargs) {
 
 SYMKey.prototype.deserialize =
     function() {
-  this.key = b64d(bytes(this.k));  // TODO
-}
+  this.key = b64d(bytes(this.k)); 
+};
 
-    SYMKey.prototype.serialize =
-        function(private) {
+YMKey.prototype.serialize = function(private) {
   private = private || true;
   res = this.common();
-  res['k'] = as_unicode(b64e(bytes(this.key)));  // TODO
+  res['k'] = asUnicode(b64e(bytes(this.key))); 
   return res;
 }
 
-        /**
-         *  Return an encryption key as per
-         *  http://openid.net/specs/openid-connect-core-1_0.html#Encryption
-         *
-         * :param alg: encryption algorithm
-         * :param kwargs:
-         * :return: encryption key as byte string
-         */
-        SYMKey.prototype.encryptionKey =
-            function(alg, kwargs) {
+/**
+ *  Return an encryption key as per
+ *  http://openid.net/specs/openid-connect-core-1_0.html#Encryption
+ *
+ * :param alg: encryption algorithm
+ * :param kwargs:
+ * :return: encryption key as byte string
+ */
+SYMKey.prototype.encryptionKey = function(alg, kwargs) {
   if (!this.key) {
     return this.deserialize();
   }
-
   var tsize = ALG2KEYLEN[alg];
-
   var encKey = null;
   if (tsize <= 32) {
     encKey = this.sha256Digest(this.key).substring(0, tsize);  // TODO
@@ -68,10 +64,8 @@ SYMKey.prototype.deserialize =
   } else {
     console.log('No support for symmetric keys > 512 bits')
   }
-
   console.log('Symmetric encryption key');
-
   return encKey;
-}
+};
 
-            module.exports = SYMKey;
+module.exports = SYMKey;

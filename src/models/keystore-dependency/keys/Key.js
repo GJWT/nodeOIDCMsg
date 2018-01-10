@@ -38,17 +38,15 @@ function Key(kty, alg, use, kid, key, x5c, x5t, x5u, kwargs) {
   this.x5t = x5t || '';
   this.x5u = x5u || '';
   this.inactiveSince = 0;
-}
+};
 
-Key.prototype.toDict =
-    function() {
+Key.prototype.toDict = function() {
   var res = this.serialize(true);
   res.update(this.extraArgs);
   return res;
-}
+};
 
-    Key.prototype.common =
-        function() {
+Key.prototype.common = function() {
   var res = {'kty': this.kty};
   if (this.use) {
     res['use'] = this.use;
@@ -60,20 +58,17 @@ Key.prototype.toDict =
     res['alg'] = this.alg;
   }
   return res;
-}
+};
 
-        Key.prototype.deserialize = function() {}
+Key.prototype.deserialize = function() {};
 
-                                    Key.prototype.serialize =
-            function() {}
+Key.prototype.serialize = function() {};
 
-            Key.prototype.getKey =
-                function() {
+Key.prototype.getKey = function() {
   return this.key;
-}
+};
 
-                Key.prototype.verify =
-                    function() {
+Key.prototype.verify = function() {
   for (var i = 0; i < this.longs.length; i++) {
     var item = this.getAttr(param);
     if (!item || item instanceof Number) {
@@ -108,10 +103,9 @@ Key.prototype.toDict =
     }
     return true;
   }
-}
+};
 
-                    Key.prototype.equals =
-                        function(other) {
+Key.prototype.equals = function(other) {
   try {
     if (key instanceof other &&
         set(Object.keys(this.dict) == set(other.dict.keys()))) {
@@ -124,15 +118,13 @@ Key.prototype.toDict =
   } catch (err) {
     console.log('Assertion Error');
   }
-}
+};
 
-                        Key.prototype.keys =
-                            function() {
+Key.prototype.keys = function() {
   return list(Object.keys(this.toDict()));
-}
+};
 
-                            Key.prototype.thumbprint =
-                                function(hashFunction, members) {
+Key.prototype.thumbprint = function(hashFunction, members) {
   members = members || null;
   if (members === null) {
     members = this.required;
@@ -152,15 +144,13 @@ Key.prototype.toDict =
   }
 
   return DIGEST_HASH[hash_function](_json);  // TODO
-}
+};
 
-                                Key.prototype.addKid =
-                                    function() {
+Key.prototype.addKid = function() {
   this.kid = b64e(self.thumbprint('SHA-256')).decode('utf8');
-}
+};
 
-                                    Key.prototype.deser =
-                                        function() {
+Key.prototype.deser = function() {
   var val = null;
   if (val instanceof str) {
     val = val.encode('utf-8');
@@ -168,6 +158,6 @@ Key.prototype.toDict =
     val = val;
   }
   return base64ToLong(val);
-}
+};
 
-                                        module.exports = Key;
+module.exports = Key;
