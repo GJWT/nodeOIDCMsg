@@ -42,11 +42,11 @@ Similarily, the following following token profile methods can be used to seriali
 * **fromUrlEncoded**
   
 
-## How to create a token profile and add standard claims 
+## How to create a token profile and add required claims 
 
-A token profile is a security token that enables identity and security information to be shared across security domains. The token profiles folder contains the different types of token profile classes including the Basic ID Token class. A token profile contains the token properties, standard, non standard and verification claims. Each token profile can be instantiated with its standard claims. 
+A token profile is a security token that enables identity and security information to be shared across security domains. The token profiles folder contains the different types of token profile classes including the Basic ID Token class. A token profile contains the token properties, required, optional and verification claims. Each token profile can be instantiated with its required claims. 
 
-If any of the standard claims are not specified such as the iss while creating a token profile, it will throw the following error for example : “You are missing a required parameter : iss”. 
+If any of the required claims are not specified such as the iss while creating a token profile, it will throw the following error for example : “You are missing a required parameter : iss”. 
 
 ```
 var clockTimestamp = 1000000000;
@@ -59,70 +59,70 @@ var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 
 ### BasicIdToken
 
-* Standard claims : *iss, sub, iat, jti*
+* Required claims : *iss, sub, iat, jti*
 
-* Nonstandard claims : *aud, exp, nbf*
+* Optional claims : *aud, exp, nbf*
 
 ### ExtendedIdToken
 
-* Standard claims : *name, email, picture, iss, sub, iat*
+* Required claims : *name, email, picture, iss, sub, iat*
 
-* Non standard claims : *aud, exp, nbf*
+* Optional claims : *aud, exp, nbf*
 
 ### AccessToken
 
-* Standard claims : *iss, sub, iat*
+* Required claims : *iss, sub, iat*
 
-* Nonstandard claims : *aud, exp*
+* Optional claims : *aud, exp*
 
 ### FacebookIdToken
 
-* Standard claims : *user_id, app_id, issued_at*
+* Required claims : *user_id, app_id, issued_at*
 
-* Nonstandard claims : *expired_at*
+* Optional claims : *expired_at*
 
 ### GoogleIdToken
 
-* Standard claims : *name, email, picture, iss, sub, iat*
+* Required claims : *name, email, picture, iss, sub, iat*
 
-* Nonstandard claims : *exp, aud*
+* Optional claims : *exp, aud*
 
 ### ImplicitAccessToken
 
-* Standard claims : *iss, sub, iat*
+* Required claims : *iss, sub, iat*
 
-* Nonstandard claims : *aud*
+* Optional claims : *aud*
 
 ### RefreshToken
 
-* Standard claims : *refresh_token, access_token*
+* Required claims : *refresh_token, access_token*
 
 ### RiscToken
 
-* Standard claims : *jti, iss, sub, iat*
+* Required claims : *jti, iss, sub, iat*
 
-* Nonstandard claims : *aud, nbf, exp*
+* Optional claims : *aud, nbf, exp*
 
 ### ScopedAccessToken
 
-* Standard claims : *iss, sub, iat, scope* 
+* Required claims : *iss, sub, iat, scope* 
 
-* Nonstandard claims : *aud, exp* 
+* Optional claims : *aud, exp* 
 
 
 
-## How to add non standard claims
+## How to add non required claims
 
-Non standard claims can be added separately by creating a new basic id token and then calling the method ‘addNonStandardClaims’.
+Non required claims can be added separately by creating a new basic id token and then calling the method ‘addNonStandardClaims’.
 
 ```
 basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
 ```
 
 
-## How to access standard & non standard claims
+## How to access required & non required claims
 
-To access the standard claims that were previously added to a token, it can be done as follows : 
+To access the required claims that were previously added to a token, it can be done as follows : 
 
 ```
 var standardClaims = basicIdToken.getStandardClaims();  
@@ -132,7 +132,7 @@ var nonStandardClaims = basicIdToken.getNonStandardClaims();
 
 
 ## Support for jti & kid
-Header includes claims such as kid and can be used to select the key wihtin a JWKS needed to verify the signature. Can also be passed in a non standard claim for each token. Kid can be used to select the key within a JWKS needed to verify the signature.
+Header includes claims such as kid and can be used to select the key wihtin a JWKS needed to verify the signature. Can also be passed in a non required claim for each token. Kid can be used to select the key within a JWKS needed to verify the signature.
 
 
 
@@ -181,15 +181,15 @@ Generated jwts will include an iat (issued at) claim by default unless noTimesta
 
 
 
-## How to deserialize & verify standard or non standard claims
+## How to deserialize & verify required or non required claims
 
-A token profile’s fromJWT method can be used to decode a JWT. While the JWT is decoded, the backend also verifies the payload to check if it matches the expected claims.  Claims to be verified can be passed in as key value pairs as the third parameter of the fromJwt method. Expected standard claim values are required while deserializing.
+A token profile’s fromJWT method can be used to decode a JWT. While the JWT is decoded, the backend also verifies the payload to check if it matches the expected claims.  Claims to be verified can be passed in as key value pairs as the third parameter of the fromJwt method. Expected required claim values are required while deserializing.
 
 ```
 var decodedPayload = basicIdToken.fromJWT(signedJWT, secretOrPublicKey, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"},{'clockTimestamp' : clockTimestamp});
 ```
 
-Known non standard claims have to be verified by using the following parameters.For each of the following known non-standard claims (audience, iat, exp, nbf) the respective verification claims are required.
+Known non required claims have to be verified by using the following parameters.For each of the following known non-required claims (audience, iat, exp, nbf) the respective verification claims are required.
 
 * **Audience : aud**
 
