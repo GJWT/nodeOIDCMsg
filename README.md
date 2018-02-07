@@ -50,14 +50,14 @@ If any of the standard claims are not specified such as the iss while creating a
 
 ```
 var clockTimestamp = 1000000000;
-var basicJsonWebToken = new BasicJsonWebToken('issuer','subject', clockTimestamp, "jti");
+var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 
 ```
 
 
 ## Supported token profile types
 
-### BasicJsonWebToken
+### BasicIdToken
 
 * Standard claims : *iss, sub, iat, jti*
 
@@ -232,12 +232,12 @@ Callbacks can be provided as one of the parameters for a token profile's toJwt a
 For example, here are the Basic Json Web token profiles method signatures:
 
 ```
-BasicJsonWebToken.prototype.toJWT = function(secretOrPrivateKey, options, callback)
+BasicIdToken.prototype.toJWT = function(secretOrPrivateKey, options, callback)
 
 ```
 
 ```
-BasicJsonWebToken.prototype.fromJWT = function(signedJWT, secretOrPublicKey, claimsToVerify, options, callback)
+BasicIdToken.prototype.fromJWT = function(signedJWT, secretOrPublicKey, claimsToVerify, options, callback)
 ```
 
 (Asynchronous) If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
