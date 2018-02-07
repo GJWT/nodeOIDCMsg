@@ -4,7 +4,18 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var BasicIdToken = require('./basicIdToken');  
 
-/* Init token using standard claims */ 
+/**
+ * GoogleIdToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @param {*} name
+ * @param {*} email
+ * @param {*} picture
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ */ 
 function GoogleIdToken(name, email, picture, iss, sub, iat){
     this.initData();        
     this.name = name;
@@ -23,7 +34,7 @@ GoogleIdToken.prototype.non_standard_claims = {};
 GoogleIdToken.prototype = Object.create(BasicIdToken.prototype);
 GoogleIdToken.prototype.constructor = GoogleIdToken;
 
-/* Required standard claims */
+/** Required standard claims */
 GoogleIdToken.prototype.options_to_payload = {
     'name': 'name',
     'email': 'email',
@@ -33,7 +44,7 @@ GoogleIdToken.prototype.options_to_payload = {
     'iat': 'iat',
 };
   
-/* Other option values */
+/** Other option values */
 GoogleIdToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -44,13 +55,13 @@ GoogleIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Required known non standard claims */
+/** Required known non standard claims */
 GoogleIdToken.prototype.knownNonStandardClaims = {
     'exp' : 'exp',
     'aud' : 'aud',
 };
 
-/* Required standard claims that need to be verified */
+/** Required standard claims that need to be verified */
 GoogleIdToken.prototype.claims_to_verify = {
     'name': 'name',
     'email': 'email',
@@ -119,7 +130,7 @@ GoogleIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVe
     GoogleIdToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Throws error if missing required non standard verification claims */
+/** Throws error if missing required non standard verification claims */
 GoogleIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (GoogleIdToken.prototype.non_standard_verification_claims['exp']){

@@ -3,6 +3,12 @@ var Buffer = require('safe-buffer').Buffer;
 var Stream = require('stream');
 var util = require('util');
 
+/**
+ * DataStream
+ * @class
+ * @constructor
+ * @param {*} data 
+ */
 function DataStream(data) {
   this.buffer = null;
   this.writable = true;

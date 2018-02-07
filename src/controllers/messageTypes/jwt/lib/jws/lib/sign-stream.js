@@ -59,6 +59,12 @@ function jwsSign(opts) {
   return util.format('%s.%s', securedInput, signature);
 }
 
+/**
+ * SignStream
+ * @class
+ * @constructor
+ * @param {*} opts 
+ */
 function SignStream(opts) {
   var secret = opts.secret||opts.privateKey||opts.key;
   var secretStream = new DataStream(secret);
@@ -78,6 +84,7 @@ function SignStream(opts) {
   }.bind(this));
 }
 util.inherits(SignStream, Stream);
+
 
 SignStream.prototype.sign = function sign() {
   try {

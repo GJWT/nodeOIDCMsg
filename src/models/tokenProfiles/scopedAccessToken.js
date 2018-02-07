@@ -4,7 +4,17 @@ var AccessToken = require('./accessToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
-/* Init token using standard claims */ 
+/**
+ * ScopedAccessToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @extends AccessToken
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ * @param {*} scope
+ */
 function ScopedAccessToken(iss, sub, iat, scope){
     this.iss = iss;
     this.sub = sub;
@@ -16,15 +26,15 @@ function ScopedAccessToken(iss, sub, iat, scope){
 ScopedAccessToken.prototype = Object.create(AccessToken.prototype);
 ScopedAccessToken.prototype.constructor = AccessToken;
 
-/* Required standard claims */
+/** Required standard claims */
 ScopedAccessToken.prototype.options_to_payload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
     'scope': 'scope',
 };
-  
-/* Other option values */
+
+/** Other option values */
 ScopedAccessToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -35,13 +45,13 @@ ScopedAccessToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Known non standard claims */ 
+/** Known non standard claims */ 
 ScopedAccessToken.prototype.knownNonStandardClaims = {
     'aud' : 'aud',
     'exp' : 'exp',
 };
 
-/* Required standard verification claims */
+/** Required standard verification claims */
 ScopedAccessToken.prototype.claims_to_verify = {
     'iss': 'iss',
     'sub': 'sub',
@@ -49,6 +59,7 @@ ScopedAccessToken.prototype.claims_to_verify = {
     'maxAge' : 'maxAge',
 };
 
+/** Check for missing required claims */
 ScopedAccessToken.prototype.validateRequiredFields = function(){
     if (this.iss && this.sub && this.iat && this.scope){
         console.log("Validated all standard fields")
@@ -90,7 +101,6 @@ ScopedAccessToken.prototype.getNonStandardVerificationClaims = function(){
     return ScopedAccessToken.prototype.non_standard_verification_claims;
 }; 
 
-/* User explicitly wants to set None Algorithm attribute */
 ScopedAccessToken.prototype.setNoneAlgorithm = function(boolVal){
     ScopedAccessToken.prototype.NoneAlgorithm = boolVal;
 };
@@ -99,14 +109,14 @@ ScopedAccessToken.prototype.getNoneAlgorithm = function(boolVal){
     return ScopedAccessToken.prototype.NoneAlgorithm;
 };
 
-/* Deserialization for JWT type */ 
+/** Deserialization for JWT type */ 
 ScopedAccessToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
     this.validateRequiredVerificationClaims(claimsToVerify);
     this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT, secretOrPrivateKey, this, options);
 };
 
-/* Throw error if missing required standard verification claims */ 
+/** Throw error if missing required standard verification claims */ 
 ScopedAccessToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
     Object.keys(ScopedAccessToken.prototype.claims_to_verify).forEach(function (key) {
@@ -117,7 +127,7 @@ ScopedAccessToken.prototype.validateRequiredVerificationClaims = function(claims
       ScopedAccessToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Throw error if missing required non standard verification claims */ 
+/** Throw error if missing required non standard verification claims */ 
 ScopedAccessToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (ScopedAccessToken.prototype.non_standard_verification_claims['exp']){

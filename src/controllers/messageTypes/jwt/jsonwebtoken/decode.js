@@ -9,18 +9,25 @@ var jwtVerifier       = require('./verify');
 var jwkToPem          = require('jwk-to-pem');
 var forge = require('node-forge');
 
+/**
+ * JWTDecoder
+ * @class
+ * @constructor
+ */
 function JWTDecoder(){
 };
 
-/* Decodes Jwt string after verifying if payload matches expected claim values 
-    * @param jwtString, the signed Jwt string
-    * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
-    * @param tokenProfile contains the token properties, standard, non standard and verification claims
-    * @param otherOptions, other inputs that are not part of the payload, for ex : 'algorithm'
-    * @param callback, If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
+/** 
+ * Decodes Jwt string after verifying if payload matches expected claim values 
+ * @param {string} jwtString The signed Jwt string
+ * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
+ * @param {Token} tokenProfile Contains the token properties, standard, non standard and verification claims
+ * @param {dictionary} otherOptions Other inputs that are not part of the payload, for ex : 'algorithm'
+ * @param {function} callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
       signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
-    * @throws JsonWebToken error if inputted claims does not match expected claims
-*/ 
+ * @throws JsonWebToken error if inputted claims does not match expected claims
+ * @memberof JWTDecoder
+ */ 
 JWTDecoder.prototype.decode = function (jwtSig, secretOrPublicKey, tokenProfile, otherOptions, callback) {
   // Verifications of other options and jwt string signature
   jwtVerifier.verifyOptions(jwtSig, secretOrPublicKey, otherOptions, callback);
@@ -60,7 +67,11 @@ JWTDecoder.prototype.decode = function (jwtSig, secretOrPublicKey, tokenProfile,
   return payload;
 };
 
-/* Initialize callback */
+/**
+ * Initialize callback
+ * @param {function} callback
+ * @memberof JWTDecoder
+ */ 
 JWTDecoder.prototype.initCallback = function(callback){
   var done;
   
@@ -75,7 +86,15 @@ JWTDecoder.prototype.initCallback = function(callback){
   return done;
 }
 
-/* Algorithms check based on decoded header */
+/**
+ * Algorithms check based on decoded header
+ * 
+ * @param {dictionary} otherOptions
+ * @param {dictionary} header
+ * @param {function} done
+ * 
+ * @memberof JWTDecoder
+ */
 JWTDecoder.prototype.verifyHeaderAlgorithm = function(otherOptions, header, done){
   if (otherOptions && otherOptions.algorithms){
     if (!~otherOptions.algorithms.indexOf(header.alg)) {
@@ -88,7 +107,16 @@ JWTDecoder.prototype.verifyHeaderAlgorithm = function(otherOptions, header, done
   }
 }
 
-/* Verifies signed Jwt */
+/** 
+ * Verifies signed Jwt
+ * @param {string} jwtSig
+ * @param {string} algorithm
+ * @param {string} secretOrPublicKey
+ * @param {string} baseEncoding
+ * @param {function} done
+ * 
+ * @memberof JWTDecoder
+ */
 JWTDecoder.prototype.validateJws = function(jwtSig, algorithm, secretOrPublicKey, baseEncoding, done){
   var valid;
   
@@ -102,7 +130,12 @@ JWTDecoder.prototype.validateJws = function(jwtSig, algorithm, secretOrPublicKey
     return done(new JsonWebTokenError('invalid signature'));
 }
 
-/* Parse payload */
+/**
+ * Parse payload
+ * @param {dictionary} payload
+ * 
+ * @memberof JWTDecoder
+ */ 
 JWTDecoder.prototype.parsePayload = function(payload){
   if(typeof payload === 'string') {
     try {

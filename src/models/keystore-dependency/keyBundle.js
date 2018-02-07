@@ -1,8 +1,5 @@
-
 var async = require('asyncawait/async');
-
-var async = require('asyncawait/async');
-var await = require('asyncawait/await');
+var awaitFunc = require('asyncawait/await');
 var forge = require('node-forge');
 var fs = require('fs');
 var jwkToPem = require('jwk-to-pem');
@@ -16,30 +13,33 @@ var NodeRSA = require('node-rsa');
 var path = require('path');
 var getPem = require('rsa-pem-from-mod-exp');
 
-
 /**
-   *  Contains a set of keys that have a common origin.
-   * The sources can be several:
-   * - A dictionary provided at the initialization, see keys below.
-   * - A list of dictionaries provided at initialization
-   * - A file containing one of: JWKS, DER encoded key
-   * - A URL pointing to a webpages from which an JWKS can be downloaded
-   *
-   * :param keys: A dictionary or a list of dictionaries with the keys ['kty',
-   'key', 'alg', 'use', 'kid']
-   * :param source: Where the key set can be fetch from
-   * :param verifySSL: Verify the SSL cert used by the server
-   * :param fileFormat: For a local file either 'jwk' or 'der'
-   * :param keyType: Iff local file and 'der' format what kind of key it is.
-      presently only 'rsa' is supported.
-   * :param keyUsage: What the key loaded from file should be used for.
-      Only applicable for DER files
-   */
-
+ * KeyBundle
+ * @class
+ * @constructor
+ */
 function KeyBundle(){
   console.log("test");
 };
 
+/**
+ * Contains a set of keys that have a common origin.
+ * The sources can be several:
+ * - A dictionary provided at the initialization, see keys below.
+ * - A list of dictionaries provided at initialization
+ * - A file containing one of: JWKS, DER encoded key
+ * - A URL pointing to a webpages from which an JWKS can be downloaded
+ * 
+ * @param {dictionary} keys A dictionary or a list of dictionaries with the keys ['kty',
+   'key', 'alg', 'use', 'kid']
+ * @param {string} source Where the key set can be fetch from
+ * @param {string} verifySSL Verify the SSL cert used by the server
+ * @param {string} fileFormat For a local file either 'jwk' or 'der'
+ * @param {string} keyType Iff local file and 'der' format what kind of key it is.
+ * @param {string} keyUsage What the key loaded from file should be used for.
+ * 
+ * @memberof KeyBundle
+ */
 KeyBundle.prototype.init = async (function(
     keys, source, fileFormat, keyUsage,
     cacheTime, verifySSL, keyType) {
@@ -96,7 +96,7 @@ KeyBundle.prototype.init = async (function(
     if (!this.remote) {
       var formatArr = ['jwks', 'jwk'];
       if (formatArr.indexOf(this.fileFormat) !== -1) {
-        result = await (self.doLocalJwk(self.source));
+        result = awaitFunc (self.doLocalJwk(self.source));
 
       } else if (this.fileFormat === 'der') {
         result = this.doLocalDer(this.source, this.keyType, this.keyUsage);
@@ -194,8 +194,8 @@ KeyBundle.prototype.getKeyWithKid = function(kid) {
   return null;
 };
 
-KeyBundle.prototype.getJwks = function(private) {
-  private = private || false;
+KeyBundle.prototype.getJwks = function(isPrivate) {
+  isPrivate = isPrivate || false;
   this.upToDate();
   var keys = [];
   var jwk = {'keys': keys};
@@ -218,6 +218,8 @@ KeyBundle.prototype.markAsInactive = function(kid) {
  * Reload the keys if necessary.
  * This is a forced update, will happen even if cache time has not elapsed
  * Replaced keys will be marked as inactive and not removed.
+ * 
+ * @memberof KeyBundle
  */
 KeyBundle.prototype.update = function() {
   var res = true;
@@ -261,8 +263,11 @@ KeyBundle.prototype.update = function() {
  * Remove keys that should not be available any more.
  * Outdated means that the key was marked as inactive at a time
  * that was longer ago then what is given in 'after'.
- * :param after: The length of time the key will remain in the KeyBundle before
- * it should be removed. :param when: To make it easier to test
+ * @param {float} after The length of time the key will remain in the KeyBundle before
+ * it should be removed. 
+ * @param {float} when To make it easier to test
+ * 
+ * @memberof KeyBundle
  */
 KeyBundle.prototype.removeOutdated = function(after, when) {
   when = when || 0;
@@ -449,8 +454,12 @@ KeyBundle.prototype.kids = function() {
 };
 
 /**
- * :param use:
- * :return: list of usage
+ * @param {*} fileName
+ * @param {*} typ
+ * @param {*} use
+ * @returns list of usage
+ * 
+ * @memberof KeyBundle
  */
 KeyBundle.prototype.harmonizeUsage = function(fileName, typ, use) {
   if (type(use) in six.stringTypes) {
@@ -468,12 +477,14 @@ KeyBundle.prototype.harmonizeUsage = function(fileName, typ, use) {
   }
 };
 
-/**
+/** 
   * Create a KeyBundle based on the content in a local file
-  * :param filename: Name of the file
-  * :param typ: Type of content
-  * :param usage: What the key should be used for
-  * :return: The created KeyBundle
+  * @param filename Name of the file
+  * @param typ Type of content
+  * @param usage What the key should be used for
+  * @return The created KeyBundle
+  *
+  * @memberof KeyBundle
   */
 KeyBundle.prototype.keybundleFromLocalFile = function(
         fileName, typ, usage) {
@@ -489,12 +500,14 @@ KeyBundle.prototype.keybundleFromLocalFile = function(
 
 /**
  * Write a JWK to a file. Will ignore symmetric keys !!
- * :param kbl: List of KeyBundles
- * :param target: Name of the file to which everything should be written
- * :param private: Should also the private parts be exported
+ * @param {Array} kbl List of KeyBundles
+ * @param {string} target Name of the file to which everything should be written
+ * @param {boolean} private Should also the private parts be exported
+ * 
+ * @memberof KeyBundle
  */
-KeyBundle.prototype.dumpJwks = function(kbl, target, private = false) {
-  private = private || false;
+KeyBundle.prototype.dumpJwks = function(kbl, target, isPrivate) {
+  isPrivate = isPrivate || false;
   var keys = [];
   for (var i = 0; i < kbl.length; i++){
     var kb = kbl[i];

@@ -4,21 +4,27 @@ var TokenExpiredError = require('./lib/TokenExpiredError');
 var timespan          = require('./lib/timespan');
 var xtend             = require('xtend');
 
-/* Message Layer */
 var messageVerifier = MessageVerifier.prototype;
 
+/**
+ * MessageVerifier
+ * @class
+ * @constructor
+ */
 function MessageVerifier(){
 };
 
-/* Check message signature and other option values 
-    * @param jwtString, the signed Jwt string
-    * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
-    * @param options, other inputs that are not part of the payload, for ex : 'algorithm'
-    * @param callback, If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
-      signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
-    * @throws JsonWebToken error if options does not match expected claims
-*/ 
-
+/** 
+ * Check message signature and other option values 
+ * 
+ * @param jwtString The signed Jwt string
+ * @param secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
+ * @param options Other inputs that are not part of the payload, for ex : 'algorithm'
+ * @param callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the
+  signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
+ * @throws JsonWebToken error if options does not match expected claims
+ * @memberof MessageVerifier
+ */ 
 messageVerifier.verifyOptions = function (jwtString, secretOrPublicKey, options, callback) {
   if ((typeof options === 'function') && !callback) {
     callback = options;
@@ -89,15 +95,15 @@ messageVerifier.verifyOptions = function (jwtString, secretOrPublicKey, options,
   return done(null);
 };
 
-/* Verify if payload options matches the expected claim values 
-    * @param payload, could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
-    * @param tokenProfile, contains the token properties, standard, non standard and verification claims
-    * @param otherOptions, other inputs that are not part of the payload, for ex : 'algorithm'
-    * @param callback, If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
+/**
+ * Verify if payload options matches the expected claim values 
+ * @param payload Could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
+ * @param tokenProfile Contains the token properties, standard, non standard and verification claims
+ * @param callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
       signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
-    * @throws JsonWebToken error if options does not match expected claims
-*/ 
-
+ * @throws JsonWebToken error if options does not match expected claims
+ * @memberof MessageVerifier
+ */ 
 messageVerifier.verifyPayload = function (payload, tokenProfile, otherOptions, callback) {
   var options = tokenProfile.getVerificationClaims();
   var done;
@@ -194,7 +200,6 @@ messageVerifier.verifyPayload = function (payload, tokenProfile, otherOptions, c
       return done(new TokenExpiredError('maxAge exceeded', new Date(maxAgeTimestamp * 1000)));
     }
   }
-
   return payload;
 };
 

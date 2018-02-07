@@ -4,7 +4,15 @@ var BasicIdToken = require('./basicIdToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
 
-/* Init token using standard claims */ 
+/**
+ * RefreshToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @extends BasicIdToken
+ * @param {*} refresh_token
+ * @param {*} access_token
+ */
 function RefreshToken(refresh_token, access_token){
     this.initData();        
     this.refresh_token = refresh_token;
@@ -15,26 +23,26 @@ function RefreshToken(refresh_token, access_token){
 RefreshToken.prototype = Object.create(BasicIdToken.prototype);
 RefreshToken.prototype.constructor = RefreshToken;
 
-/* Provided standard claims */
+/** Provided standard claims */
 RefreshToken.prototype.standard_claims = {};
 
-/* Provided non standard claims */ 
+/** Provided non standard claims */ 
 RefreshToken.prototype.non_standard_claims = {};
 
 RefreshToken.prototype.verification_claims = {};
 
-/* Expected non standard verification claims that are known */
+/** Expected non standard verification claims that are known */
 RefreshToken.prototype.non_standard_verification_claims = {};
 
 RefreshToken.prototype.NoneAlgorithm = false;
 
-/* Required standard claims */ 
+/** Required standard claims */ 
 RefreshToken.prototype.options_to_payload = {
     'refresh_token': 'refresh_token',
     'access_token': 'access_token',
 };
-  
-/* Other option values */ 
+
+/** Other option values */ 
 RefreshToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -45,12 +53,12 @@ RefreshToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Known non standard claims that need to be verified */ 
+/** Known non standard claims that need to be verified */ 
 RefreshToken.prototype.knownNonStandardClaims = {
     'knownNonStandardClaim' : 'knownNonStandardClaim',
 };
 
-/* Required standard claims to be verified */
+/** Required standard claims to be verified */
 RefreshToken.prototype.claims_to_verify = {
     'refresh_token': 'refresh_token',
     'access_token': 'access_token',
@@ -61,6 +69,7 @@ RefreshToken.prototype.initData = function(){
     RefreshToken.prototype.NoneAlgorithm = false;
 };
 
+/** Check for missing required claims */
 RefreshToken.prototype.validateRequiredFields = function(){
     if (this.refresh_token && this.access_token){
         console.log("Validated all standard fields")
@@ -89,8 +98,7 @@ RefreshToken.prototype.getNonStandardClaims = function(nonStandardClaims){
     return RefreshToken.prototype.non_standard_claims;
 };
 
-
-/* Check for required verification claims that need to be verified */
+/** Check for required verification claims that need to be verified */
 RefreshToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
     Object.keys(RefreshToken.prototype.claims_to_verify).forEach(function (key) {
@@ -101,7 +109,7 @@ RefreshToken.prototype.validateRequiredVerificationClaims = function(claimsToVer
       RefreshToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Check for required non standard verification claims that need to be verified */
+/** Check for required non standard verification claims that need to be verified */
 RefreshToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (RefreshToken.prototype.non_standard_verification_claims['exp']){
@@ -110,7 +118,6 @@ RefreshToken.prototype.validateRequiredNonStandardVerificationClaims = function(
     if (RefreshToken.prototype.non_standard_verification_claims['aud']){
         this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
     }
-
 };
 
 RefreshToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
@@ -124,12 +131,10 @@ RefreshToken.prototype.nonStandardVerificationClaimsCheck = function(key, claims
     }
 }
 
-/* Serialization of JWT type */
 RefreshToken.prototype.toJWT = function(secretOrPrivateKey, options, callback){
     return jwtSigner.sign(this, secretOrPrivateKey, options, callback);
 };
 
-/* Deserialization of JWT type */
 RefreshToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
     this.validateRequiredVerificationClaims(claimsToVerify);
     this.validateRequiredNonStandardVerificationClaims(claimsToVerify);

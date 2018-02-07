@@ -138,6 +138,12 @@ function jwsDecodeBase16(jwtString, secretOrPublicKey, tokenProfile, options, ca
   };
 }
 
+/**
+ * VerifyStream
+ * @class
+ * @constructor
+ * @param {*} opts 
+ */
 function VerifyStream(opts) {
   opts = opts || {};
   var secretOrKey = opts.secret||opts.publicKey||opts.key;

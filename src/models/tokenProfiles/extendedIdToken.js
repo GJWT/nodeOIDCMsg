@@ -4,7 +4,19 @@ var GoogleIdToken = require('./googleIdToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
-/* Init token using standard claims */ 
+/**
+ * ExtendedIdToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @extends GoogleIdToken
+ * @param {*} name
+ * @param {*} email
+ * @param {*} picture
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ */
 function ExtendedIdToken(name, email, picture, iss, sub, iat){
     this.initData();
     this.name = name;
@@ -19,7 +31,7 @@ function ExtendedIdToken(name, email, picture, iss, sub, iat){
 ExtendedIdToken.prototype = Object.create(GoogleIdToken.prototype);
 ExtendedIdToken.prototype.constructor = ExtendedIdToken;
 
-/* Required standard claims */
+/** Required standard claims */
 ExtendedIdToken.prototype.options_to_payload = {
     'name': 'name',
     'email': 'email',
@@ -28,8 +40,8 @@ ExtendedIdToken.prototype.options_to_payload = {
     'sub': 'sub',
     'iat': 'iat',
 };
-  
-/* Other options values */
+
+/** Other options values */
 ExtendedIdToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -40,14 +52,14 @@ ExtendedIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Known non standard claims to be verified */
+/** Known non standard claims to be verified */
 ExtendedIdToken.prototype.knownNonStandardClaims = {
     'aud': 'aud',
     'exp': 'exp',
     'nbf': 'nbf',
 };
 
-/* Required standard claims to be verified */
+/** Required standard claims to be verified */
 ExtendedIdToken.prototype.claims_to_verify = {
     'name': 'name',
     'email': 'email',
@@ -57,6 +69,7 @@ ExtendedIdToken.prototype.claims_to_verify = {
     'maxAge' : 'maxAge',
 };
 
+/* Check for missing standard claims */
 ExtendedIdToken.prototype.validateRequiredFields = function(){
     if (this.name && this.email && this.picture && this.iss && this.sub && this.iat){
         console.log("Validated all standard fields")
@@ -98,14 +111,13 @@ ExtendedIdToken.prototype.getNonStandardVerificationClaims = function(){
     return ExtendedIdToken.prototype.non_standard_verification_claims;
 };
 
-/* Serialization of JWT type */ 
 ExtendedIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
         this.validateRequiredVerificationClaims(claimsToVerify);
         this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
         return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
-/* Check for required verification claims that need to be verified */
+/** Check for required verification claims that need to be verified */
 ExtendedIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
     Object.keys(ExtendedIdToken.prototype.claims_to_verify).forEach(function (key) {
@@ -116,7 +128,7 @@ ExtendedIdToken.prototype.validateRequiredVerificationClaims = function(claimsTo
       ExtendedIdToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Check for required non standard verification claims that need to be verified */
+/** Check for required non standard verification claims that need to be verified */
 ExtendedIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (ExtendedIdToken.prototype.non_standard_verification_claims['exp']){

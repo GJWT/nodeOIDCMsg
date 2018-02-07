@@ -3,7 +3,16 @@
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
 
-/* Init token using standard claims */ 
+/**
+ * BasicIdToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ * @param {*} jti
+ */
 function BasicIdToken(iss, sub, iat, jti){
     this.initData();    
     this.iss = iss;
@@ -13,21 +22,21 @@ function BasicIdToken(iss, sub, iat, jti){
     this.validateRequiredFields();
 };
 
-/* Provided standard claims */
+/** Provided standard claims */
 BasicIdToken.prototype.standard_claims = {};
 
-/* Provided non standard claims */ 
+/** Provided non standard claims */ 
 BasicIdToken.prototype.non_standard_claims = {};
 
-/* Expected standard claim values */
+/** Expected standard claim values */
 BasicIdToken.prototype.verification_claims = {};
 
-/* Expected non standard verification claims that are known */
+/** Expected non standard verification claims that are known */
 BasicIdToken.prototype.non_standard_verification_claims = {};
 
 BasicIdToken.prototype.NoneAlgorithm = false;
 
-/* Required standard claims */
+/** Required standard claims */
 BasicIdToken.prototype.options_to_payload = {
     'iss': 'iss',
     'sub': 'sub',
@@ -35,7 +44,7 @@ BasicIdToken.prototype.options_to_payload = {
     'jti': 'jti',
 };
   
-/* Other option values */ 
+/** Other option values */ 
 BasicIdToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -46,14 +55,14 @@ BasicIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Known standard claims */
+/** Known standard claims */
 BasicIdToken.prototype.knownNonStandardClaims = {
     'aud': 'aud',
     'exp': 'exp',
     'nbf': 'nbf',
 };
 
-/* Required verification claims */
+/** Required verification claims */
 BasicIdToken.prototype.claims_to_verify = {
     'iss': 'iss',
     'sub': 'sub',
@@ -66,6 +75,7 @@ BasicIdToken.prototype.initData = function(){
     BasicIdToken.prototype.NoneAlgorithm = false;
 };
 
+/** Check for missing standard claims */
 BasicIdToken.prototype.validateRequiredFields = function(){
 
     if (this.iss && this.sub && this.iat && this.jti){
@@ -75,6 +85,7 @@ BasicIdToken.prototype.validateRequiredFields = function(){
     }
 };
 
+/** Add non standard claims */
 BasicIdToken.prototype.addNonStandardClaims = function(nonStandardClaims){
     BasicIdToken.prototype.non_standard_claims = nonStandardClaims;
 
@@ -86,11 +97,13 @@ BasicIdToken.prototype.addNonStandardClaims = function(nonStandardClaims){
     });  
 };
 
+/** Fetch standard claims */
 BasicIdToken.prototype.getStandardClaims = function(){
     BasicIdToken.prototype.standard_claims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat, "jti": this.jti};
     return BasicIdToken.prototype.standard_claims;         
 };
 
+/** Fetch non standard claims */
 BasicIdToken.prototype.getNonStandardClaims = function(nonStandardClaims){
     return BasicIdToken.prototype.non_standard_claims;
 }; 
@@ -103,7 +116,7 @@ BasicIdToken.prototype.getNonStandardVerificationClaims = function(){
     return BasicIdToken.prototype.non_standard_verification_claims;
 }; 
 
-/* User explicitly wants to set None Algorithm attribute */
+/** User explicitly wants to set None Algorithm attribute */
 BasicIdToken.prototype.setNoneAlgorithm = function(boolVal){
     BasicIdToken.prototype.NoneAlgorithm = boolVal;
 };
@@ -112,12 +125,12 @@ BasicIdToken.prototype.getNoneAlgorithm = function(boolVal){
     return BasicIdToken.prototype.NoneAlgorithm;
 };
 
-/* Serialization of JWT type */
+/** Serialization of JWT type */
 BasicIdToken.prototype.toJWT = function(secretOrPrivateKey, options, callback){
     return jwtSigner.sign(this, secretOrPrivateKey, options, callback);
 };
 
-/* Deserialization of JWT type */
+/** Deserialization of JWT type */
 BasicIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options, callback){
 
     this.validateRequiredVerificationClaims(claimsToVerify);
@@ -125,7 +138,7 @@ BasicIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsT
     return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options, callback);
 };
 
-/* Throws error if required verification claims are not present */ 
+/** Throws error if required verification claims are not present */ 
 BasicIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
     Object.keys(BasicIdToken.prototype.claims_to_verify).forEach(function (key) {
@@ -136,7 +149,7 @@ BasicIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVer
     BasicIdToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Throws error if required non standard verification claims are not present */ 
+/** Throws error if required non standard verification claims are not present */ 
 BasicIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (BasicIdToken.prototype.non_standard_verification_claims['nbf'] || BasicIdToken.prototype.non_standard_verification_claims['exp']){
@@ -158,19 +171,19 @@ BasicIdToken.prototype.nonStandardVerificationClaimsCheck = function(key, claims
     }
 }
 
+/** Serialization of JSON type */
 BasicIdToken.prototype.toJSON = function(){
-    // TODO
     var obj = Object.assign({}, this.getStandardClaims(), this.getNonStandardClaims());
     return JSON.stringify(obj);
 };
 
+/** Deserialization of JSON type */
 BasicIdToken.prototype.fromJSON = function(jsonString){
-    // TODO
     return JSON.parse(jsonString);
 };
 
+/** Serialization of URL Encoded type */
 BasicIdToken.prototype.toUrlEncoded = function(){
-    // TODO
     var obj = Object.assign({}, this.getStandardClaims(), this.getNonStandardClaims());
     var str = [];
     for(var p in obj)
@@ -178,8 +191,8 @@ BasicIdToken.prototype.toUrlEncoded = function(){
     return str.join("&");
 }
 
+/** Deserialization of URL Encoded type */
 BasicIdToken.prototype.fromUrlEncoded = function(urlEncodedString){
-    // TODO
     var obj = {}; 
     urlEncodedString.replace(/([^=&]+)=([^&]*)/g, function(m, key, value) {
         obj[decodeURIComponent(key)] = decodeURIComponent(value);

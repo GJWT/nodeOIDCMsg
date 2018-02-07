@@ -1,0 +1,19 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": ["index.js", "src/controllers/message/", "src/controllers/messageTypes/jwt/jsonwebtoken/", "src/models/tokenProfiles/", "src/models/keystore-dependency/"],
+	"includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "plugins": [],
+    "recurseDepth": 10,
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true
+        }
+    }
+}

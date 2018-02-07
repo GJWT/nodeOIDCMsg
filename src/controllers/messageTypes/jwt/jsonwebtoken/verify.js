@@ -11,6 +11,12 @@ var jwtVerifier= JWTVerifier.prototype;
 jwtVerifier = Object.create(messageVerifier);
 jwtVerifier.constructor = JWTVerifier;
 
+/**
+ * JWTVerifer
+ * @class 
+ * @extends MessageVerifier
+ * @constructor
+ */
 function JWTVerifier(){
 };
 

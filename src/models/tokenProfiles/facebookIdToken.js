@@ -4,7 +4,16 @@ var BasicIdToken = require('./basicIdToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
 
-/* Init token using standard claims */ 
+/**
+ * FacebookIdToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @extends BasicIdToken
+ * @param {*} user_id 
+ * @param {*} app_id 
+ * @param {*} issued_at 
+ */
 function FacebookIdToken(user_id, app_id, issued_at){
     this.userId = user_id;
     this.appId = app_id;
@@ -15,14 +24,14 @@ function FacebookIdToken(user_id, app_id, issued_at){
 FacebookIdToken.prototype = Object.create(BasicIdToken.prototype);
 FacebookIdToken.prototype.constructor = FacebookIdToken;
 
-/* Required standard claims */ 
+/** Required standard claims */ 
 FacebookIdToken.prototype.options_to_payload = {
     'userId' : 'userId',
     'appId' : 'appId',
     'iat' : 'iat',
   };
   
-/* Other option values */
+/** Other option values */
 FacebookIdToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -33,14 +42,14 @@ FacebookIdToken.prototype.options_for_objects = [
     'jwtid',
   ];
  
-/* Required standard verification claims */
+/** Required standard verification claims */
 FacebookIdToken.prototype.claims_to_verify = {
     'userId' : 'userId',
     'appId' : 'appId',
     'maxAge' : 'maxAge',
 }; 
 
-/* Known non standard claims */
+/** Known non standard claims */
 FacebookIdToken.prototype.knownNonStandardClaims = {
     'expired_at': 'expired_at',
 };
@@ -89,7 +98,7 @@ FacebookIdToken.prototype.getNonStandardVerificationClaims = function(){
     return FacebookIdToken.prototype.non_standard_verification_claims;
 }; 
 
-/* User explicitly wants to set None Algorithm attribute */
+/** User explicitly wants to set None Algorithm attribute */
 FacebookIdToken.prototype.setNoneAlgorithm = function(boolVal){
     FacebookIdToken.prototype.NoneAlgorithm = boolVal;
 };
@@ -98,12 +107,12 @@ FacebookIdToken.prototype.getNoneAlgorithm = function(boolVal){
     return FacebookIdToken.prototype.NoneAlgorithm;
 };
 
-/* Serialization for JWT type */
+/** Serialization for JWT type */
 FacebookIdToken.prototype.toJWT = function(secretOrPrivateKey, options){
     return jwtSigner.sign(this, secretOrPrivateKey, options);
 };
 
-/* Deserialization for JWT type */
+/** Deserialization for JWT type */
 FacebookIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
     this.validateRequiredVerificationClaims(claimsToVerify);
     this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
@@ -121,7 +130,7 @@ FacebookIdToken.prototype.validateRequiredVerificationClaims = function(claimsTo
       FacebookIdToken.prototype.verification_claims = claimsToVerify;
 };
 
-/* Throws error if missing required non standard claims */
+/** Throws error if missing required non standard claims */
 FacebookIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
 {
     if (FacebookIdToken.prototype.non_standard_verification_claims['expired_at']){

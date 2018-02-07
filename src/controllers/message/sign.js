@@ -9,9 +9,13 @@ var isPlainObject = require('lodash.isplainobject');
 var isString = require('lodash.isstring');
 var once = require('lodash.once');
 
-/* Message Layer */
 var messageSigner = MessageSigner.prototype;
 
+/**
+ * MessageSigner
+ * @class
+ * @constructor
+ */
 function MessageSigner(){
 };
 
@@ -39,7 +43,14 @@ messageSigner.registered_claims_schema = {
   jti: { isValid: isString, message: '"jwtid" must be a string' },
 };
 
-/* Check if the input format type matches the schema */
+/** 
+ * Check if the input format type matches the schema. 
+ * @memberof MessageSigner
+ * @param schema
+ * @param allowUnknown
+ * @param object
+ * @param parameterName
+ * */
 messageSigner.validate = function(schema, allowUnknown, object, parameterName) {
   if (!isPlainObject(object)) {
     throw new Error('Expected "' + parameterName + '" to be a plain object.');
@@ -59,24 +70,36 @@ messageSigner.validate = function(schema, allowUnknown, object, parameterName) {
     });
 }
 
-/* Checks format type of other options */
+/** 
+ * Checks format type of other options 
+ * @param {dictionary} options
+ * @memberof MessageSigner
+ */
 messageSigner.validateOptions = function(options) {
   return this.validate(this.sign_options_schema, false, options, 'options');
 }
 
-/* Checks format type of payload values */
+/** 
+ * Checks format type of payload values
+ * @param {dictionary} payload
+ * @memberof MessageSigner
+ */
 messageSigner.validatePayload = function(payload) {
   return this.validate(this.registered_claims_schema, true, payload, 'payload');
 }
 
-/* Signs message and checks for valid input
-    * @param tokenProfile contains the token properties, standard, non standard and verification claims
-    * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
-    * @param options consists of other inputs that are not part of the payload, for ex : 'algorithm'
-    * @param callback is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
+/** 
+ * Signs message and checks for valid input.
+ * 
+ * @param {Token} tokenProfile - Contains the token properties, standard, non standard and verification claims.
+ * @param {string} secretOrPublicKey - String or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
+ * @param {dictionary} options - Consists of other inputs that are not part of the payload, for ex : 'algorithm'.
+ * @param {function} callback - Called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
     will be called with the error. When supplied, the function acts asynchronously.
-    * @throws JsonWebToken error if options does not match expected claims. */ 
-
+ * @returns {dictionary} - Contains the header, payload and options info.
+ * @throws JsonWebToken error if options does not match expected claims.
+ * @memberof MessageSigner
+ */
 messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callback) {
   var payload = Object.assign({}, tokenProfile.getStandardClaims(), tokenProfile.getNonStandardClaims());
   
@@ -101,7 +124,7 @@ messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callba
     throw err;
   }
 
-  /* Check for undefined payload or invalid options */ 
+  /** Check for undefined payload or invalid options */ 
   if (typeof payload === 'undefined') {
     return failure(new Error('payload is required'));
   } else if (isObjectPayload) {
@@ -137,7 +160,9 @@ messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callba
   return messageInfo;
 };
 
-/* Initialize options */
+/** Initialize options
+ * @param {dictionary} options
+ */
 messageSigner.initOptions = function(options){
   if (typeof options === 'function') {
     callback = options;
@@ -148,13 +173,17 @@ messageSigner.initOptions = function(options){
   return options;
 }
 
-/* Check for other options values and for duplicates
-    * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
-    * @param options, other inputs that are not part of the payload, for ex : 'algorithm'
-    * @param tokenProfile, contains the token properties, standard, non standard and verification claim.
-    * @param payload, could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
-    * @throws Error if duplicate options values provided or does not match expected value */
-
+/**
+ * Check for other options values and for duplicates
+ * 
+ * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
+ * @param {dictionary} options Other inputs that are not part of the payload, for ex : 'algorithm'.
+ * @param {Token} tokenProfile Contains the token properties, standard, non standard and verification claim.
+ * @param {dictionary} payload Could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
+ * @returns {dictionary} payload
+ * @throws Error if duplicate options values provided or does not match expected value.
+ * @memberof MessageSigner
+ */
 messageSigner.checkOtherOptions = function(secretOrPrivateKey, options, tokenProfile, payload, failure){
 
   var timestamp = payload.iat || Math.floor(Date.now() / 1000);
@@ -200,7 +229,13 @@ messageSigner.checkOtherOptions = function(secretOrPrivateKey, options, tokenPro
   return payload;
 }
 
-/* Check if the payload and options have a duplicate property */ 
+/** 
+ * Check if the payload and options have a duplicate property 
+ * @param {dictionary} tokenProfileKnownClaims
+ * @param {dictionary} options
+ * @param {dictionary} payload
+ * @param {function} failure
+ * */ 
 messageSigner.checkOptions = function(tokenProfileKnownClaims, options, payload, failure){
   Object.keys(tokenProfileKnownClaims).forEach(function (key) {
     var claim = tokenProfileKnownClaims[key];

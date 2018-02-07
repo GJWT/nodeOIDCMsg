@@ -4,7 +4,16 @@ var BasicIdToken = require('./basicIdToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
-/* Init token using standard claims */ 
+/**
+ * AccessToken
+ * Init token using standard claims
+ * @class
+ * @constructor
+ * @extends BasicIdToken
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ */
 function AccessToken(iss, sub, iat){
     this.iss = iss;
     this.sub = sub;
@@ -15,14 +24,14 @@ function AccessToken(iss, sub, iat){
 AccessToken.prototype = Object.create(BasicIdToken.prototype);
 AccessToken.prototype.constructor = AccessToken;
 
-/* Required standard claims */
+/** Required standard claims */
 AccessToken.prototype.options_to_payload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
 };
   
-/* Other option values */
+/** Other option values */
 AccessToken.prototype.options_for_objects = [
     'expiresIn',
     'notBefore',
@@ -33,12 +42,13 @@ AccessToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/* Known non standard claims */
+/** Known non standard claims */
 AccessToken.prototype.knownNonStandardClaims = {
     'aud': 'aud',
     'exp': 'exp',
 };
 
+/** Validate required claims */
 AccessToken.prototype.validateRequiredFields = function(){
     if (this.iss && this.sub && this.iat){
         console.log("Validated all standard fields")
@@ -53,4 +63,3 @@ AccessToken.prototype.getStandardClaims = function(){
 };
 
 module.exports = AccessToken;
-

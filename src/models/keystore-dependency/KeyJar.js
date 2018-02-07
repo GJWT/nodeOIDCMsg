@@ -4,6 +4,15 @@ var shell = require('shelljs');
 var URL = require('url-parse');
 var RSAKey = require('./keys/RSAKey.js');
 
+/**
+ * KeyJar
+ * @class
+ * @constructor
+ * @param {*} caCerts 
+ * @param {*} verifySSL 
+ * @param {*} keyBundleCls 
+ * @param {*} removeAfter 
+ */
 function KeyJar(caCerts, verifySSL, keyBundleCls, removeAfter) {
   this.spec2key = {};
   this.issuerKeys = {};
@@ -17,10 +26,12 @@ function KeyJar(caCerts, verifySSL, keyBundleCls, removeAfter) {
  * Add a set of keys by url. This method will create a
  * :py:class:`oicmsg.oauth2.keyBundle.keyBundle` instance with the
  * url as source specification.
- * :param issuer: Who issued the keys
- * :param url: Where can the key/s be found
- * : param kwargs: extra parameters for instantiating keyBundle
- * :return: A :py:class:`oicmsg.oauth2.keyBundle.keyBundle` instance
+ * @param {*} issuer Who issued the keys
+ * @param {*} url Where can the key/s be found
+ * @param {*} kwargs extra parameters for instantiating keyBundle
+ * @returns: A :py:class:`oicmsg.oauth2.keyBundle.keyBundle` instance
+ * 
+ * @memberof KeyJar
  */
 KeyJar.prototype.addUrl = function(issuer, url, kwargs) {
   if (!url) {
@@ -45,10 +56,12 @@ KeyJar.prototype.addUrl = function(issuer, url, kwargs) {
  *  Add a symmetric key. This is done by wrapping it in a key bundle
  * cloak since KeyJar does not handle keys directly but only through
  * key bundles.
- * :param issuer: Owner of the key
- * :param key: The key
- * :param usage: What the key can be used for signing/signature verification
+ * @param issuer Owner of the key
+ * @param key The key
+ * @param usage What the key can be used for signing/signature verification
  * (sig) and/or encryption/decryption (enc)
+ * 
+ * @memberof KeyJar
  */
 KeyJar.prototype.addSymmetric = function(owner, key, usage) {
   usage = usage || null;
@@ -70,8 +83,8 @@ KeyJar.prototype.addSymmetric = function(owner, key, usage) {
 
 /**
  *  Add a key bundle and bind it to an identifier
- * :param issuer: Owner of the keys in the keyBundle
- * :param kb: A :py:class:`oicmsg.key_bundle.keyBundle`instance
+ * @param issuer Owner of the keys in the keyBundle
+ * @param kb A :py:class:`oicmsg.key_bundle.keyBundle`instance
  */
 KeyJar.prototype.addKb = function(owner, kb) {
   if (this.issuerKeys[owner]) {
@@ -85,14 +98,13 @@ KeyJar.prototype.owners = function() {
   return Object.keys(this.issuerKeys);
 }
 
-    /**
-     *  Bind one or a list of key bundles to a special identifier.
-     * Will overwrite whatever was there before !!
-     * :param issuer: The owner of the keys in the keyBundle/-s
-     * :param val: A single or a list of keyBundle instance
-     * :return:
-     */
-    KeyJar.prototype.setItem = function(issuer, val) {
+/**
+ * Bind one or a list of key bundles to a special identifier.
+ * Will overwrite whatever was there before !!
+ * @param issuer The owner of the keys in the keyBundle/-s
+ * @param val A single or a list of keyBundle instance
+ */
+KeyJar.prototype.setItem = function(issuer, val) {
   if (!(val instanceof list)) {
     val = [val];
   }
@@ -108,21 +120,20 @@ KeyJar.prototype.owners = function() {
 
 /**
  * Get all owner ID's and there key bundles
- * :return: list of 2-tuples (Owner ID., list of keyBundles)
+ * @return {Array} List of 2-tuples (Owner ID., list of keyBundles)
  */
 KeyJar.prototype.items = function() {
   return this.issuerKeys.items();
 }
 
-    /**
-     * Get all keys that matches a set of search criteria
-     * :param keyUser: A key useful for this usage (enc, dec, sig, ver)
-     * :param keyType: Type of key (rsa, ec, symmetric, ..)
-     * :param issuer: Who is responsible for the keys, "" == me
-     * :param kid: A Key Identifier
-     * :return: A possibly empty list of keys
-     * */
-
+/**
+  * Get all keys that matches a set of search criteria
+  * @param keyUser A key useful for this usage (enc, dec, sig, ver)
+  * @param keyType Type of key (rsa, ec, symmetric, ..)
+  * @param issuer Who is responsible for the keys, "" == me
+  * @param kid A Key Identifier
+  * @return: A possibly empty list of keys
+  * */
 KeyJar.prototype.get =
         function(keyUse, keyType, owner, kid, kwargs) {
   keyType = keyType || keyType;
@@ -275,9 +286,9 @@ KeyJar.prototype.matchOwner = function(url) {
 
 /**
  * Fetch keys from another server
- * :param pcr: The provider information
- * :param issuer: The provider URL
- * :param replace: If all previously gathered keys from this provider should
+ * @param {*} pcr The provider information
+ * @param {*} issuer The provider URL
+ * @param {*} replace If all previously gathered keys from this provider should
  * be replace. :return: Dictionary with usage as key and keys as values
  */
 KeyJar.prototype.loadKeys = function(pcr, issuer, replace) {
@@ -298,8 +309,8 @@ KeyJar.prototype.loadKeys = function(pcr, issuer, replace) {
 
 /**
  * Find a key bundle
- * :param source: A url
- * :param issuer: The issuer of keys
+ * @param source A url
+ * @param issuer The issuer of keys
  */
 KeyJar.prototype.find = function(source, issuer) {
   for (var i = 0; i < this.issuerKeys[issuer]; i++) {
@@ -311,12 +322,12 @@ KeyJar.prototype.find = function(source, issuer) {
 };
 
 KeyJar.prototype.exportJwksAsJSON = function(isPrivate, issuer) {
-  return JSON.stringify(this.export_jwks(private, issuer));
+  return JSON.stringify(this.export_jwks(isPrivate, issuer));
 };
 
 /**
- * :param jwks: Dictionary representation of a JWKS
- * :param issuer: Who 'owns' the JWKS
+ * @param jwks Dictionary representation of a JWKS
+ * @param issuer Who 'owns' the JWKS
  */
 KeyJar.prototype.importJwks = function(jwks, issuer) {
   try {
@@ -338,23 +349,23 @@ KeyJar.prototype.importJwksAsJSON =
   return this.importJwks(JSON.stringify(js), issuer);
 }
 
-    /**
-     * Initiates a new :py:class:`oicmsg.oauth2.Message` instance and
-     * populates it with keys according to the key configuration.
-     *
-     * Configuration of the type ::
-     *
-     * keys = [
-     *  {"type": "RSA", "key": "cp_keys/key.pem", "use": ["enc", "sig"]},
-     *  {"type": "EC", "crv": "P-256", "use": ["sig"]},
-     *  {"type": "EC", "crv": "P-256", "use": ["enc"]}
-     * ]
-     * :param keyConf: The key configuration
-     * :param kidTemplate: A template by which to build the kids
-     * :return: A tuple consisting of a JWKS dictionary, a KeyJar instance
+/**
+ * Initiates a new :py:class:`oicmsg.oauth2.Message` instance and
+ * populates it with keys according to the key configuration.
+ *
+ * Configuration of the type ::
+ *
+ * keys = [
+ *  {"type": "RSA", "key": "cp_keys/key.pem", "use": ["enc", "sig"]},
+ *  {"type": "EC", "crv": "P-256", "use": ["sig"]},
+ *  {"type": "EC", "crv": "P-256", "use": ["enc"]}
+ * ]
+ * @param {*} keyConf The key configuration
+ * @param {*} kidTemplate A template by which to build the kids
+ * @return A tuple consisting of a JWKS dictionary, a KeyJar instance
             and a representation of which kids that can be used for what.
             Note the JWKS contains private key information !!
-     */
+ */
 
 KeyJar.prototype.buildKeyJar = function(keyConf, kidTemplate, keyjar, kidd) {
   kidTemplate = kidTemplate || '';
@@ -450,6 +461,7 @@ KeyJar.prototype.getIssuerKeys = function(issuer) {
  * time that is longer ago then some set number of seconds. The number of
  * seconds a carried in the removeAfter parameter. :param when: To facilitate
  * testing
+ * @param {*} when
  */
 KeyJar.prototype.removeOutdated = function(when) {
   for (var i = 0; i < list(this.owners()); i++) {
@@ -516,6 +528,7 @@ KeyJar.prototype.addKey = function(issuer, key, keyType, kid, noKidIssuer) {
 
 /**
  *  Clean up the path specification so it looks like something I could use.
+ * @param {*} path
  */
 KeyJar.prototype.properPath = function(path) {
   if (path.startsWith('./')) {
@@ -539,8 +552,8 @@ KeyJar.prototype.properPath = function(path) {
 };
 
 /**
- * :param vault: Where the keys are kept
- * :return: 2-tuple: result of urlsplit and a dictionary with parameter name as
+ * @param {*} vault Where the keys are kept
+ * @returns {*} 2-tuple result of urlsplit and a dictionary with parameter name as
  * key and url and value
  */
 KeyJar.prototype.keySetUp = function(vault, kwargs) {
@@ -574,14 +587,14 @@ KeyJar.prototype.keySetUp = function(vault, kwargs) {
   return kb;
 }
 
-    /**
-     * :param baseurl: The base URL to which the key file names are added
-     * :param localPath: Where on the machine the export files are kept
-     * :param vault: Where the keys are kept
-     * :param keyjar: Where to store the exported keys
-     * :return: 2-tuple: result of urlsplit and a dictionary with parameter name
-     * as key and url and value
-     */
+/**
+ * @param baseurl The base URL to which the key file names are added
+ * @param localPath Where on the machine the export files are kept
+ * @param vault Where the keys are kept
+ * @param keyjar Where to store the exported keys
+ * @returns {*} 2-tuple Result of urlsplit and a dictionary with parameter name
+ * as key and url and value
+ */
 KeyJar.prototype.keyExport = function(baseurl, localPath, vault, keyjar, kwargs) {
   var url = new URL(baseurl);
   var path = url.pathname;
@@ -613,12 +626,11 @@ KeyJar.prototype.keyExport = function(baseurl, localPath, vault, keyjar, kwargs)
 };
 
 /**
- *
  * Get decryption keys from a keyjar.
  * These keys should be usable to decrypt an encrypted JWT.
- * :param jwt: A jwkest.jwt.JWT instance
- * :param kwargs: Other key word arguments
- * :return: list of usable keys
+ * @param jwt A jwkest.jwt.JWT instance
+ * @param kwargs Other key word arguments
+ * @return List of usable keys
  */
 KeyJar.prototype.getJwtDecryptKeys = function(jwt, kwargs) {
   keys = [];
@@ -645,10 +657,10 @@ KeyJar.prototype.getJwtDecryptKeys = function(jwt, kwargs) {
  * Get keys from a keyjar. These keys should be usable to verify a signed
  * JWT. :param keyjar: A KeyJar instance :param key: List of keys to start
  * with :param jso: The payload of the JWT, expected to be a dictionary.
- * :param header: The header of the JWT
- * :param jwt: A jwkest.jwt.JWT instance
- * :param kwargs: Other key word arguments
- * :return: list of usable keys
+ * @param {*} header The header of the JWT
+ * @param {*} jwt A jwkest.jwt.JWT instance
+ * @param {*} kwargs Other key word arguments
+ * @returns: list of usable keys
  */
 KeyJar.prototype.getJwtVerifyKeys = function(key, jso, header, jwt, kwargs) {
   keys = [];

@@ -137,6 +137,13 @@ function createNoneVerifier() {
   }
 }
 
+/**
+ * JWA
+ * @class
+ * @constructor
+ * @param {*} algorithm
+ * @param {*} baseEncoding
+ */
 module.exports = function jwa(algorithm, baseEncoding) {
   var signerFactories = {
     hs: createHmacSigner,
