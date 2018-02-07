@@ -116,7 +116,7 @@ var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 Non standard claims can be added separately by creating a new basic id token and then calling the method ‘addNonStandardClaims’.
 
 ```
-basicJsonWebToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
 ```
 
 
@@ -125,9 +125,9 @@ basicJsonWebToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimesta
 To access the standard claims that were previously added to a token, it can be done as follows : 
 
 ```
-var standardClaims = basicJsonWebToken.getStandardClaims();  
+var standardClaims = basicIdToken.getStandardClaims();  
        
-var nonStandardClaims = basicJsonWebToken.getNonStandardClaims(); 
+var nonStandardClaims = basicIdToken.getNonStandardClaims(); 
 ```
 
 
@@ -141,7 +141,7 @@ Header includes claims such as kid and can be used to select the key wihtin a JW
 Each token has a NoneAlgorithm boolean value which is set to False by default unless set explicitly. 
 
 ```
-basicJsonWebToken.setNoneAlgorithm(true);
+basicIdToken.setNoneAlgorithm(true);
 ```
 
 If the none algorithm property above is not set, the following error will be thrown when algorithm ‘none’ is used : 'Cannot use none algorithm unless explicitly set'
@@ -152,7 +152,7 @@ If the none algorithm property above is not set, the following error will be thr
 To sign a JWT with the Basic ID Token, call the token’s toJWT method with the secret and any additional options that need to be passed like “algorithm”. A secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
 
 ```
-var signedJWT = basicJsonWebToken.toJWT(secretOrPrivateKey);
+var signedJWT = basicIdToken.toJWT(secretOrPrivateKey);
 ```
 
 ## Other options for serialization
@@ -170,7 +170,7 @@ Options are other inputs or additional information that might be needed and are 
   * keyid
   
  ```
- var signedJWT = basicJsonWebToken.toJWT(secretOrPrivateKey, {algorithm : 'HS256'});
+ var signedJWT = basicIdToken.toJWT(secretOrPrivateKey, {algorithm : 'HS256'});
 ```
 
 If payload is not a buffer or a string, it will be coerced into a string using JSON.stringify.
@@ -186,7 +186,7 @@ Generated jwts will include an iat (issued at) claim by default unless noTimesta
 A token profile’s fromJWT method can be used to decode a JWT. While the JWT is decoded, the backend also verifies the payload to check if it matches the expected claims.  Claims to be verified can be passed in as key value pairs as the third parameter of the fromJwt method. Expected standard claim values are required while deserializing.
 
 ```
-var decodedPayload = basicJsonWebToken.fromJWT(signedJWT, secretOrPublicKey, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"},{'clockTimestamp' : clockTimestamp});
+var decodedPayload = basicIdToken.fromJWT(signedJWT, secretOrPublicKey, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"},{'clockTimestamp' : clockTimestamp});
 ```
 
 Known non standard claims have to be verified by using the following parameters.For each of the following known non-standard claims (audience, iat, exp, nbf) the respective verification claims are required.
