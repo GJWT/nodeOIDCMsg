@@ -11,7 +11,7 @@ describe('issue 147 - signing with a sealed payload', function() {
     expect(result.exp).to.be.closeTo(Math.floor(Date.now() / 1000) + 10, 0.2);*/
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2});
+    basicIdToken.addOptionalClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT('123', { expiresIn: 10});
 

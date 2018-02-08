@@ -36,7 +36,7 @@ describe('Asymmetric Algorithms', function(){
 
       describe('when signing a token with a known non standard claim', function () {
         var googleIdToken = new GoogleIdToken('name', 'email@google.com', '/pathToPic', 'issuer','subject', clockTimestamp);
-        googleIdToken.addNonStandardClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
+        googleIdToken.addOptionalClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
         googleIdToken.setNoneAlgorithm(true);
         var signedJWT = googleIdToken.toJWT('shhhh');
 
@@ -67,7 +67,7 @@ describe('Asymmetric Algorithms', function(){
         it('should throw error and require standard claim', function (done) {
           try{
             var googleIdToken = new GoogleIdToken('name', 'email@google.com', '/pathToPic', 'issuer','subject');
-            googleIdToken.addNonStandardClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
+            googleIdToken.addOptionalClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
             googleIdToken.setNoneAlgorithm(true);
             var signedJWT = googleIdToken.toJWT('shhhh');
           }catch(err){
@@ -85,12 +85,12 @@ describe('Asymmetric Algorithms', function(){
       var clockTimestamp = 1000000000;
 
       var googleIdToken = new GoogleIdToken('name', 'email@google.com', '/pathToPic', 'issuer','subject', clockTimestamp);
-      googleIdToken.addNonStandardClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
+      googleIdToken.addOptionalClaims({"aud" : "audience", "exp" : clockTimestamp + 3});
       googleIdToken.setNoneAlgorithm(true);        
 
       it('should be able to access all standard claims', function (done) {
         try{
-         var standardClaims = googleIdToken.getStandardClaims();  
+         var standardClaims = googleIdToken.getRequiredClaims();  
          assert.deepEqual(standardClaims, { "name":"name", "email": "email@google.com", "picture":"/pathToPic", "iss" : "issuer", "sub" : 'subject',  "iat" : clockTimestamp})          
         }catch(err){
           assert.isNull(err);
@@ -100,7 +100,7 @@ describe('Asymmetric Algorithms', function(){
 
       it('should be able to access non standard claims separately', function (done) {
           try{
-           var nonStandardClaims = googleIdToken.getNonStandardClaims();  
+           var nonStandardClaims = googleIdToken.getOptionalClaims();  
            assert.deepEqual(nonStandardClaims, {"aud" : "audience", "exp" : clockTimestamp + 3})          
           }catch(err){
             assert.isNull(err);

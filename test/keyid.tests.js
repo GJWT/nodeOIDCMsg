@@ -9,7 +9,7 @@ describe('when signing a token with a known non standard claim', function () {
     
 
 var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-basicIdToken.addNonStandardClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+basicIdToken.addOptionalClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
 basicIdToken.setNoneAlgorithm(true);
 var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256', "keyid": "1234"});
 

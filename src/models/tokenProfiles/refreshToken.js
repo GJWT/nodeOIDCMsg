@@ -5,45 +5,50 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
 
 /**
+ * @fileoverview
  * RefreshToken
- * Init token using standard claims
+ * Required claims : refresh_token, access_token
+ */
+/**
+ * RefreshToken
+ * Init token using required claims
  * @class
  * @constructor
  * @extends BasicIdToken
- * @param {*} refresh_token
- * @param {*} access_token
+ * @param {*} refreshToken
+ * @param {*} accessToken
  */
-function RefreshToken(refresh_token, access_token){
+function RefreshToken(refreshToken, accessToken){
     this.initData();        
-    this.refresh_token = refresh_token;
-    this.access_token = access_token;
+    this.refreshToken = refreshToken;
+    this.accessToken = accessToken;
     this.validateRequiredFields();
 };
 
 RefreshToken.prototype = Object.create(BasicIdToken.prototype);
 RefreshToken.prototype.constructor = RefreshToken;
 
-/** Provided standard claims */
-RefreshToken.prototype.standard_claims = {};
+/** Required claims */
+RefreshToken.prototype.requiredClaims = {};
 
-/** Provided non standard claims */ 
-RefreshToken.prototype.non_standard_claims = {};
+/** Optional claims */ 
+RefreshToken.prototype.optionalClaims = {};
 
-RefreshToken.prototype.verification_claims = {};
+RefreshToken.prototype.verificationClaims = {};
 
-/** Expected non standard verification claims that are known */
-RefreshToken.prototype.non_standard_verification_claims = {};
+/** Expected optional verification claims that are known */
+RefreshToken.prototype.optionalVerificationClaims = {};
 
-RefreshToken.prototype.NoneAlgorithm = false;
+RefreshToken.prototype.noneAlgorithm = false;
 
-/** Required standard claims */ 
-RefreshToken.prototype.options_to_payload = {
-    'refresh_token': 'refresh_token',
-    'access_token': 'access_token',
+/** Required claims */ 
+RefreshToken.prototype.optionsToPayload = {
+    'refreshToken': 'refreshToken',
+    'accessToken': 'accessToken',
 };
 
 /** Other option values */ 
-RefreshToken.prototype.options_for_objects = [
+RefreshToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -53,80 +58,80 @@ RefreshToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known non standard claims that need to be verified */ 
-RefreshToken.prototype.knownNonStandardClaims = {
-    'knownNonStandardClaim' : 'knownNonStandardClaim',
+/** Known optional claims that need to be verified */ 
+RefreshToken.prototype.knownOptionalClaims = {
+    'knownOptionalClaim' : 'knownOptionalClaim',
 };
 
-/** Required standard claims to be verified */
-RefreshToken.prototype.claims_to_verify = {
-    'refresh_token': 'refresh_token',
-    'access_token': 'access_token',
+/** Required claims to be verified */
+RefreshToken.prototype.claimsForVerification = {
+    'refreshToken': 'refreshToken',
+    'accessToken': 'accessToken',
 };
 
 RefreshToken.prototype.initData = function(){
-    RefreshToken.prototype.non_standard_verification_claims = {};    
-    RefreshToken.prototype.NoneAlgorithm = false;
+    RefreshToken.prototype.optionalVerificationClaims = {};    
+    RefreshToken.prototype.noneAlgorithm = false;
 };
 
 /** Check for missing required claims */
 RefreshToken.prototype.validateRequiredFields = function(){
-    if (this.refresh_token && this.access_token){
-        console.log("Validated all standard fields")
+    if (this.refreshToken && this.accessToken){
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
 };
 
-RefreshToken.prototype.getStandardClaims = function(){
-    RefreshToken.prototype.standard_claims = { "refresh_token" : this.refresh_token, "access_token" : this.access_token};
-    return RefreshToken.prototype.standard_claims;         
+RefreshToken.prototype.getRequiredClaims = function(){
+    RefreshToken.prototype.requiredClaims = { "refreshToken" : this.refreshToken, "accessToken" : this.accessToken};
+    return RefreshToken.prototype.requiredClaims;         
 };
 
-RefreshToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    RefreshToken.prototype.non_standard_claims = nonStandardClaims;
+RefreshToken.prototype.addOptionalClaims = function(optionalClaims){
+    RefreshToken.prototype.optionalClaims = optionalClaims;
 
-    RefreshToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (RefreshToken.prototype.knownNonStandardClaims[key]) {
-            RefreshToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    RefreshToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (RefreshToken.prototype.knownOptionalClaims[key]) {
+            RefreshToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
 
-RefreshToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return RefreshToken.prototype.non_standard_claims;
+RefreshToken.prototype.getOptionalClaims = function(optionalClaims){
+    return RefreshToken.prototype.optionalClaims;
 };
 
 /** Check for required verification claims that need to be verified */
 RefreshToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(RefreshToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(RefreshToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-      RefreshToken.prototype.verification_claims = claimsToVerify;
+      RefreshToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Check for required non standard verification claims that need to be verified */
-RefreshToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Check for optional verification claims that need to be verified */
+RefreshToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (RefreshToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (RefreshToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaims('clockTolerance', claimsToVerify);
     }
-    if (RefreshToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (RefreshToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaims('aud', claimsToVerify);
     }
 };
 
-RefreshToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+RefreshToken.prototype.optionalVerificationClaims = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        RefreshToken.prototype.verification_claims[key] = claimsToVerify[key];
+        RefreshToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            RefreshToken.prototype.claims_to_verify['aud'] = 'aud';
+            RefreshToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
@@ -137,14 +142,13 @@ RefreshToken.prototype.toJWT = function(secretOrPrivateKey, options, callback){
 
 RefreshToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
     this.validateRequiredVerificationClaims(claimsToVerify);
-    this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
 
 RefreshToken.prototype.getVerificationClaims = function(){
-    return RefreshToken.prototype.verification_claims;
+    return RefreshToken.prototype.verificationClaims;
 }; 
 
 module.exports = RefreshToken;
-

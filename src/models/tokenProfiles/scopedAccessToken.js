@@ -2,11 +2,17 @@
 
 var AccessToken = require('./accessToken');  
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
-var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
+var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
+
+/**
+ * @fileoverview 
+ * Required claims : iss, sub, iat, scope
+ * Optional claims : aud, exp
+ */
 
 /**
  * ScopedAccessToken
- * Init token using standard claims
+ * Init token using required claims
  * @class
  * @constructor
  * @extends AccessToken
@@ -26,8 +32,8 @@ function ScopedAccessToken(iss, sub, iat, scope){
 ScopedAccessToken.prototype = Object.create(AccessToken.prototype);
 ScopedAccessToken.prototype.constructor = AccessToken;
 
-/** Required standard claims */
-ScopedAccessToken.prototype.options_to_payload = {
+/** optional claims */
+ScopedAccessToken.prototype.optionsToPayload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
@@ -35,7 +41,7 @@ ScopedAccessToken.prototype.options_to_payload = {
 };
 
 /** Other option values */
-ScopedAccessToken.prototype.options_for_objects = [
+ScopedAccessToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -45,14 +51,14 @@ ScopedAccessToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known non standard claims */ 
-ScopedAccessToken.prototype.knownNonStandardClaims = {
+/** Known optional claims */ 
+ScopedAccessToken.prototype.knownOptionalClaims = {
     'aud' : 'aud',
     'exp' : 'exp',
 };
 
-/** Required standard verification claims */
-ScopedAccessToken.prototype.claims_to_verify = {
+/** optional verification claims */
+ScopedAccessToken.prototype.claimsForVerification = {
     'iss': 'iss',
     'sub': 'sub',
     'scope': 'scope',
@@ -62,89 +68,92 @@ ScopedAccessToken.prototype.claims_to_verify = {
 /** Check for missing required claims */
 ScopedAccessToken.prototype.validateRequiredFields = function(){
     if (this.iss && this.sub && this.iat && this.scope){
-        console.log("Validated all standard fields")
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
 };
 
-ScopedAccessToken.prototype.getStandardClaims = function(){
-    ScopedAccessToken.prototype.standard_claims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat, "scope" : this.scope};
-    return ScopedAccessToken.prototype.standard_claims;         
+ScopedAccessToken.prototype.getRequiredClaims = function(){
+    ScopedAccessToken.prototype.requiredClaims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat, "scope" : this.scope};
+    return ScopedAccessToken.prototype.requiredClaims;         
 };
 
 ScopedAccessToken.prototype.initData = function(){
-    ScopedAccessToken.prototype.non_standard_verification_claims = {};    
-    ScopedAccessToken.prototype.NoneAlgorithm = false;
+    ScopedAccessToken.prototype.optionalVerificationClaims = {};    
+    ScopedAccessToken.prototype.noneAlgorithm = false;
 };
 
-ScopedAccessToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    ScopedAccessToken.prototype.non_standard_claims = nonStandardClaims;
+ScopedAccessToken.prototype.addOptionalClaims = function(optionalClaims){
+    ScopedAccessToken.prototype.optionalClaims = optionalClaims;
 
-    ScopedAccessToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (ScopedAccessToken.prototype.knownNonStandardClaims[key]) {
-            ScopedAccessToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    ScopedAccessToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (ScopedAccessToken.prototype.knownOptionalClaims[key]) {
+            ScopedAccessToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
 
-ScopedAccessToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return ScopedAccessToken.prototype.non_standard_claims;
+ScopedAccessToken.prototype.getOptionalClaims = function(optionalClaims){
+    return ScopedAccessToken.prototype.optionalClaims;
 }; 
 
 ScopedAccessToken.prototype.getVerificationClaims = function(){
-    return ScopedAccessToken.prototype.verification_claims;
+    return ScopedAccessToken.prototype.verificationClaims;
 }; 
 
-ScopedAccessToken.prototype.getNonStandardVerificationClaims = function(){
-    return ScopedAccessToken.prototype.non_standard_verification_claims;
+ScopedAccessToken.prototype.getOptionalVerificationClaims = function(){
+    return ScopedAccessToken.prototype.optionalVerificationClaims;
 }; 
 
 ScopedAccessToken.prototype.setNoneAlgorithm = function(boolVal){
-    ScopedAccessToken.prototype.NoneAlgorithm = boolVal;
+    ScopedAccessToken.prototype.noneAlgorithm = boolVal;
 };
 
 ScopedAccessToken.prototype.getNoneAlgorithm = function(boolVal){
-    return ScopedAccessToken.prototype.NoneAlgorithm;
+    return ScopedAccessToken.prototype.noneAlgorithm;
+};
+
+ScopedAccessToken.prototype.toJWT = function(secretOrPrivateKey, options, callback){
+    return jwtSigner.sign(this, secretOrPrivateKey, options, callback);
 };
 
 /** Deserialization for JWT type */ 
 ScopedAccessToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
     this.validateRequiredVerificationClaims(claimsToVerify);
-    this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT, secretOrPrivateKey, this, options);
 };
 
-/** Throw error if missing required standard verification claims */ 
+/** Throw error if missing optional verification claims */ 
 ScopedAccessToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(ScopedAccessToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(ScopedAccessToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-      ScopedAccessToken.prototype.verification_claims = claimsToVerify;
+      ScopedAccessToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Throw error if missing required non standard verification claims */ 
-ScopedAccessToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Throw error if missing required optional verification claims */ 
+ScopedAccessToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (ScopedAccessToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (ScopedAccessToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
     }
-    if (ScopedAccessToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (ScopedAccessToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 };
 
-ScopedAccessToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+ScopedAccessToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        ScopedAccessToken.prototype.verification_claims[key] = claimsToVerify[key];
+        ScopedAccessToken.prototype.verificationClaims[key] = claimsToVerify[key];
     }
 }
 
 module.exports = ScopedAccessToken;
-

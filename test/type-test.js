@@ -41,7 +41,7 @@ describe('Asymmetric Algorithms', function(){
         it('should throw error for incorrect type format of audience', function (done) {
             try{
               var basicIdToken2 = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-              basicIdToken2.addNonStandardClaims({"aud" : 1, "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+              basicIdToken2.addOptionalClaims({"aud" : 1, "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
               basicIdToken2.setNoneAlgorithm(true);
               var signedJWT = basicIdToken2.toJWT('shhhh');
             }catch(err){
@@ -53,7 +53,7 @@ describe('Asymmetric Algorithms', function(){
           it('should throw error for incorrect type format of subject', function (done) {
             try{
               var basicIdToken2 = new BasicIdToken('issuer',1, clockTimestamp, "jti");
-              basicIdToken2.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+              basicIdToken2.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
               basicIdToken2.setNoneAlgorithm(true);
               var signedJWT = basicIdToken2.toJWT('shhhh');
             }catch(err){
@@ -65,7 +65,7 @@ describe('Asymmetric Algorithms', function(){
           it('should throw error for incorrect type format of jti', function (done) {
             try{
               var basicIdToken2 = new BasicIdToken('issuer','subject', clockTimestamp, 1);
-              basicIdToken2.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+              basicIdToken2.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
               basicIdToken2.setNoneAlgorithm(true);
               var signedJWT = basicIdToken2.toJWT('shhhh');
             }catch(err){

@@ -12,7 +12,7 @@ describe('non_object_values values', function() {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256'});
 
@@ -28,7 +28,7 @@ describe('non_object_values values', function() {
       //jwt.sign('hello', '123', { expiresIn: '12h' });
 
       var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-      basicIdToken.addNonStandardClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+      basicIdToken.addOptionalClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
       basicIdToken.setNoneAlgorithm(true);
       var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256', expiresIn: '12h'});
     }).to.throw(/invalid expiresIn option for string payload/);
@@ -47,7 +47,7 @@ describe('non_object_values values', function() {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"data": 123, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"data": 123, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256'});
   

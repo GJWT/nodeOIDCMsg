@@ -10,6 +10,9 @@ var jwkToPem          = require('jwk-to-pem');
 var forge = require('node-forge');
 
 /**
+ * @fileoverview Handles common decoding functionality for JWT message type
+ */
+/**
  * JWTDecoder
  * @class
  * @constructor
@@ -21,7 +24,7 @@ function JWTDecoder(){
  * Decodes Jwt string after verifying if payload matches expected claim values 
  * @param {string} jwtString The signed Jwt string
  * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
- * @param {Token} tokenProfile Contains the token properties, standard, non standard and verification claims
+ * @param {Token} tokenProfile Contains the token properties, required, optional and verification claims
  * @param {dictionary} otherOptions Other inputs that are not part of the payload, for ex : 'algorithm'
  * @param {function} callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
       signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.

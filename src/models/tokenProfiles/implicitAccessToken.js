@@ -5,8 +5,14 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
 /**
+ * @fileoverview 
  * ImplicitAccessToken
- * Init token using standard claims 
+ * Required claims : iss, sub, iat
+ * Optional claims : aud
+ */
+/**
+ * ImplicitAccessToken
+ * Init token using required claims 
  * @class
  * @constructor
  * @extends BasicIdToken
@@ -24,15 +30,15 @@ function ImplicitAccessToken(iss, sub, iat){
 ImplicitAccessToken.prototype = Object.create(BasicIdToken.prototype);
 ImplicitAccessToken.prototype.constructor = ImplicitAccessToken;
 
-/** Required standard claims */
-ImplicitAccessToken.prototype.options_to_payload = {
+/** Required claims */
+ImplicitAccessToken.prototype.optionsToPayload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
 };
   
 /** Other option values */
-ImplicitAccessToken.prototype.options_for_objects = [
+ImplicitAccessToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -42,13 +48,13 @@ ImplicitAccessToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known non standard claims that need to be verified */
-ImplicitAccessToken.prototype.knownNonStandardClaims = {
+/** Known optional claims that need to be verified */
+ImplicitAccessToken.prototype.knownOptionalClaims = {
     'aud' : 'aud',
 };
 
-/** Required standard claims that need to be verified */ 
-ImplicitAccessToken.prototype.claims_to_verify = {
+/** Required claims that need to be verified */ 
+ImplicitAccessToken.prototype.claimsForVerification = {
     'iss': 'iss',
     'sub': 'sub',
     'maxAge' : 'maxAge',
@@ -57,89 +63,88 @@ ImplicitAccessToken.prototype.claims_to_verify = {
 /** Check for missing required claims */
 ImplicitAccessToken.prototype.validateRequiredFields = function(){
     if (this.iss && this.sub && this.iat){
-        console.log("Validated all standard fields")
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
 };
 
-ImplicitAccessToken.prototype.getStandardClaims = function(){
-    ImplicitAccessToken.prototype.standard_claims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
-    return ImplicitAccessToken.prototype.standard_claims;         
+ImplicitAccessToken.prototype.getRequiredClaims = function(){
+    ImplicitAccessToken.prototype.requiredClaims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return ImplicitAccessToken.prototype.requiredClaims;         
 };
 
 ImplicitAccessToken.prototype.initData = function(){
-    ImplicitAccessToken.prototype.non_standard_verification_claims = {};    
-    ImplicitAccessToken.prototype.NoneAlgorithm = false;
+    ImplicitAccessToken.prototype.optionalVerificationClaims = {};    
+    ImplicitAccessToken.prototype.noneAlgorithm = false;
 };
 
-ImplicitAccessToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    ImplicitAccessToken.prototype.non_standard_claims = nonStandardClaims;
+ImplicitAccessToken.prototype.addOptionalClaims = function(optionalClaims){
+    ImplicitAccessToken.prototype.optionalClaims = optionalClaims;
 
-    ImplicitAccessToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (ImplicitAccessToken.prototype.knownNonStandardClaims[key]) {
-            ImplicitAccessToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    ImplicitAccessToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (ImplicitAccessToken.prototype.knownOptionalClaims[key]) {
+            ImplicitAccessToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
-    });  
+    });
 };
 
-ImplicitAccessToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return ImplicitAccessToken.prototype.non_standard_claims;
+ImplicitAccessToken.prototype.getOptionalClaims = function(optionalClaims){
+    return ImplicitAccessToken.prototype.optionalClaims;
 }; 
 
 ImplicitAccessToken.prototype.getVerificationClaims = function(){
-    return ImplicitAccessToken.prototype.verification_claims;
+    return ImplicitAccessToken.prototype.verificationClaims;
 }; 
 
-ImplicitAccessToken.prototype.getNonStandardVerificationClaims = function(){
-    return ImplicitAccessToken.prototype.non_standard_verification_claims;
+ImplicitAccessToken.prototype.getOptionalVerificationClaims = function(){
+    return ImplicitAccessToken.prototype.optionalVerificationClaims;
 }; 
 
 ImplicitAccessToken.prototype.setNoneAlgorithm = function(boolVal){
-    ImplicitAccessToken.prototype.NoneAlgorithm = boolVal;
+    ImplicitAccessToken.prototype.noneAlgorithm = boolVal;
 };
 
 ImplicitAccessToken.prototype.getNoneAlgorithm = function(boolVal){
-    return ImplicitAccessToken.prototype.NoneAlgorithm;
+    return ImplicitAccessToken.prototype.noneAlgorithm;
 };
 
 ImplicitAccessToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
 
     this.validateRequiredVerificationClaims(claimsToVerify);
-    this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
 /** Throws error if missing required verification claims */
 ImplicitAccessToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(ImplicitAccessToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(ImplicitAccessToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-      ImplicitAccessToken.prototype.verification_claims = claimsToVerify;
+      ImplicitAccessToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Throws error if missing required non standard claims */
-ImplicitAccessToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Throws error if missing optional claims */
+ImplicitAccessToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (ImplicitAccessToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (ImplicitAccessToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 };
 
-ImplicitAccessToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+ImplicitAccessToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        ImplicitAccessToken.prototype.verification_claims[key] = claimsToVerify[key];
+        ImplicitAccessToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            ImplicitAccessToken.prototype.claims_to_verify['aud'] = 'aud';
+            ImplicitAccessToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
 
 module.exports = ImplicitAccessToken;
-

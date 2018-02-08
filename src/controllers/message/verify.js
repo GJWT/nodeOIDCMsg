@@ -7,6 +7,9 @@ var xtend             = require('xtend');
 var messageVerifier = MessageVerifier.prototype;
 
 /**
+ * @fileoverview Handles the common verification functionality for all message protocols
+ */
+/**
  * MessageVerifier
  * @class
  * @constructor
@@ -98,12 +101,12 @@ messageVerifier.verifyOptions = function (jwtString, secretOrPublicKey, options,
 /**
  * Verify if payload options matches the expected claim values 
  * @param payload Could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
- * @param tokenProfile Contains the token properties, standard, non standard and verification claims
+ * @param tokenProfile Contains the token properties, required, optional and verification claims
  * @param callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
       signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
  * @throws JsonWebToken error if options does not match expected claims
  * @memberof MessageVerifier
- */ 
+ */
 messageVerifier.verifyPayload = function (payload, tokenProfile, otherOptions, callback) {
   var options = tokenProfile.getVerificationClaims();
   var done;
@@ -140,8 +143,8 @@ messageVerifier.verifyPayload = function (payload, tokenProfile, otherOptions, c
     }
   }
 
-  Object.keys(tokenProfile.claims_to_verify).forEach(function (key) {
-    var claim = tokenProfile.claims_to_verify[key];
+  Object.keys(tokenProfile.claimsForVerification).forEach(function (key) {
+    var claim = tokenProfile.claimsForVerification[key];
     if (options[key] && key != "maxAge" && key != "clockTolerance" && key != "aud") {
       if (payload[claim] != options[key]) {
         return done(new JsonWebTokenError('jwt option invalid. expected: ' + options[key]));

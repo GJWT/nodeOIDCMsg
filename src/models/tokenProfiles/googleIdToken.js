@@ -5,10 +5,18 @@ var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode'
 var BasicIdToken = require('./basicIdToken');  
 
 /**
+ * @fileoverview 
  * GoogleIdToken
- * Init token using standard claims
+ * Required claims : name, email, picture, iss, sub, iat
+ * Optional claims : exp, aud
+ */
+
+/**
+ * GoogleIdToken
+ * Init token using required claims
  * @class
  * @constructor
+ * @extends BasicIdToken
  * @param {*} name
  * @param {*} email
  * @param {*} picture
@@ -27,15 +35,15 @@ function GoogleIdToken(name, email, picture, iss, sub, iat){
     this.validateRequiredFields();
 };
 
-GoogleIdToken.prototype.standard_claims = {};
+GoogleIdToken.prototype.requiredClaims = {};
 
-GoogleIdToken.prototype.non_standard_claims = {};
+GoogleIdToken.prototype.optionalClaims = {};
 
 GoogleIdToken.prototype = Object.create(BasicIdToken.prototype);
 GoogleIdToken.prototype.constructor = GoogleIdToken;
 
-/** Required standard claims */
-GoogleIdToken.prototype.options_to_payload = {
+/** Required claims */
+GoogleIdToken.prototype.optionsToPayload = {
     'name': 'name',
     'email': 'email',
     'picture': 'picture',
@@ -45,7 +53,7 @@ GoogleIdToken.prototype.options_to_payload = {
 };
   
 /** Other option values */
-GoogleIdToken.prototype.options_for_objects = [
+GoogleIdToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -55,14 +63,14 @@ GoogleIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Required known non standard claims */
-GoogleIdToken.prototype.knownNonStandardClaims = {
+/** Known optional claims */
+GoogleIdToken.prototype.knownOptionalClaims = {
     'exp' : 'exp',
     'aud' : 'aud',
 };
 
-/** Required standard claims that need to be verified */
-GoogleIdToken.prototype.claims_to_verify = {
+/** Required claims that need to be verified */
+GoogleIdToken.prototype.claimsForVerification = {
     'name': 'name',
     'email': 'email',
     'picture': 'picture',
@@ -72,36 +80,36 @@ GoogleIdToken.prototype.claims_to_verify = {
 };
 
 GoogleIdToken.prototype.initData = function(){
-    GoogleIdToken.prototype.non_standard_verification_claims = {};    
-    GoogleIdToken.prototype.NoneAlgorithm = false;
+    GoogleIdToken.prototype.optionalVerificationClaims = {};    
+    GoogleIdToken.prototype.noneAlgorithm = false;
 };
 
-GoogleIdToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    GoogleIdToken.prototype.non_standard_claims = nonStandardClaims;
+GoogleIdToken.prototype.addOptionalClaims = function(optionalClaims){
+    GoogleIdToken.prototype.optionalClaims = optionalClaims;
 
-    GoogleIdToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (GoogleIdToken.prototype.knownNonStandardClaims[key]) {
-            GoogleIdToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    GoogleIdToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (GoogleIdToken.prototype.knownOptionalClaims[key]) {
+            GoogleIdToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
-GoogleIdToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return GoogleIdToken.prototype.non_standard_claims;
+GoogleIdToken.prototype.getOptionalClaims = function(optionalClaims){
+    return GoogleIdToken.prototype.optionalClaims;
 };
 
 
 GoogleIdToken.prototype.getVerificationClaims = function(){
-    return GoogleIdToken.prototype.verification_claims;
+    return GoogleIdToken.prototype.verificationClaims;
 }; 
 
-GoogleIdToken.prototype.getNonStandardVerificationClaims = function(){
-    return GoogleIdToken.prototype.non_standard_verification_claims;
+GoogleIdToken.prototype.getOptionalVerificationClaims = function(){
+    return GoogleIdToken.prototype.optionalVerificationClaims;
 };
 
 GoogleIdToken.prototype.validateRequiredFields = function(){
     if (this.name && this.email && this.picture && this.iss && this.sub && this.iat){
-        console.log("Validated all standard fields")
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
@@ -110,48 +118,46 @@ GoogleIdToken.prototype.validateRequiredFields = function(){
 /* Deserialization for JWT type */
 GoogleIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
         this.validateRequiredVerificationClaims(claimsToVerify);
-        this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+        this.validateOptionalVerificationClaims(claimsToVerify);
         return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
-GoogleIdToken.prototype.getStandardClaims = function(){
-    GoogleIdToken.prototype.standard_claims = {"name": this.name, "email" : this.email, "picture": this.picture,  "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
-    return GoogleIdToken.prototype.standard_claims;         
+GoogleIdToken.prototype.getRequiredClaims = function(){
+    GoogleIdToken.prototype.requiredClaims = {"name": this.name, "email" : this.email, "picture": this.picture,  "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return GoogleIdToken.prototype.requiredClaims;         
 };
 
-/* Throws error if missing required standard verification claims */
+/* Throws error if missing required verification claims */
 GoogleIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(GoogleIdToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(GoogleIdToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-    GoogleIdToken.prototype.verification_claims = claimsToVerify;
+    GoogleIdToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Throws error if missing required non standard verification claims */
-GoogleIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Throws error if missing optional verification claims */
+GoogleIdToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (GoogleIdToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (GoogleIdToken.prototype.optionalVerificationClaims['exp']){
+        this.OptionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
     }
-    if (GoogleIdToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (GoogleIdToken.prototype.optionalVerificationClaims['aud']){
+        this.OptionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 };
 
-
-GoogleIdToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+GoogleIdToken.prototype.OptionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        GoogleIdToken.prototype.verification_claims[key] = claimsToVerify[key];
+        GoogleIdToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            GoogleIdToken.prototype.claims_to_verify['aud'] = 'aud';
+            GoogleIdToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
 
 module.exports = GoogleIdToken;
-

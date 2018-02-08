@@ -12,6 +12,10 @@ var once = require('lodash.once');
 var messageSigner = MessageSigner.prototype;
 
 /**
+ * @fileoverview Handles the common signing functionality for all message protocols
+ */
+
+/**
  * MessageSigner
  * @class
  * @constructor
@@ -19,7 +23,7 @@ var messageSigner = MessageSigner.prototype;
 function MessageSigner(){
 };
 
-messageSigner.sign_options_schema = {
+messageSigner.signOptionsSchema = {
   expiresIn: { isValid: function(value) { return isInteger(value) || isString(value); }, message: '"expiresIn" should be a number of seconds or string representing a timespan' },
   notBefore: { isValid: function(value) { return isInteger(value) || isString(value); }, message: '"notBefore" should be a number of seconds or string representing a timespan' },
   audience: { isValid: function(value) { return isString(value) || Array.isArray(value); }, message: '"audience" must be a string or array' },
@@ -34,7 +38,7 @@ messageSigner.sign_options_schema = {
   baseEncoding: { isValid: isString, message: '"baseEncoding" must be a string' },
 };
 
-messageSigner.registered_claims_schema = {
+messageSigner.registeredClaimsSchema = {
   iat: { isValid: isNumber, message: '"iat" should be a number of seconds' },
   exp: { isValid: isNumber, message: '"exp" should be a number of seconds' },
   nbf: { isValid: isNumber, message: '"nbf" should be a number of seconds' },
@@ -76,7 +80,7 @@ messageSigner.validate = function(schema, allowUnknown, object, parameterName) {
  * @memberof MessageSigner
  */
 messageSigner.validateOptions = function(options) {
-  return this.validate(this.sign_options_schema, false, options, 'options');
+  return this.validate(this.signOptionsSchema, false, options, 'options');
 }
 
 /** 
@@ -85,13 +89,13 @@ messageSigner.validateOptions = function(options) {
  * @memberof MessageSigner
  */
 messageSigner.validatePayload = function(payload) {
-  return this.validate(this.registered_claims_schema, true, payload, 'payload');
+  return this.validate(this.registeredClaimsSchema, true, payload, 'payload');
 }
 
 /** 
  * Signs message and checks for valid input.
  * 
- * @param {Token} tokenProfile - Contains the token properties, standard, non standard and verification claims.
+ * @param {Token} tokenProfile - Contains the token properties, required, optional and verification claims.
  * @param {string} secretOrPublicKey - String or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
  * @param {dictionary} options - Consists of other inputs that are not part of the payload, for ex : 'algorithm'.
  * @param {function} callback - Called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
@@ -101,7 +105,7 @@ messageSigner.validatePayload = function(payload) {
  * @memberof MessageSigner
  */
 messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callback) {
-  var payload = Object.assign({}, tokenProfile.getStandardClaims(), tokenProfile.getNonStandardClaims());
+  var payload = Object.assign({}, tokenProfile.getRequiredClaims(), tokenProfile.getOptionalClaims());
   
   // Init options
   options = this.initOptions(options);
@@ -136,12 +140,12 @@ messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callba
     }
     payload = xtend(payload);
   } else {
-    var invalid_options = options_for_objects.filter(function (opt) {
+    var invalidOptions = optionsForObjects.filter(function (opt) {
       return typeof options[opt] !== 'undefined';
     });
 
-    if (invalid_options.length > 0) {
-      return failure(new Error('invalid ' + invalid_options.join(',') + ' option for ' + (typeof payload ) + ' payload'));
+    if (invalidOptions.length > 0) {
+      return failure(new Error('invalid ' + invalidOptions.join(',') + ' option for ' + (typeof payload ) + ' payload'));
     }
   }
 
@@ -153,8 +157,8 @@ messageSigner.sign = function (tokenProfile, secretOrPrivateKey, options, callba
   }
 
   payload = this.checkOtherOptions(secretOrPrivateKey, options, tokenProfile, payload, failure);
-  payload = this.checkOptions(tokenProfile.options_to_payload, options, payload, failure);
-  payload = this.checkOptions(tokenProfile.knownNonStandardClaims, options, payload, failure);
+  payload = this.checkOptions(tokenProfile.optionsToPayload, options, payload, failure);
+  payload = this.checkOptions(tokenProfile.knownOptionalClaims, options, payload, failure);
  
   var messageInfo = { "header": header, "payload": payload, "options": options};
   return messageInfo;
@@ -178,7 +182,7 @@ messageSigner.initOptions = function(options){
  * 
  * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
  * @param {dictionary} options Other inputs that are not part of the payload, for ex : 'algorithm'.
- * @param {Token} tokenProfile Contains the token properties, standard, non standard and verification claim.
+ * @param {Token} tokenProfile Contains the token properties, required, optional and verification claim.
  * @param {dictionary} payload Could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
  * @returns {dictionary} payload
  * @throws Error if duplicate options values provided or does not match expected value.

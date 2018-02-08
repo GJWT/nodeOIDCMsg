@@ -14,7 +14,7 @@ describe('schema', function() {
       var isEcdsa = options.algorithm && options.algorithm.indexOf('ES') === 0;
       var iat = Math.floor(Date.now() / 1000);    
       var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-      basicIdToken.addNonStandardClaims({foo: 123, "aud" : "audience"});
+      basicIdToken.addOptionalClaims({foo: 123, "aud" : "audience"});
       basicIdToken.setNoneAlgorithm(true);
       var signedJWT = basicIdToken.toJWT(isEcdsa ? cert_ecdsa_priv : cert_rsa_priv, options);
     }
@@ -24,7 +24,7 @@ describe('schema', function() {
         var dateNow = Math.floor(Date.now() / 1000);    
         var iat = dateNow - 30;
         var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience"});
+        basicIdToken.addOptionalClaims({"aud" : "audience"});
         var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: '1 monkey'});
         done();      
         sign({ expiresIn: '1 monkey' });
@@ -122,7 +122,7 @@ describe('schema', function() {
     function sign(payload) {
       var iat = Math.floor(Date.now() / 1000);    
       var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-      basicIdToken.addNonStandardClaims(payload);
+      basicIdToken.addOptionalClaims(payload);
       basicIdToken.setNoneAlgorithm(true);
       var signedJWT = basicIdToken.toJWT('foo123');
     }

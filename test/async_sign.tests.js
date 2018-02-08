@@ -12,7 +12,7 @@ describe('signing a token asynchronously', function() {
     it('should return the same result as singing synchronously', function(done) {
         var secret = "shhhh";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         basicIdToken.toJWT(secret, { algorithm: 'HS256'}, function (err, asyncToken) {
      // jwt.sign({ foo: 'bar' }, secret, { algorithm: 'HS256' }, function (err, asyncToken) {
@@ -20,7 +20,7 @@ describe('signing a token asynchronously', function() {
 
         var secret = "shhhh";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         var syncToken = basicIdToken.toJWT(secret, { algorithm: 'HS256'});
 
@@ -36,7 +36,7 @@ describe('signing a token asynchronously', function() {
         try{
             var secret = "secret";
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({ "abc": 1, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+            basicIdToken.addOptionalClaims({ "abc": 1, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
             basicIdToken.setNoneAlgorithm(true);
             var syncToken = basicIdToken.toJWT(secret, {});
         }catch(err){
@@ -56,7 +56,7 @@ describe('signing a token asynchronously', function() {
         try{
             var secret = "secret";
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({ "abc": 1, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+            basicIdToken.addOptionalClaims({ "abc": 1, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
             basicIdToken.setNoneAlgorithm(true);
             var syncToken = basicIdToken.toJWT(secret);
         }catch(err){
@@ -76,7 +76,7 @@ describe('signing a token asynchronously', function() {
         try{
             var secret = "secret";
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+            basicIdToken.addOptionalClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
             basicIdToken.setNoneAlgorithm(true);
             var token = basicIdToken.toJWT(secret, { algorithm: 'none' });
             expect(token).to.be.a('string');
@@ -100,7 +100,7 @@ describe('signing a token asynchronously', function() {
         try{
             var secret = "secret";
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+            basicIdToken.addOptionalClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
             basicIdToken.setNoneAlgorithm(true);
             var token = basicIdToken.toJWT(undefined, { algorithm: 'none' });
             expect(token).to.be.a('string');
@@ -123,7 +123,7 @@ describe('signing a token asynchronously', function() {
       try{
         var secret = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret, { algorithm: 'RS256'});
         expect(token).to.be.a('string');
@@ -146,7 +146,7 @@ describe('signing a token asynchronously', function() {
       try{
         var secret = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret, {notBefore: {}});
       }catch(err){
@@ -165,7 +165,7 @@ describe('signing a token asynchronously', function() {
         try{
             var secret = "secret";
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+            basicIdToken.addOptionalClaims({  foo: 'bar' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
             basicIdToken.setNoneAlgorithm(true);
             var token = basicIdToken.toJWT(secret, {noTimestamp: true});
           }catch(err){
@@ -192,7 +192,7 @@ describe('signing a token asynchronously', function() {
       try{
         var secret = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'payload': 'string' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        basicIdToken.addOptionalClaims({  'payload': 'string' , "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret, {});
        var result = basicIdToken.fromJWT(token, secret, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});        
@@ -211,7 +211,7 @@ describe('signing a token asynchronously', function() {
         // This is needed since jws will not answer for falsy secrets
           try{
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({   "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+            basicIdToken.addOptionalClaims({   "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
             basicIdToken.setNoneAlgorithm(true);
             var token = basicIdToken.toJWT(secret, {});
           }catch(err){

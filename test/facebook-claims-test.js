@@ -33,10 +33,10 @@ describe('Asymmetric Algorithms', function(){
       
       var pub = algorithms[algorithm].pub_key;
       var priv = algorithms[algorithm].priv_key;
-
+      
       describe('when signing a token with a known non standard claim', function () {
         var facebookIdToken = new FacebookIdToken('userId','appId', clockTimestamp);
-        facebookIdToken.addNonStandardClaims({"expired_at" : clockTimestamp + 3});
+        facebookIdToken.addOptionalClaims({"expiredAt" : clockTimestamp + 3});
         facebookIdToken.setNoneAlgorithm(true);
         var signedJWT = facebookIdToken.toJWT('shhhh');
 
@@ -46,6 +46,8 @@ describe('Asymmetric Algorithms', function(){
             assert.isNotNull(decodedPayload);
             done();            
           }catch(err){
+            console.log(err);
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             assert.isNull(err);
             done();
           }
@@ -61,13 +63,12 @@ describe('Asymmetric Algorithms', function(){
         });
       });
     });
-       
-  
+
       describe('when signing a token without standard claim', function () {
         it('should throw error and require standard claim', function (done) {
           try{
             var facebookIdToken = new FacebookIdToken('userId','appId');
-            facebookIdToken.addNonStandardClaims({"jti" : "test"});
+            facebookIdToken.addOptionalClaims({"jti" : "test"});
             facebookIdToken.setNoneAlgorithm(true);
             var signedJWT = facebookIdToken.toJWT('shhhh');
           }catch(err){
@@ -85,12 +86,12 @@ describe('Asymmetric Algorithms', function(){
       var clockTimestamp = 1000000000;
 
       var facebookIdToken = new FacebookIdToken('userId','appId', clockTimestamp);
-      facebookIdToken.addNonStandardClaims({"expired_at" : clockTimestamp + 3});
+      facebookIdToken.addOptionalClaims({"expiredAt" : clockTimestamp + 3});
       facebookIdToken.setNoneAlgorithm(true);        
 
       it('should be able to access all standard claims', function (done) {
         try{
-         var standardClaims = facebookIdToken.getStandardClaims();  
+         var standardClaims = facebookIdToken.getRequiredClaims();  
          assert.deepEqual(standardClaims,  {"userId" : "userId", "appId": "appId", 'iat': clockTimestamp})          
         }catch(err){
           assert.isNull(err);
@@ -100,8 +101,8 @@ describe('Asymmetric Algorithms', function(){
 
       it('should be able to access non standard claims separately', function (done) {
           try{
-           var nonStandardClaims = facebookIdToken.getNonStandardClaims();  
-           assert.deepEqual(nonStandardClaims, {"expired_at" : clockTimestamp + 3})          
+           var nonStandardClaims = facebookIdToken.getOptionalClaims();  
+           assert.deepEqual(nonStandardClaims, {"expiredAt" : clockTimestamp + 3})          
           }catch(err){
             assert.isNull(err);
           }
@@ -138,5 +139,4 @@ describe('Asymmetric Algorithms', function(){
     }); 
   });
 });
-}); 
-
+});

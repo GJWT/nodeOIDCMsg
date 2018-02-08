@@ -37,7 +37,7 @@ describe('Asymmetric Algorithms', function(){
 
       describe('when signing a token with a known non standard claim', function () {
         var implicitAccessToken = new ImplicitAccessToken('issuer','subject', clockTimestamp);
-        implicitAccessToken.addNonStandardClaims({"aud" : "audience"});
+        implicitAccessToken.addOptionalClaims({"aud" : "audience"});
         implicitAccessToken.setNoneAlgorithm(true);
         var signedJWT = implicitAccessToken.toJWT('shhhh');
 
@@ -68,7 +68,7 @@ describe('Asymmetric Algorithms', function(){
         it('should throw error and require standard claim', function (done) {
           try{
             var implicitAccessToken = new ImplicitAccessToken('issuer','subject');
-            implicitAccessToken.addNonStandardClaims({"jti" : "test"});
+            implicitAccessToken.addOptionalClaims({"jti" : "test"});
             implicitAccessToken.setNoneAlgorithm(true);
             var signedJWT = implicitAccessToken.toJWT('shhhh');
           }catch(err){
@@ -86,12 +86,12 @@ describe('Asymmetric Algorithms', function(){
       var clockTimestamp = 1000000000;
 
       var implicitAccessToken = new ImplicitAccessToken('issuer','subject', clockTimestamp);
-      implicitAccessToken.addNonStandardClaims({"aud" : "audience"});
+      implicitAccessToken.addOptionalClaims({"aud" : "audience"});
       implicitAccessToken.setNoneAlgorithm(true);        
 
       it('should be able to access all standard claims', function (done) {
         try{
-         var standardClaims = implicitAccessToken.getStandardClaims();  
+         var standardClaims = implicitAccessToken.getRequiredClaims();  
          assert.deepEqual(standardClaims, { "iss" : "issuer", "sub" : 'subject',  "iat" : clockTimestamp})          
         }catch(err){
           assert.isNull(err);
@@ -101,7 +101,7 @@ describe('Asymmetric Algorithms', function(){
 
       it('should be able to access non standard claims separately', function (done) {
           try{
-           var nonStandardClaims = implicitAccessToken.getNonStandardClaims();  
+           var nonStandardClaims = implicitAccessToken.getOptionalClaims();  
            assert.deepEqual(nonStandardClaims, {"aud" : "audience"})          
           }catch(err){
             assert.isNull(err);

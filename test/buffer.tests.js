@@ -9,7 +9,7 @@ describe('buffer payload', function () {
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
     var payload = new Buffer('TkJyotZe8NFpgdfnmgINqg==', 'base64');
     
-    basicIdToken.addNonStandardClaims({"payload": payload, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"payload": payload, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256', "keyid": "1234"});
 

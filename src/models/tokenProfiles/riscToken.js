@@ -5,8 +5,14 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
 /**
+ * @fileoverview 
  * RiscToken
- * Init token using standard claims 
+ * Required claims : jti, iss, sub, iat
+ * Optional claims : aud, nbf, exp
+ */
+/**
+ * RiscToken
+ * Init token using required claims 
  * @class
  * @constructor
  * @extends BasicIdToken
@@ -26,8 +32,8 @@ function RiscToken(jti, iss, sub, iat){
 RiscToken.prototype = Object.create(BasicIdToken.prototype);
 RiscToken.prototype.constructor = RiscToken;
 
-/** Required standard claims */ 
-RiscToken.prototype.options_to_payload = {
+/** Required claims */ 
+RiscToken.prototype.optionsToPayload = {
     'jti': 'jti',
     'iss': 'iss',
     'sub': 'sub',
@@ -35,7 +41,7 @@ RiscToken.prototype.options_to_payload = {
 };
   
 /** Other option values */
-RiscToken.prototype.options_for_objects = [
+RiscToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -45,15 +51,15 @@ RiscToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Required known non standard claims */ 
-RiscToken.prototype.knownNonStandardClaims = {
+/** Required known optional claims */ 
+RiscToken.prototype.knownOptionalClaims = {
     'aud' : 'aud',
     'nbf' : 'nbf',
     'exp' : 'exp',
 };
 
-/** Standard claims that need to be verified */ 
-RiscToken.prototype.claims_to_verify = {
+/** Required claims that need to be verified */ 
+RiscToken.prototype.claimsForVerification = {
     'jti': 'jti',
     'iss': 'iss',
     'sub': 'sub',
@@ -62,95 +68,94 @@ RiscToken.prototype.claims_to_verify = {
 
 RiscToken.prototype.validateRequiredFields = function(){
     if (this.jti && this.iss && this.sub && this.iat){
-        console.log("Validated all standard fields")
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
 };
 
-RiscToken.prototype.getStandardClaims = function(){
-    RiscToken.prototype.standard_claims = { "jti": this.jti, "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
-    return RiscToken.prototype.standard_claims;         
+RiscToken.prototype.getRequiredClaims = function(){
+    RiscToken.prototype.requiredClaims = { "jti": this.jti, "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return RiscToken.prototype.requiredClaims;         
 };
 
 RiscToken.prototype.initData = function(){
-    RiscToken.prototype.non_standard_verification_claims = {};    
-    RiscToken.prototype.NoneAlgorithm = false;
+    RiscToken.prototype.optionalVerificationClaims = {};    
+    RiscToken.prototype.noneAlgorithm = false;
 };
 
 
-RiscToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    RiscToken.prototype.non_standard_claims = nonStandardClaims;
+RiscToken.prototype.addOptionalClaims = function(optionalClaims){
+    RiscToken.prototype.optionalClaims = optionalClaims;
 
-    RiscToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (RiscToken.prototype.knownNonStandardClaims[key]) {
-            RiscToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    RiscToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (RiscToken.prototype.knownOptionalClaims[key]) {
+            RiscToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
 
-RiscToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return RiscToken.prototype.non_standard_claims;
+RiscToken.prototype.getOptionalClaims = function(optionalClaims){
+    return RiscToken.prototype.optionalClaims;
 }; 
 
 RiscToken.prototype.getVerificationClaims = function(){
-    return RiscToken.prototype.verification_claims;
+    return RiscToken.prototype.verificationClaims;
 }; 
 
-RiscToken.prototype.getNonStandardVerificationClaims = function(){
-    return RiscToken.prototype.non_standard_verification_claims;
+RiscToken.prototype.getOptionalVerificationClaims = function(){
+    return RiscToken.prototype.optionalVerificationClaims;
 }; 
 
 /** User explicitly wants to set None Algorithm attribute */
 RiscToken.prototype.setNoneAlgorithm = function(boolVal){
-    RiscToken.prototype.NoneAlgorithm = boolVal;
+    RiscToken.prototype.noneAlgorithm = boolVal;
 };
 
 RiscToken.prototype.getNoneAlgorithm = function(boolVal){
-    return RiscToken.prototype.NoneAlgorithm;
+    return RiscToken.prototype.noneAlgorithm;
 };
 
 /** Deserialization of JWT type */ 
 RiscToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
 
     this.validateRequiredVerificationClaims(claimsToVerify);
-    this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
-/** Throws error if required standard claims are missing */ 
+/** Throws error if required claims are missing */ 
 RiscToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(RiscToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(RiscToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-      RiscToken.prototype.verification_claims = claimsToVerify;
+      RiscToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Throws error if required non standard verification claims are missing */ 
-RiscToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Throws error if optional verification claims are missing */ 
+RiscToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (RiscToken.prototype.non_standard_verification_claims['nbf'] || BasicIdToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (RiscToken.prototype.optionalVerificationClaims['nbf'] || BasicIdToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
     }
-    if (RiscToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (RiscToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 };
 
-RiscToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+RiscToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        RiscToken.prototype.verification_claims[key] = claimsToVerify[key];
+        RiscToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            RiscToken.prototype.claims_to_verify['aud'] = 'aud';
+            RiscToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
 
 module.exports = RiscToken;
-

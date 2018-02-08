@@ -15,7 +15,7 @@ describe('encoding', function() {
     var expected = 'José';
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"name" : expected, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"name" : expected, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
 
@@ -28,7 +28,7 @@ describe('encoding', function() {
     var expected = 'José';
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"name" : expected, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3}, { encoding: 'binary' });
+    basicIdToken.addOptionalClaims({"name" : expected, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3}, { encoding: 'binary' });
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh', {encoding: 'binary' });
 
@@ -40,7 +40,7 @@ describe('encoding', function() {
     var username = '測試';
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"username" : username, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"username" : username, "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
 

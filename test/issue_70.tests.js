@@ -10,7 +10,7 @@ describe('issue 70 - public key start with BEING PUBLIC KEY', function () {
     var cert_priv = fs.readFileSync(__dirname + '/rsa-private.pem');
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"foo":"bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"foo":"bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT(cert_priv, {algorithm : 'RS256'});
 

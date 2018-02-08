@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/controllers/messageTypes/jwt/jsonwebtoken/decode.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/controllers/messageTypes/jwt/jsonwebtoken/decode.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var JsonWebTokenError = require('./lib/JsonWebTokenError');
+var NotBeforeError    = require('./lib/NotBeforeError');
+var TokenExpiredError = require('./lib/TokenExpiredError');
+var decode            = require('./decode');
+var timespan          = require('./lib/timespan');
+var jws               = require('../lib/jws');
+var xtend             = require('xtend');
+var jwtVerifier       = require('./verify');
+var jwkToPem          = require('jwk-to-pem');
+var forge = require('node-forge');
+
+/**
+ * @fileoverview Handles common decoding functionality for JWT message type
+ */
+/**
+ * JWTDecoder
+ * @class
+ * @constructor
+ */
+function JWTDecoder(){
+};
+
+/** 
+ * Decodes Jwt string after verifying if payload matches expected claim values 
+ * @param {string} jwtString The signed Jwt string
+ * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
+ * @param {Token} tokenProfile Contains the token properties, required, optional and verification claims
+ * @param {dictionary} otherOptions Other inputs that are not part of the payload, for ex : 'algorithm'
+ * @param {function} callback If a callback is supplied, function acts asynchronously. The callback is called with the decoded payload if the 
+      signature is valid and optional expiration, audience, or issuer are valid. If not, it will be called with the error.
+ * @throws JsonWebToken error if inputted claims does not match expected claims
+ * @memberof JWTDecoder
+ */ 
+JWTDecoder.prototype.decode = function (jwtSig, secretOrPublicKey, tokenProfile, otherOptions, callback) {
+  // Verifications of other options and jwt string signature
+  jwtVerifier.verifyOptions(jwtSig, secretOrPublicKey, otherOptions, callback);
+
+  // Decodes type jwt and returns header, payload &amp; signature
+  var decoded = jws.decode(jwtSig, secretOrPublicKey, tokenProfile, otherOptions, callback);
+  var done = this.initCallback(callback);
+  
+  if (!decoded) { return done(new JsonWebTokenError('invalid token')); }
+  var header = decoded.header;
+
+  var done = this.initCallback(callback);
+
+  this.verifyHeaderAlgorithm(otherOptions, header, done)
+
+  var baseEncoding = otherOptions.baseEncoding || "base64";  
+
+  this.validateJws(jwtSig, header.alg, secretOrPublicKey, baseEncoding, done)
+
+  var payload = decoded.payload;
+  this.parsePayload(payload);
+
+  // verify payload values matches expected values
+  var payload =  jwtVerifier.verifyPayload(payload, tokenProfile,otherOptions, callback);
+
+  //return header if `complete` option is enabled.  header includes claims
+  //such as `kid` and `alg` used to select the key within a JWKS needed to
+  //verify the signature
+  if (otherOptions &amp;&amp; otherOptions.complete === true) {
+    return {
+      header: decoded.header,
+      payload: payload,
+      signature: decoded.signature
+    };
+  }
+  
+  return payload;
+};
+
+/**
+ * Initialize callback
+ * @param {function} callback
+ * @memberof JWTDecoder
+ */ 
+JWTDecoder.prototype.initCallback = function(callback){
+  var done;
+  
+  if (callback) {
+    done = callback;
+  } else {
+    done = function(err, data) {
+      if (err) throw err;
+      return data;
+    };
+  }
+  return done;
+}
+
+/**
+ * Algorithms check based on decoded header
+ * 
+ * @param {dictionary} otherOptions
+ * @param {dictionary} header
+ * @param {function} done
+ * 
+ * @memberof JWTDecoder
+ */
+JWTDecoder.prototype.verifyHeaderAlgorithm = function(otherOptions, header, done){
+  if (otherOptions &amp;&amp; otherOptions.algorithms){
+    if (!~otherOptions.algorithms.indexOf(header.alg)) {
+      return done(new JsonWebTokenError('invalid algorithm'));
+    }
+  
+    if (otherOptions.algorithms.indexOf('none') != -1 &amp;&amp; tokenProfile.getNoneAlgorithm() == false) {
+      return done(new JsonWebTokenError('Cannot use none algorithm unless explicitly set'));
+    }
+  }
+}
+
+/** 
+ * Verifies signed Jwt
+ * @param {string} jwtSig
+ * @param {string} algorithm
+ * @param {string} secretOrPublicKey
+ * @param {string} baseEncoding
+ * @param {function} done
+ * 
+ * @memberof JWTDecoder
+ */
+JWTDecoder.prototype.validateJws = function(jwtSig, algorithm, secretOrPublicKey, baseEncoding, done){
+  var valid;
+  
+  try {
+    valid = jws.verify(jwtSig, algorithm, secretOrPublicKey, baseEncoding);
+  } catch (e) {
+    return done(e);
+  }
+  
+  if (!valid)
+    return done(new JsonWebTokenError('invalid signature'));
+}
+
+/**
+ * Parse payload
+ * @param {dictionary} payload
+ * 
+ * @memberof JWTDecoder
+ */ 
+JWTDecoder.prototype.parsePayload = function(payload){
+  if(typeof payload === 'string') {
+    try {
+      var obj = JSON.parse(payload);
+      if(typeof obj === 'object') {
+        payload = obj;
+      }
+    } catch (e) { }
+  }
+}
+
+JWTDecoder.prototype.verifyJwtSign = function(token, secretOrPublicKey, tokenProfile, otherOptions, baseEncoding, callback){
+  var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
+  if (!jwt.signature) {
+    return false;
+  } else {
+    var valid = null;
+    try {
+      valid = jws.verify(token, jwt.header.alg, secretOrPublicKey, baseEncoding);
+    } catch (e) {
+      return done(e);
+    }
+            
+    if (!valid) {
+      console.log('invalid signature');
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
+
+JWTDecoder.prototype.verifyJwtSignature = function(token, secretOrPublicKey, tokenProfile, otherOptions, certs, baseEncoding, callback){
+  var jwt = jws.decode(token, secretOrPublicKey, tokenProfile, otherOptions, callback);
+  if (!jwt.signature) {
+    return false;
+  } else {
+    if (JSON.parse(certs).keys.length &lt;= 0) {
+      return false;
+    } else {
+      // find the cert
+      const header = jwt.header;
+      if (header.kid) {
+        // a kid is being used
+        const kids = JSON.parse(certs).keys.filter(key => key.kid === header.kid);
+        if (kids.length > 0) {
+          // we have a key
+          return jws.verify(token, jwt.header.alg, jwkToPem(kids[0]), baseEncoding);
+        } else {
+          // no matching kid 
+          return false;
+        }
+      } else {
+        // try using the first key
+        const first = JSON.parse(certs).keys[0];
+        var pemFromX509 = this.convertX509ToPem(first);
+        console.log(pemFromX509);
+        var valid = null;
+        try {
+          valid = jws.verify(token, jwt.header.alg, pemFromX509, baseEncoding);
+        } catch (e) {
+          return done(e);
+        }
+            
+        if (!valid) {
+          console.log('invalid signature');
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+}
+
+JWTDecoder.prototype.convertX509ToPem = function(jwk){
+  // this string format is base64-encoded DER bytes
+   var certString = jwk.x5c[0];
+  // base64-decode DER bytes
+  var certDerBytes = forge.util.decode64(certString);
+  // parse DER to an ASN.1 object
+  var obj = forge.asn1.fromDer(certDerBytes);
+  // convert ASN.1 object to forge certificate object
+  var cert = forge.pki.certificateFromAsn1(obj);
+  // get forge public key object
+  var publicKey = cert.publicKey;
+  // if you did want to convert it to PEM format for transport:
+  var pem = forge.pki.publicKeyToPem(publicKey);
+  return pem;
+}
+
+module.exports = JWTDecoder.prototype;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Feb 07 2018 18:44:47 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

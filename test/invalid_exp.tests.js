@@ -11,7 +11,7 @@ describe('invalid expiration', function() {
     var clockTimestamp = 1000000000;
     try{
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", "exp" : "string"});
+        basicIdToken.addOptionalClaims({"aud" : "audience", "exp" : "string"});
         basicIdToken.setNoneAlgorithm(true);
         var signedJWT = basicIdToken.toJWT('shhhh');
         var decodedPayload = basicIdToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});
@@ -24,7 +24,7 @@ describe('invalid expiration', function() {
   it('should fail with 0', function (done) {
     try{
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 0});
+        basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 0});
         basicIdToken.setNoneAlgorithm(true);
         var signedJWT = basicIdToken.toJWT('shhhh');
         var decodedPayload = basicIdToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});
@@ -38,7 +38,7 @@ describe('invalid expiration', function() {
   it('should fail with false', function (done) {
     try{
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : false});
+        basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : false});
         basicIdToken.setNoneAlgorithm(true);
         var signedJWT = basicIdToken.toJWT('shhhh');
         var decodedPayload = basicIdToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});
@@ -52,7 +52,7 @@ describe('invalid expiration', function() {
   it('should fail with true', function (done) {
     try{
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : true});
+        basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : true});
         basicIdToken.setNoneAlgorithm(true);
         var signedJWT = basicIdToken.toJWT('shhhh');
         var decodedPayload = basicIdToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});
@@ -65,7 +65,7 @@ describe('invalid expiration', function() {
   it('should fail with object', function (done) {
     try{
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : {}});
+        basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : {}});
         basicIdToken.setNoneAlgorithm(true);
         var signedJWT = basicIdToken.toJWT('shhhh');
         var decodedPayload = basicIdToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"}, {'clockTimestamp' : clockTimestamp});

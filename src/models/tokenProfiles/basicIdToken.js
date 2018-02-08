@@ -4,8 +4,15 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
 
 /**
+ * @fileoverview 
  * BasicIdToken
- * Init token using standard claims
+ * Required claims : iss, sub, iat, jti
+ * Optional claims : aud, exp, nbf
+ */
+
+/**
+ * BasicIdToken
+ * Init token using required claims
  * @class
  * @constructor
  * @param {*} iss
@@ -22,22 +29,22 @@ function BasicIdToken(iss, sub, iat, jti){
     this.validateRequiredFields();
 };
 
-/** Provided standard claims */
-BasicIdToken.prototype.standard_claims = {};
+/** Provided required claims */
+BasicIdToken.prototype.requiredClaims = {};
 
-/** Provided non standard claims */ 
-BasicIdToken.prototype.non_standard_claims = {};
+/** Provided optional claims */ 
+BasicIdToken.prototype.optionalClaims = {};
 
-/** Expected standard claim values */
-BasicIdToken.prototype.verification_claims = {};
+/** Expected required verification claims */
+BasicIdToken.prototype.verificationClaims = {};
 
-/** Expected non standard verification claims that are known */
-BasicIdToken.prototype.non_standard_verification_claims = {};
+/** Expected optional verification claims that are known */
+BasicIdToken.prototype.optionalVerificationClaims = {};
 
-BasicIdToken.prototype.NoneAlgorithm = false;
+BasicIdToken.prototype.noneAlgorithm = false;
 
-/** Required standard claims */
-BasicIdToken.prototype.options_to_payload = {
+/** Required claims */
+BasicIdToken.prototype.optionsToPayload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
@@ -45,7 +52,7 @@ BasicIdToken.prototype.options_to_payload = {
 };
   
 /** Other option values */ 
-BasicIdToken.prototype.options_for_objects = [
+BasicIdToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -55,15 +62,15 @@ BasicIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known standard claims */
-BasicIdToken.prototype.knownNonStandardClaims = {
+/** Known required claims */
+BasicIdToken.prototype.knownOptionalClaims = {
     'aud': 'aud',
     'exp': 'exp',
     'nbf': 'nbf',
 };
 
 /** Required verification claims */
-BasicIdToken.prototype.claims_to_verify = {
+BasicIdToken.prototype.claimsForVerification = {
     'iss': 'iss',
     'sub': 'sub',
     'maxAge' : 'maxAge',
@@ -71,58 +78,58 @@ BasicIdToken.prototype.claims_to_verify = {
 };
 
 BasicIdToken.prototype.initData = function(){
-    BasicIdToken.prototype.non_standard_verification_claims = {};    
-    BasicIdToken.prototype.NoneAlgorithm = false;
+    BasicIdToken.prototype.optionalVerificationClaims = {};    
+    BasicIdToken.prototype.noneAlgorithm = false;
 };
 
-/** Check for missing standard claims */
+/** Check for missing required claims */
 BasicIdToken.prototype.validateRequiredFields = function(){
 
     if (this.iss && this.sub && this.iat && this.jti){
-        console.log("Validated all standard fields")
+        console.log("Validated all required fields")
     }else {
         throw new Error("You are missing a required parameter");
     }
 };
 
-/** Add non standard claims */
-BasicIdToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    BasicIdToken.prototype.non_standard_claims = nonStandardClaims;
+/** Add optional claims */
+BasicIdToken.prototype.addOptionalClaims = function(optionalClaims){
+    BasicIdToken.prototype.optionalClaims = optionalClaims;
 
-    BasicIdToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (BasicIdToken.prototype.knownNonStandardClaims[key]) {
-            BasicIdToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    BasicIdToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (BasicIdToken.prototype.knownOptionalClaims[key]) {
+            BasicIdToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
 
-/** Fetch standard claims */
-BasicIdToken.prototype.getStandardClaims = function(){
-    BasicIdToken.prototype.standard_claims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat, "jti": this.jti};
-    return BasicIdToken.prototype.standard_claims;         
+/** Fetch required claims */
+BasicIdToken.prototype. getRequiredClaims = function(){
+    BasicIdToken.prototype.requiredClaims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat, "jti": this.jti};
+    return BasicIdToken.prototype.requiredClaims;         
 };
 
-/** Fetch non standard claims */
-BasicIdToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return BasicIdToken.prototype.non_standard_claims;
+/** Fetch optional claims */
+BasicIdToken.prototype.getOptionalClaims = function(optionalClaims){
+    return BasicIdToken.prototype.optionalClaims;
 }; 
 
 BasicIdToken.prototype.getVerificationClaims = function(){
-    return BasicIdToken.prototype.verification_claims;
+    return BasicIdToken.prototype.verificationClaims;
 }; 
 
-BasicIdToken.prototype.getNonStandardVerificationClaims = function(){
-    return BasicIdToken.prototype.non_standard_verification_claims;
+BasicIdToken.prototype.getOptionalVerificationClaims = function(){
+    return BasicIdToken.prototype.optionalVerificationClaims;
 }; 
 
 /** User explicitly wants to set None Algorithm attribute */
 BasicIdToken.prototype.setNoneAlgorithm = function(boolVal){
-    BasicIdToken.prototype.NoneAlgorithm = boolVal;
+    BasicIdToken.prototype.noneAlgorithm = boolVal;
 };
 
 BasicIdToken.prototype.getNoneAlgorithm = function(boolVal){
-    return BasicIdToken.prototype.NoneAlgorithm;
+    return BasicIdToken.prototype.noneAlgorithm;
 };
 
 /** Serialization of JWT type */
@@ -134,46 +141,46 @@ BasicIdToken.prototype.toJWT = function(secretOrPrivateKey, options, callback){
 BasicIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options, callback){
 
     this.validateRequiredVerificationClaims(claimsToVerify);
-    this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
     return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options, callback);
 };
 
 /** Throws error if required verification claims are not present */ 
 BasicIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(BasicIdToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(BasicIdToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
             throw new Error('Missing required verification claim: ' + key);
         }
       });  
-    BasicIdToken.prototype.verification_claims = claimsToVerify;
+    BasicIdToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Throws error if required non standard verification claims are not present */ 
-BasicIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Throws error if optional verification claims are not present */ 
+BasicIdToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (BasicIdToken.prototype.non_standard_verification_claims['nbf'] || BasicIdToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (BasicIdToken.prototype.optionalVerificationClaims['nbf'] || BasicIdToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
     }
-    if (BasicIdToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (BasicIdToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 };
 
-BasicIdToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+BasicIdToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
         throw new Error('Missing required verification claim: ' + key);
     }else{
-        BasicIdToken.prototype.verification_claims[key] = claimsToVerify[key];
+        BasicIdToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            BasicIdToken.prototype.claims_to_verify['aud'] = 'aud';
+            BasicIdToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
 
 /** Serialization of JSON type */
 BasicIdToken.prototype.toJSON = function(){
-    var obj = Object.assign({}, this.getStandardClaims(), this.getNonStandardClaims());
+    var obj = Object.assign({}, this. getRequiredClaims(), this.getOptionalClaims());
     return JSON.stringify(obj);
 };
 
@@ -184,7 +191,7 @@ BasicIdToken.prototype.fromJSON = function(jsonString){
 
 /** Serialization of URL Encoded type */
 BasicIdToken.prototype.toUrlEncoded = function(){
-    var obj = Object.assign({}, this.getStandardClaims(), this.getNonStandardClaims());
+    var obj = Object.assign({}, this. getRequiredClaims(), this.getOptionalClaims());
     var str = [];
     for(var p in obj)
         str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
@@ -201,4 +208,3 @@ BasicIdToken.prototype.fromUrlEncoded = function(urlEncodedString){
 };
 
 module.exports = BasicIdToken;
-

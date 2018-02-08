@@ -18,7 +18,7 @@ describe('when setting a wrong `header.alg`', function () {
   var clockTimestamp = 1000000000;
   
   var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-  basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+  basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
   basicIdToken.setNoneAlgorithm(true);
   var signedJWT = basicIdToken.toJWT(pub, {algorithm : 'HS256'});
 

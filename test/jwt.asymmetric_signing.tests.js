@@ -42,7 +42,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1000000000;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(priv, { algorithm: algorithm });
 
@@ -98,7 +98,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1000000000;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(priv, {expiresIn: '10m', algorithm: algorithm });
 
@@ -116,7 +116,7 @@ describe('Asymmetric Algorithms', function(){
         it('should be invalid', function (done) {
 
           var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-          basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+          basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
           basicIdToken.setNoneAlgorithm(true);
           var token = basicIdToken.toJWT(priv, {expiresIn: -1 * ms('10m'), algorithm: algorithm });
 
@@ -137,7 +137,7 @@ describe('Asymmetric Algorithms', function(){
         it('should NOT be invalid', function (done) {
 
           var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-          basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+          basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
           basicIdToken.setNoneAlgorithm(true);
           var token = basicIdToken.toJWT(priv, {expiresIn: -1 * ms('10m'), algorithm: algorithm });
 
@@ -154,7 +154,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1521783267;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT("shhh", {notBefore: -10 * 3600, algorithm: "HS256" });
 
@@ -182,7 +182,7 @@ describe('Asymmetric Algorithms', function(){
           var clockTimestamp = 1511783267;
           
           var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-          basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+          basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
           basicIdToken.setNoneAlgorithm(true);
           var token = basicIdToken.toJWT(priv, {notBefore: '10m', algorithm: algorithm });
 
@@ -215,7 +215,7 @@ describe('Asymmetric Algorithms', function(){
             //token = jwt.sign({ foo: 'bar' }, priv, { algorithm: algorithm, notBefore: 0 });
           
             var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-            basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+            basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
             basicIdToken.setNoneAlgorithm(true);
             var token = basicIdToken.toJWT("shh", {notBefore: 0, algorithm: 'HS256' });
           
@@ -234,7 +234,7 @@ describe('Asymmetric Algorithms', function(){
           //token = jwt.sign({ foo: 'bar' }, priv, { algorithm: algorithm, notBefore: '10m' });
 
           var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-          basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+          basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
           basicIdToken.setNoneAlgorithm(true);
           var token = basicIdToken.toJWT(priv, {notBefore: 0, algorithm: algorithm });
 
@@ -257,7 +257,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1511783267;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud": 'urn:foo'});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud": 'urn:foo'});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT("shh", {algorithm: 'HS256'});
 
@@ -295,7 +295,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1511783267;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jwtid");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT("shh", {algorithm: 'HS256' });
 
@@ -370,7 +370,7 @@ describe('Asymmetric Algorithms', function(){
         var clockTimestamp = 1511783267;
         
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jwtid");
-        basicIdToken.addNonStandardClaims({"foo": 'bar', "aud" : "audience"});
+        basicIdToken.addOptionalClaims({"foo": 'bar', "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(priv, {algorithm: algorithm });
         //var token = jwt.sign({ foo: 'bar' }, priv, { algorithm: algorithm });

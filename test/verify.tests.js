@@ -18,7 +18,7 @@ describe('verify', function() {
 
     var secret = "secret";
     var basicIdToken = new BasicIdToken('issuer','subject', Math.floor(Date.now() / 1000 ), "jti");
-    basicIdToken.addNonStandardClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
+    basicIdToken.addOptionalClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT(priv, {header: header, encoding : 'utf8'});
 
@@ -38,7 +38,7 @@ describe('verify', function() {
 
     var secret = "secret";
     var basicIdToken = new BasicIdToken('issuer','subject', Math.floor(Date.now() / 1000 ), "jti");
-    basicIdToken.addNonStandardClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
+    basicIdToken.addOptionalClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT(priv, {header: header, encoding : 'utf8'});
 
@@ -60,7 +60,7 @@ describe('verify', function() {
 
     var secret = "secret";
     var basicIdToken = new BasicIdToken('issuer','subject', Math.floor(Date.now() / 1000 ), "jti");
-    basicIdToken.addNonStandardClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
+    basicIdToken.addOptionalClaims({  'payload': 'string' , "aud" : "audience", "nbf" : Math.floor(Date.now() / 1000 ) + 2, "exp" : Math.floor(Date.now() / 1000 ) + 3});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT(priv, {header: header, encoding : 'utf8'});
 
@@ -85,7 +85,7 @@ describe('verify', function() {
 
     var secret = "secret";
     var basicIdToken = new BasicIdToken('issuer','subject',1437018582, "jti");
-    basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018592});
+    basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018592});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT(key);
 
@@ -138,7 +138,7 @@ describe('verify', function() {
         var options = {algorithms: ['HS256'], clockTimestamp : 1437018587000};
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',1437018587000 - 5, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018587000 + 5});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018587000 + 5});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -269,7 +269,7 @@ describe('verify', function() {
       it('should verify unexpired token relative to user-provided clockTimestamp', function (done) {
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -286,7 +286,7 @@ describe('verify', function() {
       it('should error on expired token relative to user-provided clockTimestamp', function (done) {
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -308,7 +308,7 @@ describe('verify', function() {
       it('should verify clockTimestamp is a number', function (done) {
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -325,7 +325,7 @@ describe('verify', function() {
       it('should verify valid token with nbf', function (done) {
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 2, "nbf": clockTimestamp + 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 2, "nbf": clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -341,7 +341,7 @@ describe('verify', function() {
       it('should error on token used before nbf', function (done) {
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 2, "nbf": clockTimestamp + 1});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 2, "nbf": clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -361,7 +361,7 @@ describe('verify', function() {
       
       var key = "secret";
       var basicIdToken = new BasicIdToken('issuer','subject',1437018582, "jti");
-      basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018800});
+      basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : 1437018800});
       basicIdToken.setNoneAlgorithm(true);
       var token = basicIdToken.toJWT(key);
 
@@ -393,7 +393,7 @@ describe('verify', function() {
 
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject',clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 10});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience", "exp" : clockTimestamp + 10});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -427,7 +427,7 @@ describe('verify', function() {
 
         var key = "secret";
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp - 6, "jti");
-        basicIdToken.addNonStandardClaims({  'foo': 'bar' , "aud" : "audience"});
+        basicIdToken.addOptionalClaims({  'foo': 'bar' , "aud" : "audience"});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(key);
 
@@ -491,7 +491,7 @@ describe('verify', function() {
         var refreshToken = new RefreshToken('refreshToken','accessToken');
         var token = refreshToken.toJWT(key, {noTimestamp : true});
         try{
-            var result = refreshToken.fromJWT(token, key, {"refresh_token" : "refreshToken", "access_token": "accessToken", 'maxAge': '1s'}, options);        
+            var result = refreshToken.fromJWT(token, key, {"refreshToken" : "refreshToken", "accessToken": "accessToken", 'maxAge': '1s'}, options);        
         }catch(err){
             assert.equal(err.name, 'JsonWebTokenError');
             assert.equal(err.message, 'iat required when maxAge is specified');

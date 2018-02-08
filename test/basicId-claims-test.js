@@ -39,7 +39,7 @@ describe('Asymmetric Algorithms', function(){
 
       describe('when signing a token with a known non standard claim', function () {
         var basicIdToken2 = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken2.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        basicIdToken2.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         basicIdToken2.setNoneAlgorithm(true);
         var signedJWT = basicIdToken2.toJWT('shhhh');
 
@@ -70,7 +70,7 @@ describe('Asymmetric Algorithms', function(){
         it('should throw error and require standard claim', function (done) {
           try{
             var basicIdToken = new BasicIdToken('issuer','subject');
-            basicIdToken.addNonStandardClaims({"jti" : "test"});
+            basicIdToken.addOptionalClaims({"jti" : "test"});
             basicIdToken.setNoneAlgorithm(true);
             var signedJWT = basicIdToken.toJWT('shhhh');
           }catch(err){
@@ -88,12 +88,12 @@ describe('Asymmetric Algorithms', function(){
       var clockTimestamp = 1000000000;
 
       var basicIdToken2 = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-      basicIdToken2.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+      basicIdToken2.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
       basicIdToken2.setNoneAlgorithm(true);        
 
       it('should be able to access all standard claims', function (done) {
         try{
-         var standardClaims = basicIdToken2.getStandardClaims();  
+         var standardClaims = basicIdToken2.getRequiredClaims();  
          assert.deepEqual(standardClaims, { "iss" : "issuer", "sub" : 'subject',  "iat" : clockTimestamp,"jti" : "jti"})          
         }catch(err){
           assert.isNull(err);
@@ -103,7 +103,7 @@ describe('Asymmetric Algorithms', function(){
 
       it('should be able to access non standard claims separately', function (done) {
           try{
-           var nonStandardClaims = basicIdToken2.getNonStandardClaims();  
+           var nonStandardClaims = basicIdToken2.getOptionalClaims();  
            assert.deepEqual(nonStandardClaims, {"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3})          
           }catch(err){
             assert.isNull(err);
@@ -142,5 +142,4 @@ describe('Asymmetric Algorithms', function(){
     }); 
   });
 });
-}); 
-
+});

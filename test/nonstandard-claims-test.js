@@ -11,7 +11,7 @@ describe('iat', function () {
     var iat = dateNow - 30;
     var expiresInVal = 50;
     var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience"});
+    basicIdToken.addOptionalClaims({"aud" : "audience"});
     var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: expiresInVal});
 
     try{
@@ -31,7 +31,7 @@ describe('iat', function () {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
     try{
@@ -46,7 +46,7 @@ describe('iat', function () {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
     try{
@@ -61,7 +61,7 @@ describe('iat', function () {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
     try{
@@ -76,7 +76,7 @@ describe('iat', function () {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('shhhh');
     try{

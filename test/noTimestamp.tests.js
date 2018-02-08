@@ -22,7 +22,7 @@ describe('noTimestamp', function() {
     var refreshToken = new RefreshToken('refreshToken','accessToken');
     var token = refreshToken.toJWT(key, {expiresIn: '5m', noTimestamp : true});
     try{
-        var result = refreshToken.fromJWT(token, key, {"refresh_token" : "refreshToken", "access_token": "accessToken"}, options);        
+        var result = refreshToken.fromJWT(token, key, {"refreshToken" : "refreshToken", "accessToken": "accessToken"}, options);        
     }catch(err){
         assert.equal(err.name, 'JsonWebTokenError');
         assert.equal(err.message, 'iat required when maxAge is specified');

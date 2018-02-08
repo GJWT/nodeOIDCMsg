@@ -4,9 +4,17 @@ var BasicIdToken = require('./basicIdToken');
 var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
+
+/**
+ * @fileoverview 
+ * AccessToken
+ * Required claims : iss, sub, iat
+ * Optional claims : aud, exp
+ */
+
 /**
  * AccessToken
- * Init token using standard claims
+ * Init token using required claims
  * @class
  * @constructor
  * @extends BasicIdToken
@@ -24,15 +32,15 @@ function AccessToken(iss, sub, iat){
 AccessToken.prototype = Object.create(BasicIdToken.prototype);
 AccessToken.prototype.constructor = AccessToken;
 
-/** Required standard claims */
-AccessToken.prototype.options_to_payload = {
+/** Required claims */
+AccessToken.prototype.optionsToPayload = {
     'iss': 'iss',
     'sub': 'sub',
     'iat': 'iat',
 };
   
 /** Other option values */
-AccessToken.prototype.options_for_objects = [
+AccessToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -42,8 +50,8 @@ AccessToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known non standard claims */
-AccessToken.prototype.knownNonStandardClaims = {
+/** Known optional claims */
+AccessToken.prototype.knownOptionalClaims = {
     'aud': 'aud',
     'exp': 'exp',
 };
@@ -57,9 +65,9 @@ AccessToken.prototype.validateRequiredFields = function(){
     }
 };
 
-AccessToken.prototype.getStandardClaims = function(){
-    AccessToken.prototype.standard_claims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
-    return AccessToken.prototype.standard_claims;         
+AccessToken.prototype.getRequiredClaims = function(){
+    AccessToken.prototype.requiredClaims = { "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return AccessToken.prototype.requiredClaims;         
 };
 
 module.exports = AccessToken;

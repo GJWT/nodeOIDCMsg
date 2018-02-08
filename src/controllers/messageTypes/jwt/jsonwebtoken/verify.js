@@ -6,6 +6,9 @@ var timespan          = require('./lib/timespan');
 var xtend             = require('xtend');
 var messageVerifier = require('../../../message/verify');
 
+/**
+ * @fileoverview Handles common verification functionality for JWT message type
+ */
 /* Calls super class' verification method */ 
 var jwtVerifier= JWTVerifier.prototype;
 jwtVerifier = Object.create(messageVerifier);

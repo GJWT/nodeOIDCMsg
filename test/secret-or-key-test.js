@@ -12,7 +12,7 @@ describe('verifying without specified secret or public key', function () {
   var clockTimestamp = 1000000000;
   
   var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-  basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+  basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
   basicIdToken.setNoneAlgorithm(true);
   var signedJWT = basicIdToken.toJWT('shhhh');
   it('should not verify null', function (done) {

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/models/tokenProfiles/riscToken.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/models/tokenProfiles/riscToken.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var RiscToken = require('./basicIdToken');  
+var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
+var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
+
+/**
+ * @fileoverview 
+ * RiscToken
+ * Required claims : jti, iss, sub, iat
+ * Optional claims : aud, nbf, exp
+ */
+/**
+ * RiscToken
+ * Init token using required claims 
+ * @class
+ * @constructor
+ * @extends BasicIdToken
+ * @param {*} jti
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ */
+function RiscToken(jti, iss, sub, iat){
+    this.jti = jti;
+    this.iss = iss;
+    this.sub = sub;
+    this.iat = iat;
+    this.validateRequiredFields();
+};
+
+RiscToken.prototype = Object.create(BasicIdToken.prototype);
+RiscToken.prototype.constructor = RiscToken;
+
+/** Required claims */ 
+RiscToken.prototype.optionsToPayload = {
+    'jti': 'jti',
+    'iss': 'iss',
+    'sub': 'sub',
+    'iat': 'iat',
+};
+  
+/** Other option values */
+RiscToken.prototype.optionsForObjects = [
+    'expiresIn',
+    'notBefore',
+    'noTimestamp',
+    'audience',
+    'issuer',
+    'subject',
+    'jwtid',
+];
+
+/** Required known optional claims */ 
+RiscToken.prototype.knownOptionalClaims = {
+    'aud' : 'aud',
+    'nbf' : 'nbf',
+    'exp' : 'exp',
+};
+
+/** Required claims that need to be verified */ 
+RiscToken.prototype.claimsForVerification = {
+    'jti': 'jti',
+    'iss': 'iss',
+    'sub': 'sub',
+    'maxAge' : 'maxAge',
+};
+
+RiscToken.prototype.validateRequiredFields = function(){
+    if (this.jti &amp;&amp; this.iss &amp;&amp; this.sub &amp;&amp; this.iat){
+        console.log("Validated all required fields")
+    }else {
+        throw new Error("You are missing a required parameter");
+    }
+};
+
+RiscToken.prototype.getRequiredClaims = function(){
+    RiscToken.prototype.requiredClaims = { "jti": this.jti, "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return RiscToken.prototype.requiredClaims;         
+};
+
+RiscToken.prototype.initData = function(){
+    RiscToken.prototype.optionalVerificationClaims = {};    
+    RiscToken.prototype.noneAlgorithm = false;
+};
+
+
+RiscToken.prototype.addOptionalClaims = function(optionalClaims){
+    RiscToken.prototype.optionalClaims = optionalClaims;
+
+    RiscToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (RiscToken.prototype.knownOptionalClaims[key]) {
+            RiscToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
+        }
+    });  
+};
+
+RiscToken.prototype.getOptionalClaims = function(optionalClaims){
+    return RiscToken.prototype.optionalClaims;
+}; 
+
+RiscToken.prototype.getVerificationClaims = function(){
+    return RiscToken.prototype.verificationClaims;
+}; 
+
+RiscToken.prototype.getOptionalVerificationClaims = function(){
+    return RiscToken.prototype.optionalVerificationClaims;
+}; 
+
+/** User explicitly wants to set None Algorithm attribute */
+RiscToken.prototype.setNoneAlgorithm = function(boolVal){
+    RiscToken.prototype.noneAlgorithm = boolVal;
+};
+
+RiscToken.prototype.getNoneAlgorithm = function(boolVal){
+    return RiscToken.prototype.noneAlgorithm;
+};
+
+/** Deserialization of JWT type */ 
+RiscToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
+
+    this.validateRequiredVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
+    return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
+};
+
+/** Throws error if required claims are missing */ 
+RiscToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
+{
+    Object.keys(RiscToken.prototype.claimsForVerification).forEach(function (key) {
+        if (!claimsToVerify[key]) {
+            throw new Error('Missing required verification claim: ' + key);
+        }
+      });  
+      RiscToken.prototype.verificationClaims = claimsToVerify;
+};
+
+/** Throws error if optional verification claims are missing */ 
+RiscToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
+{
+    if (RiscToken.prototype.optionalVerificationClaims['nbf'] || BasicIdToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    }
+    if (RiscToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
+    }
+};
+
+RiscToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
+    if (!claimsToVerify[key]) {
+        throw new Error('Missing required verification claim: ' + key);
+    }else{
+        RiscToken.prototype.verificationClaims[key] = claimsToVerify[key];
+        if (key == "aud"){
+            RiscToken.prototype.claimsForVerification['aud'] = 'aud';
+        }
+    }
+}
+
+module.exports = RiscToken;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Feb 07 2018 18:44:47 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

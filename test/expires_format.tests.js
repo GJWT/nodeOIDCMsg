@@ -12,7 +12,7 @@ describe('expires option', function() {
     var dateNow = Math.floor(Date.now() / 1000);    
     var iat = dateNow;
     var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience"});
+    basicIdToken.addOptionalClaims({"aud" : "audience"});
     var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: 10});
     try{
       var verificationClaims = {'iss': 'issuer','sub' : 'subject', 'aud' : 'audience', 'maxAge': '1d', 'jti': 'jti', 'clockTolerance' : 10};
@@ -35,7 +35,7 @@ describe('expires option', function() {
     var dateNow = Math.floor(Date.now() / 1000);    
     var iat = dateNow - 30;
     var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience"});
+    basicIdToken.addOptionalClaims({"aud" : "audience"});
     var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: '2d' });
 
     try{
@@ -60,7 +60,7 @@ describe('expires option', function() {
     var dateNow = Math.floor(Date.now() / 1000);    
     var iat = dateNow - 30;
     var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-    basicIdToken.addNonStandardClaims({"aud" : "audience"});
+    basicIdToken.addOptionalClaims({"aud" : "audience"});
     var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: '36h'});
 
     try{
@@ -84,7 +84,7 @@ describe('expires option', function() {
         var dateNow = Math.floor(Date.now() / 1000);    
         var iat = dateNow - 30;
         var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience"});
+        basicIdToken.addOptionalClaims({"aud" : "audience"});
         var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: '1 monkey'});
       //jwt.sign({foo: 123}, '123', { expiresIn: '1 monkey' });
       done();      
@@ -99,7 +99,7 @@ describe('expires option', function() {
         var dateNow = Math.floor(Date.now() / 1000);    
         var iat = dateNow - 30;
         var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience"});
+        basicIdToken.addOptionalClaims({"aud" : "audience"});
         var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: { crazy : 213 }});
       //jwt.sign({foo: 123}, '123', { expiresIn: { crazy : 213 } });
       done();
@@ -114,7 +114,7 @@ describe('expires option', function() {
         var dateNow = Math.floor(Date.now() / 1000);    
         var iat = dateNow - 30;
         var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", exp: 839218392183});
+        basicIdToken.addOptionalClaims({"aud" : "audience", exp: 839218392183});
         var signedJWT = basicIdToken.toJWT('shhhh', {expiresIn: '5h'});
         done();
     }).to.throw(/Bad "options.expiresIn" option the payload already has an "exp" property./);
@@ -127,7 +127,7 @@ describe('expires option', function() {
         var dateNow = Math.floor(Date.now() / 1000);    
         var iat = dateNow - 30;
         var basicIdToken = new BasicIdToken('issuer','subject', iat, "jti");
-        basicIdToken.addNonStandardClaims({"aud" : "audience", exp: 839218392183});
+        basicIdToken.addOptionalClaims({"aud" : "audience", exp: 839218392183});
         var signedJWT = basicIdToken.toJWT('shhhh', { expiresInSeconds: 5 });
         done();
     }).to.throw('"expiresInSeconds" is not allowed');

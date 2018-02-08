@@ -7,7 +7,7 @@ describe('issue 304 - verifying values other than strings', function() {
     var clockTimestamp = 1000000000;
     
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+    basicIdToken.addOptionalClaims({"hello": "hello", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
     basicIdToken.setNoneAlgorithm(true);
     var signedJWT = basicIdToken.toJWT('123', {algorithm : 'HS256', "keyid": "1234"});
   it('should fail with numbers', function (done) {

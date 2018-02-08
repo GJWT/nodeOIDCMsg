@@ -5,8 +5,15 @@ var jwtDecoder = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode
 var jwtSigner = require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
 
 /**
+ * @fileoverview 
+ * AccessToken
+ * Required claims : name, email, picture, iss, sub, iat
+ * Optional claims : aud, exp, nbf
+ */
+
+/**
  * ExtendedIdToken
- * Init token using standard claims
+ * Init token using required claims
  * @class
  * @constructor
  * @extends GoogleIdToken
@@ -31,8 +38,8 @@ function ExtendedIdToken(name, email, picture, iss, sub, iat){
 ExtendedIdToken.prototype = Object.create(GoogleIdToken.prototype);
 ExtendedIdToken.prototype.constructor = ExtendedIdToken;
 
-/** Required standard claims */
-ExtendedIdToken.prototype.options_to_payload = {
+/** Required claims */
+ExtendedIdToken.prototype.optionsToPayload = {
     'name': 'name',
     'email': 'email',
     'picture': 'picture',
@@ -42,7 +49,7 @@ ExtendedIdToken.prototype.options_to_payload = {
 };
 
 /** Other options values */
-ExtendedIdToken.prototype.options_for_objects = [
+ExtendedIdToken.prototype.optionsForObjects = [
     'expiresIn',
     'notBefore',
     'noTimestamp',
@@ -52,15 +59,15 @@ ExtendedIdToken.prototype.options_for_objects = [
     'jwtid',
 ];
 
-/** Known non standard claims to be verified */
-ExtendedIdToken.prototype.knownNonStandardClaims = {
+/** Known optional claims to be verified */
+ExtendedIdToken.prototype.knownOptionalClaims = {
     'aud': 'aud',
     'exp': 'exp',
     'nbf': 'nbf',
 };
 
-/** Required standard claims to be verified */
-ExtendedIdToken.prototype.claims_to_verify = {
+/** Required claims to be verified */
+ExtendedIdToken.prototype.claimsForVerification = {
     'name': 'name',
     'email': 'email',
     'picture': 'picture',
@@ -69,88 +76,86 @@ ExtendedIdToken.prototype.claims_to_verify = {
     'maxAge' : 'maxAge',
 };
 
-/* Check for missing standard claims */
+/* Check for missing requiredclaims */
 ExtendedIdToken.prototype.validateRequiredFields = function(){
     if (this.name && this.email && this.picture && this.iss && this.sub && this.iat){
-        console.log("Validated all standard fields")
+        console.log("Validated all requiredfields")
     }else {
-        throw new Error("You are missing a required parameter");
+        throw new Error("You are missing a requiredparameter");
     }
 };
 
-ExtendedIdToken.prototype.getStandardClaims = function(){
-    ExtendedIdToken.prototype.standard_claims = {"name": this.name, "email" : this.email, "picture": this.picture,  "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
-    return ExtendedIdToken.prototype.standard_claims;         
+ExtendedIdToken.prototype.getRequiredClaims = function(){
+    ExtendedIdToken.prototype.requiredClaims = {"name": this.name, "email" : this.email, "picture": this.picture,  "iss" : this.iss, "sub" : this.sub, "iat": this.iat};
+    return ExtendedIdToken.prototype.requiredClaims;         
 };
 
 ExtendedIdToken.prototype.initData = function(){
-    ExtendedIdToken.prototype.non_standard_verification_claims = {};    
-    ExtendedIdToken.prototype.NoneAlgorithm = false;
+    ExtendedIdToken.prototype.optionalVerificationClaims = {};    
+    ExtendedIdToken.prototype.noneAlgorithm = false;
 };
 
-ExtendedIdToken.prototype.addNonStandardClaims = function(nonStandardClaims){
-    ExtendedIdToken.prototype.non_standard_claims = nonStandardClaims;
+ExtendedIdToken.prototype.addOptionalClaims = function(optionalClaims){
+    ExtendedIdToken.prototype.optionalClaims = optionalClaims;
 
-    ExtendedIdToken.prototype.non_standard_verification_claims = {};
-    Object.keys(nonStandardClaims).forEach(function (key) {
-        if (ExtendedIdToken.prototype.knownNonStandardClaims[key]) {
-            ExtendedIdToken.prototype.non_standard_verification_claims[key] = nonStandardClaims[key];
+    ExtendedIdToken.prototype.optionalVerificationClaims = {};
+    Object.keys(optionalClaims).forEach(function (key) {
+        if (ExtendedIdToken.prototype.knownOptionalClaims[key]) {
+            ExtendedIdToken.prototype.optionalVerificationClaims[key] = optionalClaims[key];
         }
     });  
 };
-ExtendedIdToken.prototype.getNonStandardClaims = function(nonStandardClaims){
-    return ExtendedIdToken.prototype.non_standard_claims;
+ExtendedIdToken.prototype.getOptionalClaims = function(optionalClaims){
+    return ExtendedIdToken.prototype.optionalClaims;
 };
 
 
 ExtendedIdToken.prototype.getVerificationClaims = function(){
-    return ExtendedIdToken.prototype.verification_claims;
+    return ExtendedIdToken.prototype.verificationClaims;
 }; 
 
-ExtendedIdToken.prototype.getNonStandardVerificationClaims = function(){
-    return ExtendedIdToken.prototype.non_standard_verification_claims;
+ExtendedIdToken.prototype.getOptionalVerificationClaims = function(){
+    return ExtendedIdToken.prototype.optionalVerificationClaims;
 };
 
 ExtendedIdToken.prototype.fromJWT = function(signedJWT, secretOrPrivateKey, claimsToVerify, options){
         this.validateRequiredVerificationClaims(claimsToVerify);
-        this.validateRequiredNonStandardVerificationClaims(claimsToVerify);
+        this.validateOptionalVerificationClaims(claimsToVerify);
         return jwtDecoder.decode(signedJWT,secretOrPrivateKey, this, options);
 };
 
 /** Check for required verification claims that need to be verified */
 ExtendedIdToken.prototype.validateRequiredVerificationClaims = function(claimsToVerify)
 {
-    Object.keys(ExtendedIdToken.prototype.claims_to_verify).forEach(function (key) {
+    Object.keys(ExtendedIdToken.prototype.claimsForVerification).forEach(function (key) {
         if (!claimsToVerify[key]) {
-            throw new Error('Missing required verification claim: ' + key);
+            throw new Error('Missing requiredverification claim: ' + key);
         }
       });  
-      ExtendedIdToken.prototype.verification_claims = claimsToVerify;
+      ExtendedIdToken.prototype.verificationClaims = claimsToVerify;
 };
 
-/** Check for required non standard verification claims that need to be verified */
-ExtendedIdToken.prototype.validateRequiredNonStandardVerificationClaims = function(claimsToVerify)
+/** Check for optional claims that need to be verified */
+ExtendedIdToken.prototype.validateOptionalVerificationClaims = function(claimsToVerify)
 {
-    if (ExtendedIdToken.prototype.non_standard_verification_claims['exp']){
-        this.nonStandardVerificationClaimsCheck('clockTolerance', claimsToVerify);
+    if (ExtendedIdToken.prototype.optionalVerificationClaims['exp']){
+        this.optionalVerificationClaimsCheck('clockTolerance', claimsToVerify);
     }
-    if (ExtendedIdToken.prototype.non_standard_verification_claims['aud']){
-        this.nonStandardVerificationClaimsCheck('aud', claimsToVerify);
+    if (ExtendedIdToken.prototype.optionalVerificationClaims['aud']){
+        this.optionalVerificationClaimsCheck('aud', claimsToVerify);
     }
 
 };
 
-ExtendedIdToken.prototype.nonStandardVerificationClaimsCheck = function(key, claimsToVerify){
+ExtendedIdToken.prototype.optionalVerificationClaimsCheck = function(key, claimsToVerify){
     if (!claimsToVerify[key]) {
-        throw new Error('Missing required verification claim: ' + key);
+        throw new Error('Missing requiredverification claim: ' + key);
     }else{
-        ExtendedIdToken.prototype.verification_claims[key] = claimsToVerify[key];
+        ExtendedIdToken.prototype.verificationClaims[key] = claimsToVerify[key];
         if (key == "aud"){
-            ExtendedIdToken.prototype.claims_to_verify['aud'] = 'aud';
+            ExtendedIdToken.prototype.claimsForVerification['aud'] = 'aud';
         }
     }
 }
 
-
 module.exports = ExtendedIdToken;
-

@@ -3,7 +3,7 @@
         "allowUnknownTags": true
     },
     "source": {
-        "include": ["index.js", "src/controllers/message/", "src/controllers/messageTypes/jwt/jsonwebtoken/", "src/models/tokenProfiles/", "src/models/keystore-dependency/"],
+        "include": ["index.js", "src/controllers/message/", "src/controllers/messageTypes/jwt/jsonwebtoken/", "src/models/tokenProfiles/", "src/models/keystoreDependency/"],
 	"includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_"
     },

@@ -36,7 +36,7 @@ describe('Asymmetric Algorithms', function(){
 
       describe('when signing a token with a known non standard claim', function () {
         var scopedAccessToken = new ScopedAccessToken('issuer','subject', clockTimestamp, "scope");
-        scopedAccessToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        scopedAccessToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         scopedAccessToken.setNoneAlgorithm(true);
         var signedJWT = scopedAccessToken.toJWT('shhhh');
 
@@ -49,6 +49,7 @@ describe('Asymmetric Algorithms', function(){
             assert.isNull(err);
             done();
           }
+        });
 
         it('should throw when invalid known non standard claim', function (done) {
          
@@ -59,24 +60,22 @@ describe('Asymmetric Algorithms', function(){
             done();
           }
         });
+    });
+
+    describe('when signing a token without standard claim', function () {
+      it('should throw error and require standard claim', function (done) {
+        try{
+          var scopedAccessToken = new ScopedAccessToken('issuer','subject');
+          scopedAccessToken.addOptionalClaims({"jti" : "test"});
+          scopedAccessToken.setNoneAlgorithm(true);
+          var signedJWT = scopedAccessToken.toJWT('shhhh');
+        }catch(err){
+          assert.isNotNull(err);
+          assert.instanceOf(err, Error);
+          done();
+        }
       });
     });
-       
-  
-      describe('when signing a token without standard claim', function () {
-        it('should throw error and require standard claim', function (done) {
-          try{
-            var scopedAccessToken = new ScopedAccessToken('issuer','subject');
-            scopedAccessToken.addNonStandardClaims({"jti" : "test"});
-            scopedAccessToken.setNoneAlgorithm(true);
-            var signedJWT = scopedAccessToken.toJWT('shhhh');
-          }catch(err){
-            assert.isNotNull(err);
-            assert.instanceOf(err, Error);
-            done();
-          }
-        });
-      });
 
     describe('when adding claims to token profile', function () {
       var dateNow = Math.floor(Date.now() / 1000);
@@ -85,12 +84,12 @@ describe('Asymmetric Algorithms', function(){
       var clockTimestamp = 1000000000;
 
       var scopedAccessToken = new ScopedAccessToken('issuer','subject', clockTimestamp, "scope");
-      scopedAccessToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+      scopedAccessToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
       scopedAccessToken.setNoneAlgorithm(true);        
 
       it('should be able to access all standard claims', function (done) {
         try{
-         var standardClaims = scopedAccessToken.getStandardClaims();  
+         var standardClaims = scopedAccessToken.getRequiredClaims();  
          assert.deepEqual(standardClaims, { "iss" : "issuer", "sub" : 'subject',  "iat" : clockTimestamp,"scope" : "scope"})          
         }catch(err){
           assert.isNull(err);
@@ -100,7 +99,7 @@ describe('Asymmetric Algorithms', function(){
 
       it('should be able to access non standard claims separately', function (done) {
           try{
-           var nonStandardClaims = scopedAccessToken.getNonStandardClaims();  
+           var nonStandardClaims = scopedAccessToken.getOptionalClaims();  
            assert.deepEqual(nonStandardClaims, {"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3})          
           }catch(err){
             assert.isNull(err);
@@ -120,6 +119,8 @@ describe('Asymmetric Algorithms', function(){
           var decodedPayload = scopedAccessToken.fromJWT(signedJWT, 'shhhh', {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "scope": "scope"}, {'clockTimestamp' : clockTimestamp});
         }catch(err){
           assert.isNotNull(decodedPayload);
+          console.log(err)
+          console.log("******************************************************************")
           assert.isNull(err);
         }
         done();
@@ -139,5 +140,4 @@ describe('Asymmetric Algorithms', function(){
     }); 
   });
 });
-}); 
-
+});

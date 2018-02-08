@@ -7,6 +7,9 @@ jwtSigner = Object.create(messageSigner);
 jwtSigner.constructor = JWTSigner;
 
 /**
+ * @fileoverview Handles common signing functionality for JWT message type
+ */
+/**
  * JWTSigner
  * @class
  * @extends MessageSigner
@@ -17,7 +20,7 @@ function JWTSigner(){
 
 /**
  * Signs JWT and checks for valid input
- * @param tokenProfile contains the token properties, standard, non standard and verification claims
+ * @param tokenProfile contains the token properties,required, optional and verification claims
  * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
  * @param options consists of other inputs that are not part of the payload, for ex : 'algorithm'
  * @param callback is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 

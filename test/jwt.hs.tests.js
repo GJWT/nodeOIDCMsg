@@ -12,7 +12,7 @@ describe('HS256', function() {
 
 
   var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-  basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+  basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
   basicIdToken.setNoneAlgorithm(true);
   var token = basicIdToken.toJWT(secret, { algorithm: 'HS256' });
 
@@ -62,7 +62,7 @@ describe('HS256', function() {
 
     it('should throw with secret and token not signed', function(done) {
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         basicIdToken.setNoneAlgorithm(true);
         var signed = basicIdToken.toJWT(secret, { algorithm: 'none'  });
 
@@ -78,7 +78,7 @@ describe('HS256', function() {
 
     it('should work with falsy secret and token not signed', function(done) {
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         basicIdToken.setNoneAlgorithm(true);
         var signed = basicIdToken.toJWT(null, { algorithm: 'none'  });
 
@@ -103,7 +103,7 @@ describe('HS256', function() {
 
     it('should return an error when the token is expired', function(done) {
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret, { algorithm: 'HS256'   });
         try{
@@ -123,7 +123,7 @@ describe('HS256', function() {
 
     it('should NOT return an error when the token is expired with "ignoreExpiration"', function(done) {
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret, { algorithm: 'HS256'});
         basicIdToken.fromJWT(token, secret, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"},{'clockTimestamp' : clockTimestamp, algorithm: 'HS256', ignoreExpiration: true}, function(err, decoded) {
@@ -142,7 +142,7 @@ describe('HS256', function() {
 
         var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
     it('should default to HS256 algorithm when no options are passed', function() {
-        basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+        basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
         basicIdToken.setNoneAlgorithm(true);
         var token = basicIdToken.toJWT(secret);
       
@@ -159,7 +159,7 @@ describe('HS256', function() {
     //var token  = jwt.sign({ foo: 'bar' }, secret, { algorithm: 'HS256' });
 
     var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
-    basicIdToken.addNonStandardClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
+    basicIdToken.addOptionalClaims({ "foo": "bar", "aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : 1});
     basicIdToken.setNoneAlgorithm(true);
     var token = basicIdToken.toJWT(secret, { algorithm: 'HS256'   });
 
