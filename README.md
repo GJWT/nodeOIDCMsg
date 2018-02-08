@@ -113,7 +113,7 @@ var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 
 ## How to add optional claims
 
-Optional claims can be added separately by creating a new basic id token and then calling the method ‘addNon
+Optional claims can be added separately by creating a new basic id token and then calling the method ‘addOptional
 Claims’.
 
 ```
