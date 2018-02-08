@@ -111,9 +111,9 @@ var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 
 
 
-## How to add non required claims
+## How to add optional claims
 
-Non required claims can be added separately by creating a new basic id token and then calling the method ‘addNon
+Optional claims can be added separately by creating a new basic id token and then calling the method ‘addNon
 Claims’.
 
 ```
@@ -121,7 +121,7 @@ basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, 
 ```
 
 
-## How to access required & non required claims
+## How to access required & optional claims
 
 To access the required claims that were previously added to a token, it can be done as follows : 
 
@@ -133,7 +133,7 @@ var optionalClaims = basicIdToken.getOptionalClaims();
 
 
 ## Support for jti & kid
-Header includes claims such as kid and can be used to select the key wihtin a JWKS needed to verify the signature. Can also be passed in a non required claim for each token. Kid can be used to select the key within a JWKS needed to verify the signature.
+Header includes claims such as kid and can be used to select the key wihtin a JWKS needed to verify the signature. Can also be passed in an optional claim for each token. Kid can be used to select the key within a JWKS needed to verify the signature.
 
 
 
@@ -182,7 +182,7 @@ Generated jwts will include an iat (issued at) claim by default unless noTimesta
 
 
 
-## How to deserialize & verify required or non required claims
+## How to deserialize & verify required or optional claims
 
 A token profile’s fromJWT method can be used to decode a JWT. While the JWT is decoded, the backend also verifies the payload to check if it matches the expected claims.  Claims to be verified can be passed in as key value pairs as the third parameter of the fromJwt method. Expected required claim values are required while deserializing.
 
@@ -190,7 +190,7 @@ A token profile’s fromJWT method can be used to decode a JWT. While the JWT is
 var decodedPayload = basicIdToken.fromJWT(signedJWT, secretOrPublicKey, {"iss" : "issuer", "sub": "subject", "aud" : "audience", 'maxAge': '1d', 'clockTolerance' : 10, "jti": "jti"},{'clockTimestamp' : clockTimestamp});
 ```
 
-Known non required claims have to be verified by using the following parameters.For each of the following known non-required claims (audience, iat, exp, nbf) the respective verification claims are required.
+Known optional claims have to be verified by using the following parameters.For each of the following known non-required claims (audience, iat, exp, nbf) the respective verification claims are required.
 
 * **Audience : aud**
 
