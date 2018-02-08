@@ -113,10 +113,11 @@ var basicIdToken = new BasicIdToken('issuer','subject', clockTimestamp, "jti");
 
 ## How to add non required claims
 
-Non required claims can be added separately by creating a new basic id token and then calling the method ‘addNonStandardClaims’.
+Non required claims can be added separately by creating a new basic id token and then calling the method ‘addNon
+Claims’.
 
 ```
-basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
+basicIdToken.addOptionalClaims({"aud" : "audience", "nbf" : clockTimestamp + 2, "exp" : clockTimestamp + 3});
 ```
 
 
@@ -125,9 +126,9 @@ basicIdToken.addNonStandardClaims({"aud" : "audience", "nbf" : clockTimestamp + 
 To access the required claims that were previously added to a token, it can be done as follows : 
 
 ```
-var standardClaims = basicIdToken.getStandardClaims();  
+var requiredClaims = basicIdToken.getRequiredClaims();  
        
-var nonStandardClaims = basicIdToken.getNonStandardClaims(); 
+var optionalClaims = basicIdToken.getOptionalClaims(); 
 ```
 
 
