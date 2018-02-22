@@ -98,7 +98,7 @@ class ECKey extends Key{
     return this;
   }
 
-  decryptionKey = function() {
+  decryptionKey() {
     return this.getKey(true);
   }
 

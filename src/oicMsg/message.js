@@ -102,9 +102,8 @@ class Message {
 
   /** 
    * Fetch optional claims 
-   * @param {?Object<string, string>} optionalClaims Claims that are not required
    */
-  getOptionalClaims(optionalClaims) {
+  getOptionalClaims() {
     return this.optionalClaims;
   }
 
