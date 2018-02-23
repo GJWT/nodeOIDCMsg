@@ -1,5 +1,5 @@
 
-var Key = require('./Key');
+const Key = require('./Key');
 
 /**
  * Key
@@ -8,11 +8,12 @@ var Key = require('./Key');
  * @extends Key
  * JSON Web key representation of a RSA key
  */
-class RSAKey extends Key{
-  constructor(use, key, kty, alg, kid, x5c, x5t, x5u, n, e, d, p, q, dp, dq, di, qi,
-    kwargs) {
+class RSAKey extends Key {
+  constructor(
+      use, key, kty, alg, kid, x5c, x5t, x5u, n, e, d, p, q, dp, dq, di, qi,
+      kwargs) {
     super();
-    var key = Key.call(this, kty, alg, use, kid, key, x5c, x5t, x5u, kwargs);
+    key = super(kty, alg, use, kid, key, x5c, x5t, x5u, kwargs);
     this.members.push(['n', 'e', 'd', 'p', 'q']);
     this.longs = ['n', 'e', 'd', 'p', 'q', 'dp', 'dq', 'di', 'qi'];
     this.publicMembers.push(['n', 'e']);
@@ -36,8 +37,8 @@ class RSAKey extends Key{
     this.di = di || '';
     this.qi = qi || '';
 
-    var hasPublicKeyParts = this.n.length > 0 && this.e.length;
-    var hasX509CertChain = x5c && (x5c.length > 0);
+    const hasPublicKeyParts = this.n.length > 0 && this.e.length;
+    const hasX509CertChain = x5c && (x5c.length > 0);
 
     if (!this.key && (hasPublicKeyParts || hasX509CertChain)) {
       this.deserialize();
@@ -49,24 +50,24 @@ class RSAKey extends Key{
   deserialize() {
     if (this.n && this.e) {
       try {
-        for (var i = 0; i < this.longs; i++) {
-          var param = this.longs[i];
-  
-          // var item = getAttr(param);
-  
+        for (const i = 0; i < this.longs; i++) {
+          const param = this.longs[i];
+
+          // const item = getAttr(param);
+
           if (!item || item instanceof Number) {
             continue;
           } else {
             try {
-              var val = long(deser(item));  // TODO
+              const val = long(deser(item));  // TODO
             } catch (err) {
               console.log(err);
             }
             setAttr(param, val);  // TODO
           }
         }
-  
-        var lst = [this.n, this.e];
+
+        const lst = [this.n, this.e];
         if (this.d) {
           lst.push(this.d);
         } else if (this.p) {
@@ -82,10 +83,11 @@ class RSAKey extends Key{
         console.log('Deserialization Not Possible')
       }
     } else if (this.x5c) {
-      var derCert = base64.b64decode(self.x5c[0].encode('ascii'));
-  
+      const derCert = base64.b64decode(self.x5c[0].encode('ascii'));
+
       if (this.x5t) {
-        if (!b64d(self.x5t.encode('ascii')) == hashlib.sha1(der_cert).digest()) {
+        if (!b64d(self.x5t.encode('ascii')) ==
+            hashlib.sha1(der_cert).digest()) {
           console.log('Deserialization not possible');
         }
       }
@@ -98,41 +100,40 @@ class RSAKey extends Key{
       console.log('Deserialization not possible')
     }
   };
-  
+
   serialize(priv) {
     priv = priv || false;
     if (!this.key) {
       console.log('Serialization not possible');
     }
-    var res = this.common();
-    var set = new Set(this.publicMembers.concat(this.longs));
-    var publicLongs =
-        Array.from(set);  //
-    for (var i = 0; i < publicLongs.length; i++) {
-      var param = publicLongs[i];
-      /*var item = getAttr(param);
+    const res = this.common();
+    const set = new Set(this.publicMembers.concat(this.longs));
+    const publicLongs = Array.from(set);  //
+    for (const i = 0; i < publicLongs.length; i++) {
+      const param = publicLongs[i];
+      /*const item = getAttr(param);
       if (item){
           res[param] = longToBase64(item); //TODO
       }*/
     }
-  
+
     if (priv) {
-      for (var i = 0; i < this.longs.length; i++) {
-        var param = this.longs[i];
-        var lst = ['d', 'p', 'q', 'dp', 'dq', 'di', 'qi'];
+      for (const i = 0; i < this.longs.length; i++) {
+        const param = this.longs[i];
+        const lst = ['d', 'p', 'q', 'dp', 'dq', 'di', 'qi'];
         if (!priv && lst.indexOf(param)) {
           continue;
         }
-        // var item = getAttr(param);
+        // const item = getAttr(param);
         if (item) {
           res[param] = longToBase64(item);
         }
       }
     }
-  
+
     return res;
   };
-  
+
   split() {
     this.n = this.key.n;
     this.e = this.key.e;
@@ -141,11 +142,11 @@ class RSAKey extends Key{
     } catch (err) {
       console.log('Attribute Error')
     }
-    var lst = ['p', 'q'];
-    for (var i = 0; i < lst.length; i++) {
-      var param = lst[i];
+    const lst = ['p', 'q'];
+    for (const i = 0; i < lst.length; i++) {
+      const param = lst[i];
       try {
-        var val = this.key.p
+        const val = this.key.p
       } catch (err) {
         console.log('AttributeError');
       }
@@ -158,7 +159,7 @@ class RSAKey extends Key{
       }
     }
   }
-  
+
   /**
    *  Load the key from a file.
    *  :param filename: File name
@@ -168,17 +169,17 @@ class RSAKey extends Key{
     this.split();
     return this;
   }
-  
+
   /**
    *   Use this RSA key
    *   :param key: An RSA key instance
    */
-   loadKey(key) {
+  loadKey(key) {
     this.key = key;
     this.split();
     return this;
   }
-  
+
   /**
    * Make sure there is a key instance present that can be used for
    * encrypting/signing.
@@ -189,19 +190,19 @@ class RSAKey extends Key{
     }
     return this.key;
   }
-  
+
   getP() {
     return this.p;
   };
-  
+
   setP(val) {
     this.p = val;
   };
-  
+
   getQ() {
     return this.q;
   };
-  
+
   setQ(val) {
     return this.q = val;
   };

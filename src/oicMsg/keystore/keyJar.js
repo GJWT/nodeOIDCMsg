@@ -1,11 +1,13 @@
-var KeyBundle = require('./keyBundle');
-var fs = require('fs');
-var shell = require('shelljs');
-var URL = require('url-parse');
-var RSAKey = require('./keys/RSAKey.js');
+const KeyBundle = require('./keyBundle');
+const fs = require('fs');
+const shell = require('shelljs');
+const URL = require('url-parse');
+const RSAKey = require('../jose/jwk/keys/RSAKey.js');
 
 /**
- * @fileoverview handle several sets of keys from several different origins. To do that it connects key bundles to identifiers for their owner.A KeyJar does not store keys directly it always stores them cloaked in a KeyBundle.
+ * @fileoverview handle several sets of keys from several different origins. To
+ * do that it connects key bundles to identifiers for their owner.A KeyJar does
+ * not store keys directly it always stores them cloaked in a KeyBundle.
  */
 
 /**
@@ -35,7 +37,7 @@ class KeyJar {
    * @param {*} url Where can the key/s be found
    * @param {*} kwargs extra parameters for instantiating keyBundle
    * @returns: A :py:class:`oicmsg.oauth2.keyBundle.keyBundle` instance
-   * 
+   *
    * @memberof KeyJar
    */
   addUrl(issuer, url, kwargs) {
@@ -46,8 +48,8 @@ class KeyJar {
     if (url.includes('/localhost:') || url.includes('/localhost/')) {
       kc = new this.keyBundleCls(source = url, verifySSL = False, kwargs);
     } else {
-      kc =
-          new this.keyBundleCls(source = url, verifySSL = this.verifySSL, kwargs);
+      kc = new this.keyBundleCls(
+          source = url, verifySSL = this.verifySSL, kwargs);
     }
     if (this.issuerKeys[owner]) {
       this.issuerKeys[owner] += [kc];
@@ -65,17 +67,18 @@ class KeyJar {
    * @param key The key
    * @param usage What the key can be used for signing/signature verification
    * (sig) and/or encryption/decryption (enc)
-   * 
+   *
    * @memberof KeyJar
    */
-  addSymmetric(owner, key, usage=null) {
+  addSymmetric(owner, key, usage = null) {
     if (!this.issuerKeys[owner]) {
       this.issuerKeys[owner] = [];
     }
 
     //_key = b64e(as_bytes(key));
     if (usage == null) {
-      this.issuerKeys[owner] += new this.keyBundleCls([{'kty': 'oct', 'k': key}]);
+      this.issuerKeys[owner] +=
+          new this.keyBundleCls([{'kty': 'oct', 'k': key}]);
     } else {
       for (const use of usage) {
         this.issuerKeys[owner] +=
@@ -130,14 +133,14 @@ class KeyJar {
   }
 
   /**
-    * Get all keys that matches a set of search criteria
-    * @param keyUser A key useful for this usage (enc, dec, sig, ver)
-    * @param keyType Type of key (rsa, ec, symmetric, ..)
-    * @param issuer Who is responsible for the keys, "" == me
-    * @param kid A Key Identifier
-    * @return: A possibly empty list of keys
-    * */
-  get(keyUse, keyType=keyType, owner='', kid=null, kwargs) {
+   * Get all keys that matches a set of search criteria
+   * @param keyUser A key useful for this usage (enc, dec, sig, ver)
+   * @param keyType Type of key (rsa, ec, symmetric, ..)
+   * @param issuer Who is responsible for the keys, "" == me
+   * @param kid A Key Identifier
+   * @return: A possibly empty list of keys
+   * */
+  get(keyUse, keyType = keyType, owner = '', kid = null, kwargs) {
     let use = '';
     if (['dec', 'enc'].includes(keyUse)) {
       use = 'enc';
@@ -161,7 +164,7 @@ class KeyJar {
     }
 
     let lst = [];
-    for (var i = 0; i < kj.length; i++) {
+    for (const i = 0; i < kj.length; i++) {
       const bundle = kj[i];
       let _bkeys = null;
       if (keyType) {
@@ -169,8 +172,8 @@ class KeyJar {
       } else {
         _bkeys = bundle.getKeys();
       }
-      for (var i = 0; i < _bkeys.length; i++) {
-        var key = _bkeys[i];
+      for (const i = 0; i < _bkeys.length; i++) {
+        const key = _bkeys[i];
         if (key.inactiveSince && keyUse !== 'sig') {
           continue;
         }
@@ -193,8 +196,8 @@ class KeyJar {
     if (keyType == 'EC' && kwargs.indexOf('alg')) {
       name = 'P-{}'.format(kwargs['alg'].slice(0, -1));  // the type
       _lst = [];
-      for (var i = 0; i < lst.length; i++) {
-        var key = lst[i];
+      for (const i = 0; i < lst.length; i++) {
+        const key = lst[i];
         if (name != key.crv) {
           console.log('Assertion Error');
         } else {
@@ -206,11 +209,11 @@ class KeyJar {
 
     if (use === 'enc' && keyType === 'oct' && owner != '') {
       // Add my symmetric keys
-      for (var i = 0; i < this.issuerKeys[''].length; i++) {
+      for (const i = 0; i < this.issuerKeys[''].length; i++) {
         const kb = this.issuerKeys[''][i];
 
-        for (var i = 0; i < kb.getKty(keyType); i++) {
-          var key = kb.getKty(keyType)[i];
+        for (const i = 0; i < kb.getKty(keyType); i++) {
+          const key = kb.getKty(keyType)[i];
           if (key.inactiveSince) {
             continue;
           }
@@ -223,19 +226,19 @@ class KeyJar {
     return lst;
   }
 
-  getSigningKey(keyType='', owner='', kid=null, args) {
+  getSigningKey(keyType = '', owner = '', kid = null, args) {
     return this.get('sig', keyType, owner, kid, args);
   }
 
-  getVerifyKey(keyType='', owner='', kid=null, args) {
+  getVerifyKey(keyType = '', owner = '', kid = null, args) {
     return this.get('ver', keyType, owner, kid, args);
   }
 
-  getEncryptKey(keyType='', owner='', kid=null, args) {
+  getEncryptKey(keyType = '', owner = '', kid = null, args) {
     return this.get('enc', keyType, owner, kid, args);
   }
 
-  getDecryptKey(keyType='', owner='', kid=null, args) {
+  getDecryptKey(keyType = '', owner = '', kid = null, args) {
     return this.get('dec', keyType, owner, kid, args);
   }
 
@@ -251,9 +254,9 @@ class KeyJar {
   }
 
   updateKeyJar(keyjar) {
-    for (var i = 0; i < keyjar.items().length; i++) {
+    for (const i = 0; i < keyjar.items().length; i++) {
       const kbl = keyjar.items()[i];
-      for (var i = 0; i < kbl.length; i++) {
+      for (const i = 0; i < kbl.length; i++) {
         const kb = kbl[i];
         kb.update();
       }
@@ -330,8 +333,8 @@ class KeyJar {
   }
 
   importJwksAsJSON(js, issuer) {
-return this.importJwks(JSON.stringify(js), issuer);
-}
+    return this.importJwks(JSON.stringify(js), issuer);
+  }
 
   /**
    * Initiates a new :py:class:`oicmsg.oauth2.Message` instance and
@@ -351,38 +354,38 @@ return this.importJwks(JSON.stringify(js), issuer);
               Note the JWKS contains private key information !!
    */
 
-  buildKeyJar(keyConf, kidTemplate='', keyjar='', kidd=null) {
+  buildKeyJar(keyConf, kidTemplate = '', keyjar = '', kidd = null) {
     if (keyjar == null) {
       keyjar = new KeyJar();
     }
 
     if (kidd == null) {
-      kidd = {'sig': {}, 'enc': {}}
+      kidd = { 'sig': {}, 'enc': {} }
     }
 
     let kid = 0;
     const jwks = {'keys': []};
 
-    for (var i = 0; i < keyConf.length; i++) {
+    for (const i = 0; i < keyConf.length; i++) {
       const spec = keyConf[i];
       const typ = spec['type'].toUpperCase();
 
-      var kb = null;
+      const kb = null;
       if (typ === 'RSA') {
         if (spec['key']) {
           kb = new KeyBundle(
-              source = `file://${spec['key']}`, fileformat = 'der', keytype = typ,
-              keyusage = spec['use']);
+              source = `file://${spec['key']}`, fileformat = 'der',
+              keytype = typ, keyusage = spec['use']);
         } else {
-          var kb = new KeyBundle();
+          const kb = new KeyBundle();
           kb = kb.rsaInit(spec);
         }
       } else if (typ === 'EC') {
         kb = ecInit(spec);
       }
 
-      for (var i = 0; i < kb.keys.length; i++) {
-        var k = kb.keys[i];
+      for (const i = 0; i < kb.keys.length; i++) {
+        const k = kb.keys[i];
         if (kidTemplate) {
           k.kid = kidTemplate % kid;
           kid += 1;
@@ -392,8 +395,8 @@ return this.importJwks(JSON.stringify(js), issuer);
         kidd[k.use][k.kty] = k.kid;
       }
 
-      for (var i in kb.keys) {
-        var k = kb.keys[i];
+      for (const i in kb.keys) {
+        const k = kb.keys[i];
         if (k.kty !== 'oct') {
           k.serialize();
         }
@@ -406,9 +409,9 @@ return this.importJwks(JSON.stringify(js), issuer);
 
   copy() {
     const kj = new KeyJar();
-    for (var i = 0; i < this.owners.length; i++) {
+    for (const i = 0; i < this.owners.length; i++) {
       const owner = this.owners[i];
-      for (var i = 0; i < [owner].length; i++) {
+      for (const i = 0; i < [owner].length; i++) {
         const kb = this.owner[i];
         kj[owner] = [kb.copy()];
       }
@@ -446,10 +449,10 @@ return this.importJwks(JSON.stringify(js), issuer);
    * @param {*} when
    */
   removeOutdated(when) {
-    for (var i = 0; i < list(this.owners()); i++) {
+    for (const i = 0; i < list(this.owners()); i++) {
       _kbl = [];
       const iss = list(this.owners)[i];
-      for (var i = 0; i < this.issuerKeys[iss]; i++) {
+      for (const i = 0; i < this.issuerKeys[iss]; i++) {
         kb.removeOutdated(this.removeAfter, when);
         if (kb.length > 0) {
           _kbl.append(kb);
@@ -471,8 +474,8 @@ return this.importJwks(JSON.stringify(js), issuer);
 
     if (kid) {
       const getVal = this.get(use, owner, kid, keyType);
-      for (var i in getVal) {
-        var key = getVal[i];
+      for (const i in getVal) {
+        const key = getVal[i];
         if (key && !this.keys.includes(key)) {
           keys.append(_key);
         }
@@ -489,12 +492,12 @@ return this.importJwks(JSON.stringify(js), issuer);
         }
       } else if (no_kid_issuer) {
         try {
-          var allowedKids = no_kid_issuer[owner];
+          const allowedKids = no_kid_issuer[owner];
         } catch (err) {
           return keys;
         }
         if (allowedKids) {
-          for (var i = 0; i < kl.length; i++) {
+          for (const i = 0; i < kl.length; i++) {
             const k = kl[i];
             if (allowedKids.indexOf(k.kid)) {
               keys.push(k);
@@ -540,28 +543,28 @@ return this.importJwks(JSON.stringify(js), issuer);
    */
   keySetUp(vault, kwargs) {
     const vault_path = proper_path(vault);
-    if (!fs.lstatSync(vault_path).isFile()){
+    if (!fs.lstatSync(vault_path).isFile()) {
       shell.mkdir('-p', localPath);
     }
     const kb = new KeyBundle();
     const usageArr = ['sig', 'enc'];
 
     for (const usage of usageArr) {
-      if (kwargs.includes(usage)){
-        if (kwargs[usage] === null){
+      if (kwargs.includes(usage)) {
+        if (kwargs[usage] === null) {
           continue;
         }
       }
       _args = kwargs[usage];
-      if (_args['alg'].toUpperCase() === 'RSA'){
-        try{
+      if (_args['alg'].toUpperCase() === 'RSA') {
+        try {
           //_key = rsa_load()
-        }catch(err){
+        } catch (err) {
           const fileName = new fileName();
           fileName.write();
           _key = createAndStoreRsaKeyPair(vaultPath);
         }
-        k = RSAKey(key=_key, use=usage);
+        k = RSAKey(key = _key, use = usage);
         k.add_kid();
         kb.append(k);
       }
@@ -586,8 +589,9 @@ return this.importJwks(JSON.stringify(js), issuer);
     } else {
       path = path;
     }
-    localPath = this.properPath(`${path}/${localPath}`)
-    if (!fs.existsSync(localPath)) {
+    localPath =
+        this.properPath(`${path}/${localPath}`);
+        if (!fs.existsSync(localPath)) {
       shell.mkdir('-p', localPath);
     }
     const kb = new KeyBundle();
@@ -603,7 +607,9 @@ return this.importJwks(JSON.stringify(js), issuer);
       }
       console.log('The file was saved!');
     });
-    url = `http://${url.hostname}${exportFileName.substring(1, exportFileName.length)}`;
+    url = `http://${
+                    url.hostname
+                  }${exportFileName.substring(1, exportFileName.length)}`;
     return url;
   }
 
@@ -616,10 +622,10 @@ return this.importJwks(JSON.stringify(js), issuer);
    */
   getJwtDecryptKeys(jwt, kwargs) {
     keys = [];
-    var _keyType = '';
+    const _keyType = '';
 
     try {
-      var _keyType = jwe.alg2keytype(jwt.headers['alg']);
+      const _keyType = jwe.alg2keytype(jwt.headers['alg']);
     } catch (err) {
       console.log('Key Error');
     }
@@ -689,7 +695,8 @@ return this.importJwks(JSON.stringify(js), issuer);
     }
 
     try {
-      keys = this.addKey(keys, kwargs['opponent_id'], 'sig', _keyType, _kid, nki);
+      keys =
+          this.addKey(keys, kwargs['opponent_id'], 'sig', _keyType, _kid, nki);
     } catch (err) {
       pass;
     }

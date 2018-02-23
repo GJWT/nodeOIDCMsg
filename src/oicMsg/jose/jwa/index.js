@@ -8,7 +8,8 @@ var conv = require('binstring');
 var base32 = require('hi-base32');
 
 
-var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512" and "none".'
+var MSG_INVALID_ALGORITHM =
+    '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512" and "none".'
 var MSG_INVALID_SECRET = 'secret must be a string or buffer';
 var MSG_INVALID_VERIFIER_KEY = 'key must be a string or a buffer';
 var MSG_INVALID_SIGNER_KEY = 'key must be a string, a buffer or an object';
@@ -24,56 +25,54 @@ function bufferOrString(obj) {
 }
 
 function normalizeInput(thing) {
-  if (!bufferOrString(thing))
-    thing = JSON.stringify(thing);
+  if (!bufferOrString(thing)) thing = JSON.stringify(thing);
   return thing;
 }
 
 function createHmacSigner(bits, baseEncoding) {
   return function sign(thing, secret, baseEncoding) {
-    switch(baseEncoding) {
-      case "base16":
-        if (!bufferOrString(secret))
-          throw typeError(MSG_INVALID_SECRET);
+    switch (baseEncoding) {
+      case 'base16':
+        if (!bufferOrString(secret)) throw typeError(MSG_INVALID_SECRET);
         thing = normalizeInput(thing);
         var hmac = crypto.createHmac('sha' + bits, secret);
         var sig = (hmac.update(thing), hmac.digest('hex'))
-        var uriEncodedSignature = encodeURIComponent(JSON.stringify(sig));
+            var uriEncodedSignature = encodeURIComponent(JSON.stringify(sig));
         return uriEncodedSignature;
         break;
-      case "base32":
-          if (!bufferOrString(secret))
-            throw typeError(MSG_INVALID_SECRET);
-          thing = normalizeInput(thing);
-          var hmac = crypto.createHmac('sha' + bits, secret);
-          var sig = (hmac.update(thing), hmac.digest('hex'))
-          var base32Encoded = base32.encode(sig)
-          var uriEncodedSignature = encodeURIComponent(JSON.stringify(base32Encoded));
-          return uriEncodedSignature;
-          break;
+      case 'base32':
+        if (!bufferOrString(secret)) throw typeError(MSG_INVALID_SECRET);
+        thing = normalizeInput(thing);
+        var hmac = crypto.createHmac('sha' + bits, secret);
+        var sig = (hmac.update(thing), hmac.digest('hex'));
+        var base32Encoded =
+            base32.encode(sig);
+        var uriEncodedSignature =
+            encodeURIComponent(JSON.stringify(base32Encoded));
+        return uriEncodedSignature;
+        break;
       default:
-          if (!bufferOrString(secret))
-            throw typeError(MSG_INVALID_SECRET);
-          thing = normalizeInput(thing);
-          var hmac = crypto.createHmac('sha' + bits, secret);
-          var sig = (hmac.update(thing), hmac.digest('base64'))
-          return base64url.fromBase64(sig);
-      }
+        if (!bufferOrString(secret)) throw typeError(MSG_INVALID_SECRET);
+        thing = normalizeInput(thing);
+        var hmac = crypto.createHmac('sha' + bits, secret);
+        var sig = (hmac.update(thing),
+                   hmac.digest('base64'));
+        return base64url.fromBase64(sig);
+    }
   }
 }
 
 function createHmacSignerBase16(bits) {
   return function sign(thing, secret) {
-    if (!bufferOrString(secret))
-      throw typeError(MSG_INVALID_SECRET);
+    if (!bufferOrString(secret)) throw typeError(MSG_INVALID_SECRET);
     thing = normalizeInput(thing);
     var hmac = crypto.createHmac('sha' + bits, secret);
     var sig = (hmac.update(thing), hmac.digest('hex'))
 
-    var uriEncodedSignature = encodeURIComponent(JSON.stringify(sig));
+        var uriEncodedSignature = encodeURIComponent(JSON.stringify(sig));
     return uriEncodedSignature;
   }
-} 
+}
 
 function createHmacVerifier(bits, baseEncoding) {
   return function verify(thing, signature, secret) {
@@ -83,7 +82,7 @@ function createHmacVerifier(bits, baseEncoding) {
 }
 
 function createKeySigner(bits) {
- return function sign(thing, privateKey) {
+  return function sign(thing, privateKey) {
     if (!bufferOrString(privateKey) && !(typeof privateKey === 'object'))
       throw typeError(MSG_INVALID_SIGNER_KEY);
     thing = normalizeInput(thing);
@@ -97,8 +96,7 @@ function createKeySigner(bits) {
 
 function createKeyVerifier(bits) {
   return function verify(thing, signature, publicKey) {
-    if (!bufferOrString(publicKey))
-      throw typeError(MSG_INVALID_VERIFIER_KEY);
+    if (!bufferOrString(publicKey)) throw typeError(MSG_INVALID_VERIFIER_KEY);
     thing = normalizeInput(thing);
     signature = base64url.toBase64(signature);
     var verifier = crypto.createVerify('RSA-SHA' + bits);
@@ -119,7 +117,8 @@ function createECDSASigner(bits) {
 function createECDSAVerifer(bits) {
   var inner = createKeyVerifier(bits);
   return function verify(thing, signature, publicKey) {
-    signature = formatEcdsa.joseToDer(signature, 'ES' + bits).toString('base64');
+    signature =
+        formatEcdsa.joseToDer(signature, 'ES' + bits).toString('base64');
     var result = inner(thing, signature, publicKey);
     return result;
   };
@@ -150,22 +149,21 @@ module.exports = function jwa(algorithm, baseEncoding) {
     rs: createKeySigner,
     es: createECDSASigner,
     none: createNoneSigner,
-  }
+  };
   var verifierFactories = {
     hs: createHmacVerifier,
     rs: createKeyVerifier,
     es: createECDSAVerifer,
     none: createNoneVerifier,
-  }
+  };
   var match = algorithm.match(/^(RS|ES|HS)(256|384|512)$|^(none)$/i);
-  if (!match)
-    throw typeError(MSG_INVALID_ALGORITHM, algorithm);
+  if (!match) throw typeError(MSG_INVALID_ALGORITHM, algorithm);
   var algo = (match[1] || match[3]).toLowerCase();
   var bits = match[2];
   var baseEncoding = baseEncoding;
 
   return {
     sign: signerFactories[algo](bits, baseEncoding),
-    verify: verifierFactories[algo](bits, baseEncoding),
+        verify: verifierFactories[algo](bits, baseEncoding),
   }
 };

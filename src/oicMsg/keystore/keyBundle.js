@@ -6,14 +6,20 @@ const jwkToPem = require('jwk-to-pem');
 const path = require('path');
 const shell = require('shelljs');
 const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-const RSAKey = require('./keys/RSAKey.js');
-const ECKey = require('./keys/ECKey.js');
-const SYMKey = require('./keys/SYMKey.js');
+const RSAKey = require('../jose/jwk/keys/RSAKey.js');
+const ECKey = require('../jose/jwk/keys/ECKey.js');
+const SYMKey = require('../jose/jwk/keys/SYMKey.js');
 const NodeRSA = require('node-rsa');
 const getPem = require('rsa-pem-from-mod-exp');
 
 /**
- * @fileoverview Represents a set of keys with a common origin.The idea behind the class is that it should be the link between a set of keys and the OIDC client library. It works by on one hand keeping an internal representation of the keys in sync with a specific external representation (the external version representing the correct state of the key) and on the other hand provide an API for accessing the keys. The reason for key sets to change are regular key roll-over or as a result of key compromise.
+ * @fileoverview Represents a set of keys with a common origin.The idea behind
+ * the class is that it should be the link between a set of keys and the OIDC
+ * client library. It works by on one hand keeping an internal representation of
+ * the keys in sync with a specific external representation (the external
+ * version representing the correct state of the key) and on the other hand
+ * provide an API for accessing the keys. The reason for key sets to change are
+ * regular key roll-over or as a result of key compromise.
  */
 
 /**
@@ -23,7 +29,7 @@ const getPem = require('rsa-pem-from-mod-exp');
  */
 class KeyBundle {
   constructor() {
-    console.log("test");
+    console.log('test');
   }
 
   getCurrentTime() {
@@ -31,7 +37,7 @@ class KeyBundle {
   }
 
   doKeys(keyData) {
-    if (!this.keys){
+    if (!this.keys) {
       this.keys = [];
     }
     if (typeof keyData === 'string') {
@@ -43,13 +49,13 @@ class KeyBundle {
     }
   }
 
-  getKty(typ='') {
+  getKty(typ = '') {
     this.upToDate();
     if (typ !== '') {
       const keysList = [];
 
       for (const key of this.keys) {
-        if (key.kty === typ){ 
+        if (key.kty === typ) {
           keysList.push(key);
         }
       }
@@ -83,10 +89,12 @@ class KeyBundle {
     if (this.formattedKeysList.length !== 0) {
       return this.formattedKeysList;
     } else if (this.source !== '') {
-      this.getHttpRequestResponse(this.source, args).then (function (response) { 
-        const keys = JSON.parse(response).keys;
-        return this.getKeyList(keys);
-      }).catch(err => { console.log(`Something went wrong: ${err}`)});
+      this.getHttpRequestResponse(this.source, args)
+          .then(function(response) {
+            const keys = JSON.parse(response).keys;
+            return this.getKeyList(keys);
+          })
+          .catch(err => {console.log(`Something went wrong: ${err}`)});
     } else {
       return this.getKeyList(this.keys);
     }
@@ -110,7 +118,7 @@ class KeyBundle {
     return null;
   }
 
-  getJwks(isPrivate=false) {
+  getJwks(isPrivate = false) {
     this.upToDate();
     const keys = [];
     const jwk = {'keys': keys};
@@ -133,7 +141,7 @@ class KeyBundle {
    * Reload the keys if necessary.
    * This is a forced update, will happen even if cache time has not elapsed
    * Replaced keys will be marked as inactive and not removed.
-   * 
+   *
    * @memberof KeyBundle
    */
   update() {
@@ -179,12 +187,12 @@ class KeyBundle {
    * Outdated means that the key was marked as inactive at a time
    * that was longer ago then what is given in 'after'.
    * @param {float} after The length of time the key will remain in the KeyBundle before
-   * it should be removed. 
+   * it should be removed.
    * @param {float} when To make it easier to test
-   * 
+   *
    * @memberof KeyBundle
    */
-  removeOutdated(after, when=0) {
+  removeOutdated(after, when = 0) {
     const now = this.getCurrentTime();
     if (when) {
       now = when;
@@ -245,44 +253,45 @@ class KeyBundle {
       args['headers'] = {'If-None-Match': this.etag};
     }
 
-    this.getHttpRequestResponse(this.source, args).then (function (response) { 
-      if (response.status === 304) {
-        this.timeOut = this.getCurrentTime() + this.cacheTime;
-        this.lastUpdated = this.getCurrentTime();
-        try {
-          this.doKeys(this.impJwks['keys']);
-        } catch (err) {
-          console.log('No \'keys\' keyword in JWKS');
-        }
-      } else if (response.status === 200) {
-        this.timeOut = this.getCurrentTime() +
-            this.cacheTime;
-        this.impJwks = this.parseRemoteResponse(response);
-      
-        if (!(typeof this.impJwks === 'object' && this.impJwks !== null &&
-              !(this.impJwks instanceof Array) &&
-              !(this.impJwks instanceof Date)) &&
-            !(JSON.parse(this.impJwks).keys)) {
-          console.log('Malformed format for Imported JWK');
-        }
+    this.getHttpRequestResponse(this.source, args)
+        .then(function(response) {
+          if (response.status === 304) {
+            this.timeOut = this.getCurrentTime() + this.cacheTime;
+            this.lastUpdated = this.getCurrentTime();
+            try {
+              this.doKeys(this.impJwks['keys']);
+            } catch (err) {
+              console.log('No \'keys\' keyword in JWKS');
+            }
+          } else if (response.status === 200) {
+            this.timeOut = this.getCurrentTime() + this.cacheTime;
+            this.impJwks = this.parseRemoteResponse(response);
 
-        try {
-          this.doKeys(JSON.parse(this.impJwks).keys);
-        } catch (err) {
-          console.log('No \'keys\' keyword in JWKS');
-          console.log('MALFORMED FORMAT');
-        }
-        try {
-          this.etag = response.headers['Etag'];
-        } catch (err) {
-          console.log('Etag err');
-        }
-      } else {
-        console.log('Update Failed');
-      }
-      this.lastUpdated = this.getCurrentTime();
-      return true;    
-    }).catch(err => { console.log(err)});
+            if (!(typeof this.impJwks === 'object' && this.impJwks !== null &&
+                  !(this.impJwks instanceof Array) &&
+                  !(this.impJwks instanceof Date)) &&
+                !(JSON.parse(this.impJwks).keys)) {
+              console.log('Malformed format for Imported JWK');
+            }
+
+            try {
+              this.doKeys(JSON.parse(this.impJwks).keys);
+            } catch (err) {
+              console.log('No \'keys\' keyword in JWKS');
+              console.log('MALFORMED FORMAT');
+            }
+            try {
+              this.etag = response.headers['Etag'];
+            } catch (err) {
+              console.log('Etag err');
+            }
+          } else {
+            console.log('Update Failed');
+          }
+          this.lastUpdated = this.getCurrentTime();
+          return true;
+        })
+        .catch(err => {console.log(err)});
   }
 
   upToDate() {
@@ -386,15 +395,15 @@ class KeyBundle {
     }
   }
 
-  /** 
-    * Create a KeyBundle based on the content in a local file
-    * @param filename Name of the file
-    * @param typ Type of content
-    * @param usage What the key should be used for
-    * @return The created KeyBundle
-    *
-    * @memberof KeyBundle
-    */
+  /**
+   * Create a KeyBundle based on the content in a local file
+   * @param filename Name of the file
+   * @param typ Type of content
+   * @param usage What the key should be used for
+   * @return The created KeyBundle
+   *
+   * @memberof KeyBundle
+   */
   keybundleFromLocalFile(fileName, typ, usage) {
     if (typ.toLowerCase() === 'jwks') {
       kb = KeyBundle(null, filename, 'jwks', usage);
@@ -411,30 +420,30 @@ class KeyBundle {
    * @param {Array} kbl List of KeyBundles
    * @param {string} target Name of the file to which everything should be written
    * @param {boolean} private Should also the private parts be exported
-   * 
+   *
    * @memberof KeyBundle
    */
-  dumpJwks(kbl, target, isPrivate=false) {
+  dumpJwks(kbl, target, isPrivate = false) {
     const keys = [];
-    for (const i = 0; i < kbl.length; i++){
+    for (const i = 0; i < kbl.length; i++) {
       const kb = kbl[i];
-      for (const i = 0; i < kb.keys(); i++){
+      for (const i = 0; i < kb.keys(); i++) {
         const k = kb[i];
-        if (k.kty !== 'oct' && ! k.inactiveSince){
+        if (k.kty !== 'oct' && !k.inactiveSince) {
           keys += [key]
         }
       }
     }
-    res = {"keys": keys};
+    res = {'keys': keys};
 
-    try{
+    try {
       const file = new File(target);
       file.open('w')
-    }catch(err){
+    } catch (err) {
       const pathArr = target.split('/');
       const head = pathArr[0];
       shell.mkdir('-p', head);
-      
+
       const file = new File(target);
       file.open('w')
     }
@@ -445,23 +454,24 @@ class KeyBundle {
   }
 
   rsaInit(spec) {
-    const arg = {}
-    const arr = ["name", "path", "size"];
+    const arg = {};
+    const arr = ['name', 'path', 'size'];
 
     for (const param of arr) {
-      try{
-          arg[param] = spec[param]
-      }catch(err){
-        console.log("KeyError")
+      try {
+        arg[param] = spec[param]
+      } catch (err) {
+        console.log('KeyError')
       }
     }
 
-    const kb = new KeyBundle(null, null, "RSA", spec["use"])
+    const kb = new KeyBundle(null, null, 'RSA', spec['use']);
     const key = null;
 
-    for (const use of spec["use"]) {
-      key = this.createAndStoreRSAKeyPair(arg['name'], arg['path'], arg['size']);
-      key.kty = "rsa";
+    for (const use of spec['use']) {
+      key =
+          this.createAndStoreRSAKeyPair(arg['name'], arg['path'], arg['size']);
+      key.kty = 'rsa';
       key.use = use;
       kb.keys.push(new RSAKey(use, key));
     }
@@ -469,25 +479,25 @@ class KeyBundle {
     return kb;
   }
 
-  createAndStoreRSAKeyPair(name="oicmsg", filePath=".", size=2048) {
+  createAndStoreRSAKeyPair(name = 'oicmsg', filePath = '.', size = 2048) {
     const pair = forge.pki.rsa.generateKeyPair(size, 0x10001);
     const privKey = pair.privateKey;
     const pubKey = pair.publicKey;
-    try{
-      shell.mkdir('-p', filePath);    
-    }catch(err){
-      console.log("OSError")
+    try {
+      shell.mkdir('-p', filePath);
+    } catch (err) {
+      console.log('OSError')
     }
 
-    if (name){
+    if (name) {
       const pathName = path.join(filePath, name);
       fs.open(pathName, 'w', (err, file) => {
         if (err) throw err;
-        fs.write(forge.pki.privateKeyToPem(privKey));      
+        fs.write(forge.pki.privateKeyToPem(privKey));
         console.log('Saved!');
       });
-      
-      const pathNamePub = path.join(pathName, ".pub")
+
+      const pathNamePub = path.join(pathName, '.pub')
       fs.open(pathNamePub, 'w', (err, file) => {
         if (err) throw err;
         fs.write(forge.pki.publicKeyToPem(pubKey));
@@ -499,10 +509,10 @@ class KeyBundle {
 
   fetchPubKey(response, kid) {
     const keys = JSON.parse(response).keys;
-    for (const i = 0; i < keys.length; i++){
-      if (keys[i].kid == kid){
+    for (const i = 0; i < keys.length; i++) {
+      if (keys[i].kid == kid) {
         const pubKeyPem = getPem(keys[i].n, keys[i].e);
-        console.log(pubKeyPem);     
+        console.log(pubKeyPem);
         const key = new NodeRSA(keys[i]);
         const pubKey = key.exportKey('pkcs8-public-pem');
         const keyPair = key.generateKeyPair([2048], keys[i].e);
@@ -519,7 +529,7 @@ class KeyBundle {
  * - A list of dictionaries provided at initialization
  * - A file containing one of: JWKS, DER encoded key
  * - A URL pointing to a webpages from which an JWKS can be downloaded
- * 
+ *
  * @param {dictionary} keys A dictionary or a list of dictionaries with the keys ['kty',
    'key', 'alg', 'use', 'kid']
  * @param {string} source Where the key set can be fetch from
@@ -527,13 +537,12 @@ class KeyBundle {
  * @param {string} fileFormat For a local file either 'jwk' or 'der'
  * @param {string} keyType Iff local file and 'der' format what kind of key it is.
  * @param {string} keyUsage What the key loaded from file should be used for.
- * 
+ *
  * @memberof KeyBundle
  */
-KeyBundle.prototype.init = async (function(
-    keys, source, fileFormat, keyUsage,
-    cacheTime, verifySSL, keyType) {
-  console.log("constructor");
+KeyBundle.prototype.init = async(function(
+    keys, source, fileFormat, keyUsage, cacheTime, verifySSL, keyType) {
+  console.log('constructor');
   fileFormat = fileFormat || 'jwk';
   keyUsage = keyUsage || 'None';
   cacheTime = cacheTime || 300;
@@ -555,7 +564,7 @@ KeyBundle.prototype.init = async (function(
   this.formattedKeysList = [];
   const self = this;
 
-  const result = null;  
+  const result = null;
   if (keys) {
     if (typeof keys === 'object' && keys !== null && !(keys instanceof Array) &&
         !(keys instanceof Date)) {
@@ -586,7 +595,7 @@ KeyBundle.prototype.init = async (function(
     if (!this.remote) {
       const formatArr = ['jwks', 'jwk'];
       if (formatArr.includes(this.fileFormat)) {
-        result = awaitFunc (self.doLocalJwk(self.source));
+        result = awaitFunc(self.doLocalJwk(self.source));
 
       } else if (this.fileFormat === 'der') {
         result = this.doLocalDer(this.source, this.keyType, this.keyUsage);
@@ -596,32 +605,37 @@ KeyBundle.prototype.init = async (function(
   return result;
 });
 
-const MAP = {'dec': 'enc', 'enc': 'enc', 'ver': 'sig', 'sig': 'sig'};
+const MAP = {
+  'dec': 'enc',
+  'enc': 'enc',
+  'ver': 'sig',
+  'sig': 'sig'
+};
 
-KeyBundle.prototype.getHttpRequestResponse = async ((url, args) => {
+KeyBundle.prototype.getHttpRequestResponse = async((url, args) => {
   const HttpClient = function() {
     this.get = (aUrl, aCallback) => {
       const anHttpRequest = new XMLHttpRequest();
-      anHttpRequest.onreadystatechange = () => { 
+      anHttpRequest.onreadystatechange = () => {
         if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
           aCallback(anHttpRequest.responseText);
-      }
-      anHttpRequest.open( "GET", aUrl, true );            
-      if (args){
+      };
+      anHttpRequest.open('GET', aUrl, true);
+      if (args) {
         anHttpRequest.setRequestHeader(
-          'Content-type', 'application/json; charset=utf-8');
+            'Content-type', 'application/json; charset=utf-8');
         anHttpRequest.setRequestHeader('Content-length', args.length);
         anHttpRequest.setRequestHeader('Connection', 'close');
         anHttpRequest.send(JSON.stringify(args));
       } else {
-        anHttpRequest.send(null);          
+        anHttpRequest.send(null);
       }
     }
-  }
+  };
   return new Promise((resolve, reject) => {
     const client = new HttpClient();
     client.get(url, (response, err) => {
-      if (response){
+      if (response) {
         resolve(response);
       } else {
         reject(err);

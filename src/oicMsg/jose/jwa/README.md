@@ -1,4 +1,7 @@
-# node-jwa [![Build Status](https://travis-ci.org/brianloveswords/node-jwa.png?branch=master)](https://travis-ci.org/brianloveswords/node-jwa)
+#node -                  \
+    jwa[![Build Status]( \
+        https            \
+        :  // travis-ci.org/brianloveswords/node-jwa.png?branch=master)](https://travis-ci.org/brianloveswords/node-jwa)
 
 A
 [JSON Web Algorithms](http://tools.ietf.org/id/draft-ietf-jose-json-web-algorithms-08.html)
@@ -20,14 +23,14 @@ ES384 | ECDSA using P-384 curve and SHA-384 hash algorithm
 ES512 | ECDSA using P-521 curve and SHA-512 hash algorithm
 none | No digital signature or MAC value included
 
-# Requirements
+#Requirements
 
 In order to run the tests, a recent version of OpenSSL is
 required. **The version that comes with OS X (OpenSSL 0.9.8r 8 Feb
 2011) is not recent enough**, as it does not fully support ECDSA
 keys. You'll need to use a version > 1.0.0; I tested with OpenSSL 1.0.1c 10 May 2012.
 
-# Testing
+#Testing
 
 To run the tests, do
 
@@ -44,7 +47,7 @@ I spawn `openssl dgst -sign` to test OpenSSL sign → JS verify and
 `openssl dgst -verify` to test JS sign → OpenSSL verify for each of the
 RSA and ECDSA algorithms.
 
-# Usage
+#Usage
 
 ## jwa(algorithm)
 
@@ -75,7 +78,9 @@ the meantime, you can use
 to decode the signature.
 
 As of nodejs *v0.11.8*, SPKAC support was introduce. If your nodeJs
-version satisfies, then you can pass an object `{ key: '..', passphrase: '...' }`
+version satisfies, then you can pass an object `{
+key:
+  '..', passphrase : '...' }`
 
 
 ## jwa#verify(input, signature, secretOrPublicKey)
@@ -88,8 +93,7 @@ For the HMAC algorithm, `secretOrPublicKey` should be a string or a
 buffer. For ECDSA and RSA, the value should be a string represented a
 PEM encoded **public** key.
 
-
-# Example
+#Example
 
 HMAC
 ```js

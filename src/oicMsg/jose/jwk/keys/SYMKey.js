@@ -1,17 +1,17 @@
-var Key = require('./Key');
+const Key = require('./Key');
 /**
  * SYMKey
  * @class
  * @constructor
  * @extends Key
  */
-class SYMKey extends Key{
-  constructor(kty, alg, use, kid, key, x5c, x5t, x5u, k, mtrl, kwargs){
-    var key = super(kty, alg, use, kid, key, x5c, x5t, x5u, kwargs);
+class SYMKey extends Key {
+  constructor(kty, alg, use, kid, key, x5c, x5t, x5u, k, mtrl, kwargs) {
+    key = super(kty, alg, use, kid, key, x5c, x5t, x5u, kwargs);
     this.members = ['kty', 'alg', 'use', 'kid', 'k'];
     this.publicMembers = members;
     this.required = ['k', 'kty'];
-  
+
     kty = kty || 'oct';
     alg = alg || '';
     use = use | '';
@@ -22,7 +22,7 @@ class SYMKey extends Key{
     x5u = x5u || '';
     mtrl = mtrl || '';
     this.k = k || '';
-  
+
     if (!this.key && this.k) {
       if (k instanceof str) {
         this.k = this.k.encode('utf8');
@@ -49,28 +49,28 @@ class SYMKey extends Key{
    * @param {*} kwargs
    * @return Encryption key as byte string
    */
-    encryptionKey(alg, kwargs) {
-      if (!this.key) {
-        return this.deserialize();
-      }
-
-      var tsize = ALG2KEYLEN[alg];
-
-      var encKey = null;
-      if (tsize <= 32) {
-        encKey = this.sha256Digest(this.key).substring(0, tsize);  // TODO
-      } else if (tsize <= 48) {
-        encKey = this.sha384Digest(this.key).substring(0, tsize);
-      } else if (tsize <= 64) {
-        encKey = this.sha512Digest(this.key).substring(0, tsize);
-      } else {
-        console.log('No support for symmetric keys > 512 bits')
-      }
-
-      console.log('Symmetric encryption key');
-
-      return encKey;
+  encryptionKey(alg, kwargs) {
+    if (!this.key) {
+      return this.deserialize();
     }
+
+    const tsize = ALG2KEYLEN[alg];
+
+    const encKey = null;
+    if (tsize <= 32) {
+      encKey = this.sha256Digest(this.key).substring(0, tsize);  // TODO
+    } else if (tsize <= 48) {
+      encKey = this.sha384Digest(this.key).substring(0, tsize);
+    } else if (tsize <= 64) {
+      encKey = this.sha512Digest(this.key).substring(0, tsize);
+    } else {
+      console.log('No support for symmetric keys > 512 bits')
+    }
+
+    console.log('Symmetric encryption key');
+
+    return encKey;
+  }
 }
 
 module.exports = SYMKey;

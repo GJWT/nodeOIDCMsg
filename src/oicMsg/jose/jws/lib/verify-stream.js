@@ -14,10 +14,12 @@ function isObject(thing) {
 }
 
 function safeJsonParse(thing) {
-  if (isObject(thing))
-    return thing;
-  try { return JSON.parse(thing); }
-  catch (e) { return undefined; }
+  if (isObject(thing)) return thing;
+  try {
+    return JSON.parse(thing);
+  } catch (e) {
+    return undefined;
+  }
 }
 
 function headerFromJWS(jwsSig) {
@@ -27,7 +29,7 @@ function headerFromJWS(jwsSig) {
 
 function headerFromJWSBase16(jwsSig) {
   var encodedHeader = jwsSig.split('.', 1)[0];
-  var decodedHeader =  conv(encodedHeader, { in:'hex', out:'binary' });
+  var decodedHeader = conv(encodedHeader, {in : 'hex', out: 'binary'});
   var urlDecodedHeader = decodeURIComponent(decodedHeader);
   return JSON.parse(urlDecodedHeader);
 }
@@ -35,8 +37,8 @@ function headerFromJWSBase16(jwsSig) {
 function headerFromJWSBase32(jwsSig) {
   var encodedHeader = jwsSig.split('.', 1)[0];
   var decodedHeader = new Buffer(base32.decode(encodedHeader), 'binary')
-  var urlDecodedHeader = decodeURIComponent(decodedHeader);
-  
+      var urlDecodedHeader = decodeURIComponent(decodedHeader);
+
   return JSON.parse(urlDecodedHeader);
 }
 
@@ -49,8 +51,8 @@ function signatureFromJWS(jwsSig) {
 }
 
 function signatureFromJWSBase16(jwsSig) {
-  var encodedSignature =  jwsSig.split('.')[2];
-  return safeJsonParse(conv(encodedSignature, { in:'hex', out:encoding }));
+  var encodedSignature = jwsSig.split('.')[2];
+  return safeJsonParse(conv(encodedSignature, {in : 'hex', out: encoding}));
 }
 
 function payloadFromJWS(jwsSig, encoding) {
@@ -62,7 +64,7 @@ function payloadFromJWS(jwsSig, encoding) {
 function payloadFromJWSBase16(jwsSig, encoding) {
   encoding = encoding || 'utf8';
   var encodedPayload = jwsSig.split('.')[1];
-  var decodedPayload = conv(encodedPayload, { in:'hex', out:encoding });
+  var decodedPayload = conv(encodedPayload, {in : 'hex', out: encoding});
   var urlDecodedPayload = decodeURIComponent(decodedPayload);
   return urlDecodedPayload;
 }
@@ -70,18 +72,18 @@ function payloadFromJWSBase16(jwsSig, encoding) {
 function payloadFromJWSBase32(jwsSig, encoding) {
   encoding = encoding || 'utf8';
   var encodedPayload = jwsSig.split('.')[1];
-  var decodedPayload =   new Buffer(base32.decode(encodedPayload), encoding);  
+  var decodedPayload = new Buffer(base32.decode(encodedPayload), encoding);
   var urlDecodedPayload = decodeURIComponent(decodedPayload);
   return urlDecodedPayload;
 }
 
 function isValidJws(string, baseEncoding) {
-  switch(baseEncoding) {
-    case "base16":
-        return !!headerFromJWSBase16(string);
-        break;
-    case "base32":
-      return !!headerFromJWSBase32(string);        
+  switch (baseEncoding) {
+    case 'base16':
+      return !!headerFromJWSBase16(string);
+      break;
+    case 'base32':
+      return !!headerFromJWSBase32(string);
       break;
     default:
       return JWS_REGEX.test(string) && !!headerFromJWS(string);
@@ -90,8 +92,8 @@ function isValidJws(string, baseEncoding) {
 
 function jwsVerify(jwsSig, algorithm, secretOrKey, baseEncoding) {
   if (!algorithm) {
-    var err = new Error("Missing algorithm parameter for jws.verify");
-    err.code = "MISSING_ALGORITHM";
+    var err = new Error('Missing algorithm parameter for jws.verify');
+    err.code = 'MISSING_ALGORITHM';
     throw err;
   }
   jwsSig = toString(jwsSig);
@@ -101,36 +103,35 @@ function jwsVerify(jwsSig, algorithm, secretOrKey, baseEncoding) {
   return algo.verify(securedInput, signature, secretOrKey, baseEncoding);
 }
 
-function jwsDecodeBase16(jwtString, secretOrPublicKey, tokenProfile, options, callback) {  
+function jwsDecodeBase16(
+    jwtString, secretOrPublicKey, tokenProfile, options, callback) {
   options = options || {};
   jwsSig = toString(jwtString);
 
-  var baseEncoding = options.baseEncoding || "base64";
+  var baseEncoding = options.baseEncoding || 'base64';
 
-  if (!isValidJws(jwtString, baseEncoding))
-    return null;
+  if (!isValidJws(jwtString, baseEncoding)) return null;
 
-  var header = "";
-  var payload = "";
-  switch(baseEncoding) {
-    case "base16":
+  var header = '';
+  var payload = '';
+  switch (baseEncoding) {
+    case 'base16':
       header = headerFromJWSBase16(jwtString);
       payload = payloadFromJWSBase16(jwtString);
       break;
-    case "base32":
-      header = headerFromJWSBase32(jwtString);  
+    case 'base32':
+      header = headerFromJWSBase32(jwtString);
       payload = payloadFromJWSBase32(jwtString);
       break;
     default:
-      header = headerFromJWS(jwtString);  
-      payload = payloadFromJWS(jwtString);      
-    }
-  if (!header)
-    return null;
+      header = headerFromJWS(jwtString);
+      payload = payloadFromJWS(jwtString);
+  }
+  if (!header) return null;
 
   if (header.typ === 'JWT' || options.json)
     payload = JSON.parse(payload, options.encoding);
-  
+
   return {
     header: header,
     payload: payload,
@@ -142,31 +143,30 @@ function jwsDecodeBase16(jwtString, secretOrPublicKey, tokenProfile, options, ca
  * VerifyStream
  * @class
  * @constructor
- * @param {*} opts 
+ * @param {*} opts
  */
 function VerifyStream(opts) {
   opts = opts || {};
-  var secretOrKey = opts.secret||opts.publicKey||opts.key;
+  var secretOrKey = opts.secret || opts.publicKey || opts.key;
   var secretStream = new DataStream(secretOrKey);
   this.readable = true;
   this.algorithm = opts.algorithm;
   this.encoding = opts.encoding;
   this.secret = this.publicKey = this.key = secretStream;
   this.signature = new DataStream(opts.signature);
-  this.secret.once('close', function () {
-    if (!this.signature.writable && this.readable)
-      this.verify();
+  this.secret.once('close', function() {
+    if (!this.signature.writable && this.readable) this.verify();
   }.bind(this));
 
-  this.signature.once('close', function () {
-    if (!this.secret.writable && this.readable)
-      this.verify();
+  this.signature.once('close', function() {
+    if (!this.secret.writable && this.readable) this.verify();
   }.bind(this));
 }
 util.inherits(VerifyStream, Stream);
 VerifyStream.prototype.verify = function verify() {
   try {
-    var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
+    var valid =
+        jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
     var obj = jwsDecode(this.signature.buffer, this.encoding);
     this.emit('done', valid, obj);
     this.emit('data', valid);

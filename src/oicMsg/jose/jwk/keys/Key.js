@@ -4,7 +4,7 @@
  * @class
  * @constructor
  */
-class Key{
+class Key {
   constructor(kty, alg, use, kid, key, x5c, x5t, x5u, kwargs) {
     this.members = ['kty', 'alg', 'use', 'kid', 'x5c', 'x5t', 'x5u'];
     this.longs = [];
@@ -47,13 +47,13 @@ class Key{
   }
 
   toDict() {
-    var res = this.serialize(true);
+    const res = this.serialize(true);
     res.update(this.extraArgs);
     return res;
   }
 
   common() {
-    var res = {'kty': this.kty};
+    const res = {'kty': this.kty};
     if (this.use) {
       res['use'] = this.use;
     }
@@ -66,17 +66,17 @@ class Key{
     return res;
   }
 
-  deserialize(){}
+  deserialize() {}
 
-  serialize(){}
+  serialize() {}
 
   getKey() {
     return this.key;
   }
 
   verify() {
-    for (var i = 0; i < this.longs.length; i++) {
-      var item = this.getAttr(param);
+    for (const i = 0; i < this.longs.length; i++) {
+      const item = this.getAttr(param);
       if (!item || item instanceof Number) {
         continue;
       }
@@ -86,13 +86,13 @@ class Key{
       }
 
       try {
-        var b64ToLong = base64UrlToLong(item);
+        const b64ToLong = base64UrlToLong(item);
       } catch (err) {
         return false;
       }
 
-      var operators = ['+', '/', '='];
-      for (var i = 0; i < operators.length; i++) {
+      const operators = ['+', '/', '='];
+      for (const i = 0; i < operators.length; i++) {
         if (item.indexOf(e) !== -1) {
           if ([e]) {
             return false;
@@ -102,7 +102,7 @@ class Key{
 
       if (this.kid) {
         try {
-          var instanceOfStr = (this.kid instanceof String)
+          const instanceOfStr = (this.kid instanceof String)
         } catch (err) {
           console.log('Kid of wrong value type')
         }
@@ -115,7 +115,7 @@ class Key{
     try {
       if (key instanceof other &&
           set(Object.keys(this.dict) == set(other.dict.keys()))) {
-        for (var i = 0; i < this.publicMembers.length; i++) {
+        for (const i = 0; i < this.publicMembers.length; i++) {
           if (this.getAttr(other, key) == this.getAttr(key)) {
             return true;
           }
@@ -137,12 +137,12 @@ class Key{
     }
 
     members.sort();
-    var ser = this.serialize();
-    var se = [];
-    for (var i = 0; i < members.length; i++) {
-      var elem = this.members[i];
+    const ser = this.serialize();
+    const se = [];
+    for (const i = 0; i < members.length; i++) {
+      const elem = this.members[i];
       try {
-        var val = ser[elem];
+        const val = ser[elem];
       } catch (err) {
         console.log('Key Error')
       }
@@ -157,7 +157,7 @@ class Key{
   }
 
   deser() {
-    var val = null;
+    const val = null;
     if (val instanceof str) {
       val = val.encode('utf-8');
     } else {

@@ -7,7 +7,7 @@ var util = require('util');
  * DataStream
  * @class
  * @constructor
- * @param {*} data 
+ * @param {*} data
  */
 function DataStream(data) {
   this.buffer = null;
@@ -32,7 +32,7 @@ function DataStream(data) {
   if (data.length || typeof data === 'object') {
     this.buffer = data;
     this.writable = false;
-    process.nextTick(function () {
+    process.nextTick(function() {
       this.emit('end', data);
       this.readable = false;
       this.emit('close');
@@ -40,7 +40,7 @@ function DataStream(data) {
     return this;
   }
 
-  throw new TypeError('Unexpected data type ('+ typeof data + ')');
+  throw new TypeError('Unexpected data type (' + typeof data + ')');
 }
 util.inherits(DataStream, Stream);
 
@@ -50,8 +50,7 @@ DataStream.prototype.write = function write(data) {
 };
 
 DataStream.prototype.end = function end(data) {
-  if (data)
-    this.write(data);
+  if (data) this.write(data);
   this.emit('end', data);
   this.emit('close');
   this.writable = false;

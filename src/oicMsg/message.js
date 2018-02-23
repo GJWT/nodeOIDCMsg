@@ -1,9 +1,7 @@
 'use strict';
 
-const jwtDecoder =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
-const jwtSigner =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/sign');
+const jwtDecoder = require('../oicMsg/jose/jwt/decode');
+const jwtSigner = require('../oicMsg/jose/jwt/sign');
 
 /**
  * @fileoverview
@@ -67,7 +65,7 @@ class Message {
     this.noneAlgorithm = false;
   }
 
-  /** 
+  /**
    * Add optional claims
    * @param {?Object<string, string>} optionalClaims Claims that are not required
    * */
@@ -100,8 +98,8 @@ class Message {
   }
 
 
-  /** 
-   * Fetch optional claims 
+  /**
+   * Fetch optional claims
    */
   getOptionalClaims() {
     return this.optionalClaims;
@@ -117,7 +115,7 @@ class Message {
     return this.optionalVerificationClaims;
   }
 
-  /** 
+  /**
    * User explicitly wants to set None Algorithm attribute
    * @param {?boolean} boolVal Bool value that determines none algorithm setting
    * */
@@ -130,7 +128,7 @@ class Message {
     return this.noneAlgorithm;
   }
 
-  /** 
+  /**
    * Throws error if required verification claims are not present
    * @param {?Object<string, string>} claimsToVerify Claims that need to be verified
    * */
@@ -143,7 +141,7 @@ class Message {
     this.verificationClaims = claimsToVerify;
   }
 
-  /** 
+  /**
    * Throws error if required non Required verification claims are not present
    * @param {?Object<string, string>} claimsToVerify Claims that need to be verified
    */
@@ -160,7 +158,7 @@ class Message {
   optionalVerificationClaimsCheck(key, claimsToVerify) {
     console.log(claimsToVerify);
     console.log(key);
-    console.log("****************************");
+    console.log('****************************');
     if (!claimsToVerify[key]) {
       throw new Error(`Missing required verification claim: ${key}`);
     } else {
@@ -171,27 +169,32 @@ class Message {
     }
   }
 
-  /** 
-   * Serialization of JWT type 
+  /**
+   * Serialization of JWT type
    * Signs JWT and checks for valid input
-   * @param secretOrPublicKey is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
-   * @param options consists of other inputs that are not part of the payload, for ex : 'algorithm'
-   * @param callback is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
-      will be called with the error. When supplied, the function acts asynchronously.
+   * @param secretOrPublicKey is a string or buffer containing either the secret
+   for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
+   * @param options consists of other inputs that are not part of the payload,
+   for ex : 'algorithm'
+   * @param callback is called with the decoded payload if the signature is
+   valid and optional expiration, audience, or issuer are valid. If not, it will
+   be called with the error. When supplied, the function acts asynchronously.
    **/
   toJWT(secretOrPrivateKey, options, callback) {
-    return jwtSigner.prototype.sign(this, secretOrPrivateKey, options, callback);
+    return jwtSigner.prototype.sign(
+        this, secretOrPrivateKey, options, callback);
   }
 
-  /** 
-   * Deserialization of JWT type 
+  /**
+   * Deserialization of JWT type
    * Signs JWT and checks for valid input
-   * @param {string} signedJWT Signed JWT string 
+   * @param {string} signedJWT Signed JWT string
    * @param {*} secretOrPublicKey String or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
    * @param {?Object<string, string>} claimsToVerify Dictionary contains claims that need to be verified
    * @param {?Object<string, string>} options Consists of other inputs that are not part of the payload, for ex : 'algorithm'
-   * @param {*} callback Called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
-      will be called with the error. When supplied, the function acts asynchronously.
+   * @param {*} callback Called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it
+      will be called with the error. When supplied, the function acts
+   asynchronously.
    **/
   fromJWT(signedJWT, secretOrPrivateKey, claimsToVerify, options, callback) {
     this.validateRequiredVerificationClaims(claimsToVerify);
@@ -200,19 +203,19 @@ class Message {
         signedJWT, secretOrPrivateKey, this, options, callback);
   }
 
-  /** 
-   * Serialization of JSON type 
+  /**
+   * Serialization of JSON type
    * @param {?Object<string, string>} obj Object that needs to be converted to JSON
-  */
+   */
   toJSON(obj) {
     if (!obj) {
-      obj = Object.assign(
-          {}, this.getRequiredClaims(), this.getOptionalClaims());
+      obj =
+          Object.assign({}, this.getRequiredClaims(), this.getOptionalClaims());
     }
     return JSON.stringify(obj);
   }
 
-  /** 
+  /**
    * Deserialization of JSON type
    * @param {string} jsonString Json object that needs to be deserialized
    * */
@@ -220,14 +223,14 @@ class Message {
     return JSON.parse(jsonString);
   }
 
-  /** 
+  /**
    * Serialization of URL Encoded type
    * @param {?Object<string, string>} obj Object that needs to be URL encoded
    */
   toUrlEncoded(obj) {
     if (!obj) {
-      obj = Object.assign(
-          {}, this.getRequiredClaims(), this.getOptionalClaims());
+      obj =
+          Object.assign({}, this.getRequiredClaims(), this.getOptionalClaims());
     }
     const str = [];
     for (const p in obj)
@@ -235,7 +238,7 @@ class Message {
     return str.join('&');
   }
 
-  /** 
+  /**
    * Deserialization of URL Encoded string
    * @param {string} obj Url encoded string that needs to be deserialized
    * */
@@ -252,39 +255,35 @@ class Message {
   }
 
   /** Boolean that tells if the required values are there and that the values
-   *  are of the correct type 
+   *  are of the correct type
    * @param {?Object<string, string>} args Claims that need to be checked for type
    * */
-  verify(args){
-  }
+  verify(args) {}
 
   /**
    * @param {*} location A URL
    * @param {*} inFragment Whether the information should be placed in a fragment (true) or in a query part (false)
    */
-  request(location, inFragment){
-  }
+  request(location, inFragment) {}
 
   /**
-   * Convert this instance to another representation. Which representation 
+   * Convert this instance to another representation. Which representation
    * is given by the choice of serialization method.
    * @param {*} method A serialization method. Presently 'urlencoded', 'json',
       'jwt' and 'dict' is supported.
-   * @param {*} lev 
+   * @param {*} lev
    * @param {*} kwargs Extra key word arguments
    * @return The content of this message serialized using a chosen method
    */
-  serialize(method, lev, kwargs){
-  }
+  serialize(method, lev, kwargs) {}
 
   /**
    * Convert from an external representation to an internal.
    * @param {*} info Information that needs to be deserialized
    * @param {*} method Deserialization method
-   * @param {*} kwargs 
+   * @param {*} kwargs
    */
-  deserialize(info, method, kwargs){
-  }
+  deserialize(info, method, kwargs) {}
 }
 
 module.exports = Message;

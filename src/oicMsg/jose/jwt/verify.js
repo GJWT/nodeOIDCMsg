@@ -1,10 +1,10 @@
-var JsonWebTokenError = require('./lib/JsonWebTokenError');
-var NotBeforeError    = require('./lib/NotBeforeError');
-var TokenExpiredError = require('./lib/TokenExpiredError');
-var decode            = require('./decode');
-var timespan          = require('./lib/timespan');
-var xtend             = require('xtend');
-var MessageVerifier = require('../../../message/verify');
+var JsonWebTokenError = require('../../lib/JsonWebTokenError');
+var NotBeforeError = require('../../lib/NotBeforeError');
+var TokenExpiredError = require('../../lib/TokenExpiredError');
+var decode = require('./decode');
+var timespan = require('../../lib/timespan');
+var xtend = require('xtend');
+var MessageVerifier = require('../../msgVerifier');
 
 /**
  * @fileoverview Handles common verification functionality for JWT message type
@@ -12,16 +12,15 @@ var MessageVerifier = require('../../../message/verify');
 
 /**
  * JWTVerifer
- * @class 
+ * @class
  * @extends MessageVerifier
  * @constructor
  */
-class JWTVerifier extends MessageVerifier{
-
-    /** Calls super class' verification method */ 
-    constructor(){
-        super();
-    }
+class JWTVerifier extends MessageVerifier {
+  /** Calls super class' verification method */
+  constructor() {
+    super();
+  }
 };
 
 module.exports = JWTVerifier;

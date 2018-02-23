@@ -1,10 +1,8 @@
 'use strict';
 
-const jwtDecoder =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
-const jwtSigner =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
-const Message = require('./message');
+const jwtDecoder = require('../../oicMsg/jose/jwt/decode');
+const jwtSigner = require('../../oicMsg/jose/jwt/decode');
+const Message = require('../message');
 const BasicIdToken = require('./basicIdToken');
 
 /**

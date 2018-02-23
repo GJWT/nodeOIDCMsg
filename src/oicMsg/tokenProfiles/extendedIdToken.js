@@ -1,10 +1,8 @@
 'use strict';
 
 const GoogleIdToken = require('./googleIdToken');
-const jwtDecoder =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
-const jwtSigner =
-    require('../../controllers/messageTypes/jwt/jsonwebtoken/decode');
+const jwtDecoder = require('../../oicMsg/jose/jwt/decode');
+const jwtSigner = require('../../oicMsg/jose/jwt/decode');
 
 /**
  * @fileoverview

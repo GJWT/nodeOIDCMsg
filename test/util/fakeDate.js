@@ -1,10 +1,10 @@
-var oldDate = global.Date;
+const oldDate = global.Date;
 
 /*
  * fix new Date() to a fixed unix timestamp.
  */
 global.Date.fix = function (timestamp) {
-  var time = timestamp * 1000;
+  const time = timestamp * 1000;
 
   if (global.Date.unfake) {
     global.Date.unfake();
