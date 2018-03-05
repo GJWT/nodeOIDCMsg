@@ -128,7 +128,7 @@ Promise of payload.  E.g.
   auth_time: 1311280969,
   acr: 'urn:mace:incommon:iap:silver'
 }
-`
+```
 
 #### `oidcmsg.<type>.toJWT(payload, key, options)`
 
