@@ -34,7 +34,7 @@ const concludeLogin = (getKey) => (session, idToken) {
 ```
 
 
-## Message types 
+## Message types
 
 The serialization and deserialization formats supported are:
 
@@ -45,21 +45,42 @@ The serialization and deserialization formats supported are:
 
 ## How to serialize and deserialize using a message type
 
-This depends on the serialization format.
+This depends on the serialization format.  All deserialization will validate
+that all required claims are present, and that all specified claims conform to
+the correct format.
 
 ### JWT
 
 Included JWT types:
 
-* [BasicIdToken](http://openid.net/specs/openid-connect-core-1_0.html#IDToken)
+* [BasicIdToken](http://openid.net/specs/openid-connect-core-1_0.html#IDToken) - OpenID Connect ID Token
+  * Required: iss, sub, iat, jti, exp
+  * Optional: nbf, auth_time, nonce, azr, amr, azp
 * ExtendedIdToken (?)
+  * Required: name, email, picture, iss, sub, iat
+  * Optional: aud, exp, nbf
 * AccessToken
-* FacebookIdToken
+  * Required:
 * GoogleIdToken
-* ImplicitAccessToken
-* RefreshToken
-* RiscToken
+  * Required: name, email, picture, iss, sub, iat
+  * Optional: aud, exp
+* FacebookIdToken
+  * Required: user_id, app_id, issued_at
+  * Optional: expired_at
+* AccessToken
+  * Required: iss, sub, iat
+  * Optional: aud, exp
 * ScopedAccessToken
+  * Required: iss, sub, iat, scope
+  * Optional: aud, exp
+* ImplicitAccessToken
+  * Required: iss, sub, iat
+  * Optional: aud
+* RefreshToken:
+  * Required: refresh_token, access_token
+* SecurityEvent (risc):
+  * Required: jti, iss, sub, iat
+  * Optional: aud, nbf, exp
 
 
 #### `oidcmsg.<type>.fromJWT(jwt, getKey, validation, options)`
