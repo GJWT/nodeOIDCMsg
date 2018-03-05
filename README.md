@@ -132,14 +132,6 @@ Promise of payload.  E.g.
 
 #### `oidcmsg.<type>.toJWT(payload, key, options)`
 
-**Options**
-
-Options are other inputs or additional information that might be needed and are
-not part of the payload, for ex : 'algorithm'. Other options such as follows
-can be passed in as the fourth parameter to token profile’s fromJWT method. Any
-duplicate options such as issuer cannot be passed in both in the payload and
-the options. The values provided in the options are not mandatory.
-
 * `payload` - an object literal of all claims.
 
 * `key` is a string, buffer, or object containing either the secret for HMAC
@@ -149,7 +141,12 @@ the options. The values provided in the options are not mandatory.
   [crypto documentation](https://nodejs.org/api/crypto.html#crypto_sign_sign_private_key_output_format)),
   in this case be sure you pass the `algorithm` option.
 
-* `options`:
+* `options`: Options are other inputs or additional information that might be
+  needed and are not part of the payload, for ex : 'algorithm'. Other options
+  such as follows can be passed in as the fourth parameter to token profile’s
+  fromJWT method. Any duplicate options such as issuer cannot be passed in both
+  in the payload and the options. The values provided in the options are not
+  mandatory.
   * `algorithm` (default: `HS256`)
   * `expiresIn`: expressed in seconds or a string describing a time span
     [zeit/ms](https://github.com/zeit/ms). Eg: `60`, `"2 days"`, `"10h"`,
