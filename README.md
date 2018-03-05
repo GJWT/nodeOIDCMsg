@@ -140,9 +140,7 @@ can be passed in as the fourth parameter to token profile’s fromJWT method. An
 duplicate options such as issuer cannot be passed in both in the payload and
 the options. The values provided in the options are not mandatory.
 
-* `payload` could be an object literal, buffer or string representing valid
-  JSON. *Please note that* `exp` is only set if the payload is an object
-  literal. Buffer or string payloads are not checked for JSON validity.
+* `payload` - an object literal of all claims.
 
 * `key` is a string, buffer, or object containing either the secret for HMAC
   algorithms or the PEM encoded private key for RSA and ECDSA. In case of a
