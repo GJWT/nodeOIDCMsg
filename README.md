@@ -87,28 +87,28 @@ Included JWT types:
 
 Validates and deserialized a JWT, e.g. `BasicIdToken`.
 
-* **jwt** - The token string.
+* `jwt` - The token string.
 
-* **getKey** - A function `({header,payload}) => key` where `key` is a string
+* `getKey` - A function `({header,payload}) => key` where `key` is a string
   or buffer containing either the secret for HMAC algorithms, or the PEM
   encoded public key for RSA and ECDSA.
 
-* **validation** - Include the claims that you want to validate on top of the
+* `validation` - Include the claims that you want to validate on top of the
   type's specified claims and the ones validated by the options below..
 
-* **options**
-  * clockTolerance - Clock tolerance signifies the number of seconds to
+* `options`
+  * `clockTolerance` - Clock tolerance signifies the number of seconds to
     tolerate when checking the nbf and exp claims, to deal with small clock
     differences among different servers
-  * algorithms: List of strings with the names of the allowed algorithms. For instance, ["HS256", "HS384"].
-  * audience: if you want to check audience (aud), provide a value here. The audience can be checked against a string, a regular expression or a list of strings and/or regular expressions. Eg: "urn:foo", /urn:f[o]{2}/, [/urn:f[o]{2}/, "urn:bar"]
-  * issuer (optional): string or array of strings of valid values for the iss field.
-  * ignoreExpiration: if true do not validate the expiration of the token.
-  * ignoreNotBefore...
-  * maxAge: the maximum allowed age for tokens to still be valid. It is
+  * `algorithms`: List of strings with the names of the allowed algorithms. For instance, ["HS256", "HS384"].
+  * `audience`: if you want to check audience (aud), provide a value here. The audience can be checked against a string, a regular expression or a list of strings and/or regular expressions. Eg: "urn:foo", /urn:f[o]{2}/, [/urn:f[o]{2}/, "urn:bar"]
+  * `issuer`: string or array of strings of valid values for the iss field.
+  * `ignoreExpiration`: if true do not validate the expiration of the token.
+  * `ignoreNotBefore`...
+  * `maxAge`: the maximum allowed age for tokens to still be valid. It is
     expressed in seconds or a string describing a time span zeit/ms. Eg: 1000,
     "2 days", "10h", "7d".
-  * clockTimestamp: the time in seconds that should be used as the current time
+  * `clockTimestamp`: the time in seconds that should be used as the current time
     for all necessary comparisons. This allows the user to provide any date and
     time and not just the current. In the backend, it fetches the
     clockTimestamp from the system if it is not provided.
