@@ -89,7 +89,7 @@ Validates and deserialized a JWT, e.g. `BasicIdToken`.
 
 * `jwt` - The token string.
 
-* `getKey` - A function `({header,payload}) => key` where `key` is a string
+* `getKey` - A function `({header,payload}) => Promise<key>` where `key` is a string
   or buffer containing either the secret for HMAC algorithms, or the PEM
   encoded public key for RSA and ECDSA.
 
