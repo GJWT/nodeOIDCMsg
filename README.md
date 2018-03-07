@@ -20,7 +20,7 @@ const oidcmsg = require('oidc-msg');
  * @throws Error if idToken is not valid.
  * @throws Error if issuer is not https://my.auth.server
  */
-const concludeLogin = (getKey) => (session, idToken) {
+const concludeLogin = (getKey) => async (session, idToken) {
   // Function gives full payload after validation, but in this case, we are
   // only interested in sub since we only trust one iss.
   const {sub} = await oidcmsg.BasicIdToken.fromJWT(
@@ -31,6 +31,48 @@ const concludeLogin = (getKey) => (session, idToken) {
 
   session.setLoggedIn(sub);
 }
+```
+
+
+## KeyJar helpers
+
+A KeyJar is a container holding public keys for several issuers, caching them
+and looking them up by jwks.
+
+```
+const keyJar = new oidcmsg.KeyJar({
+  cache: true,
+  cacheMaxEntries: 5, // Default value
+  cacheMaxAge: ms('10h'), // Default value
+  rateLimit: true, // Default
+  jwksRequestsPerMinute: 10, // Default value
+});
+```
+
+You could add an issuer and have it lookup openid-configuration to get jwks:
+```
+keyJar.addIssuer('https://server.example.com');
+```
+
+...or add info gotten elsewhere:
+
+```
+keyJar.addIssuer(
+    'https://server.example.com',
+    {jwks_uri: 'https://some.where/jwks.json', jwks: {keys: [...]}}
+);
+```
+
+Get a key by issuer and kid - will request remote jwks if not in cache:
+
+```
+const signingKey = await keyJar.getKey(iss, kid);
+```
+
+...which can be used (without bind) as getKey in fromJWT:
+
+```
+const claims = BasicIdToken.fromJWT(idToken, keyJar.getKey, {aud: 'myClientId'});
 ```
 
 
