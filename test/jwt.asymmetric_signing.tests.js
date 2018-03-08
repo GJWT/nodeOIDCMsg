@@ -311,9 +311,8 @@ describe('Asymmetric Algorithms', function() {
           });*/
         });
 
-
         it('should be valid when date are equals', function(done) {
-          var clockTimestamp = 1520000000;
+          var clockTimestamp = Math.floor(Date.now());
 
           // token = jwt.sign({ foo: 'bar' }, priv, { algorithm: algorithm,
           // notBefore: 0 });
@@ -342,7 +341,6 @@ describe('Asymmetric Algorithms', function() {
             assert.isNotNull(decoded);
           }
           done();
-
         });
 
         it('should NOT be invalid', function(done) {
