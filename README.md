@@ -19,57 +19,57 @@ The serialization and deserialization formats supported are:
 A token profile is a security token that enables identity and security information to be shared across security domains. The token profiles folder contains the different types of JWT messages including the Basic ID Token. A token profile contains the required, optional, and verification claims specific to the token. 
 
 ### Supported JWT types 
-* BasicIdToken
+BasicIdToken
 
-Required claims : iss, sub, iat, jti, exp
+* Required claims : iss, sub, iat, jti, exp
 
-Optional claims : nbf, auth_time, nonce, azr, amr, azp
+* Optional claims : nbf, auth_time, nonce, azr, amr, azp
 
-* ExtendedIdToken
+ExtendedIdToken
 
-Required claims : name, email, picture, iss, sub, iat
+* Required claims : name, email, picture, iss, sub, iat
 
-Optional claims : aud, exp, nbf
+* Optional claims : aud, exp, nbf
 
-* GoogleAccessToken
+GoogleAccessToken
 
-Required claims : iss, sub, iat
+* Required claims : iss, sub, iat
 
-Optional claims : aud, exp
+* Optional claims : aud, exp
 
-* FacebookIdToken
+FacebookIdToken
 
-Required claims : user_id, app_id, issued_at
+* Required claims : user_id, app_id, issued_at
 
-Optional claims : expired_at
+* Optional claims : expired_at
 
-* GoogleIdToken
+GoogleIdToken
 
-Required claims : name, email, picture, iss, sub, iat
+* Required claims : name, email, picture, iss, sub, iat
 
-Optional claims : exp, aud
+* Optional claims : exp, aud
 
-* ImplicitAccessToken
+ImplicitAccessToken
 
-Required claims : iss, sub, iat
+* Required claims : iss, sub, iat
 
-Optional claims : aud
+* Optional claims : aud
 
-* RefreshToken
+RefreshToken
 
-Required claims : refresh_token, access_token
+* Required claims : refresh_token, access_token
 
-* RiscToken
+RiscToken
 
-Required claims : jti, iss, sub, iat
+* Required claims : jti, iss, sub, iat
 
-Optional claims : aud, nbf, exp
+* Optional claims : aud, nbf, exp
 
-* ScopedAccessToken
+ScopedAccessToken
 
-Required claims : iss, sub, iat, scope
+* Required claims : iss, sub, iat, scope
 
-Optional claims : aud, exp
+* Optional claims : aud, exp
 
  
 ## JWT Serialization  
