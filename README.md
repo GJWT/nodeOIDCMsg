@@ -51,8 +51,6 @@ Optional claims : aud, exp
 The toJWT method can be passed in required and optional claims claims, the key, and other options that might be necessary. This method checks for missing claims, validates the required claims, and signs and serializes a JWT type, ex- BasicIdToken. Throws error if missing a required claim or claims are not in expected format.
 
 ```
-const oidcMsg = require('oidc-msg');
-
 /**
  * @param {!Object<string, Object>} payload Required and optional claims
  * @param {!Object} key  Secret or private key used to sign the JWT (OP)
@@ -83,11 +81,9 @@ Usage Example:
 const signedJwt = GoogleAccessToken.toJWT({iss: ‘https://my.auth.server’, sub: subject, iat: clockTimestamp, exp: clockTimestamp + 3600, aud:’myClientId’}, privateKey, {algorithm : ‘RS256’}); 
 ```
 
-##JWT Deserialization
+## JWT Deserialization
 A JWT type can be deserialized by calling the token profile’s fromJWT method which extends the Message class.     
 The fromJWT method for example can be passed in verification claims, the key, and other options that might be necessary. This method checks for required verification claims, decodes, and verifies the JWT, ex. BasicIdToken. 
-
-const oidcMsg = require('oidc-msg');
 
 ```
 /**
@@ -101,7 +97,6 @@ const oidcMsg = require('oidc-msg');
  */
  <type>.fromJWT(jwt, key, verificationClaims, options); 
 ```
-
 
 Options parameter can include the following : 
 * clockTolerance: Clock tolerance signifies the number of seconds to tolerate when checking the nbf and exp claims, to deal with small clock differences among different servers
@@ -131,8 +126,6 @@ Promise of claims. E.g.
 Example usage: 
 
 ```
-const oidcMsg = require('oidc-msg');
-
 /**
  * @param {Object<string, Object>} jwt Contains the jwt header and payload
  * @param {string}   idToken  The JWT gotten from OpenID Provider (OP)
@@ -189,10 +182,11 @@ Similarly, the following methods can be used to serialize and deserialize other 
 * fromUrlEncoded
 * JSON Serialization
 
-Serialize a JSON type by using the following function : 
-```
-const oidcMsg = require('oidc-msg');
+## JSON Serialization
 
+Serialize a JSON type by using the following function : 
+
+```
 /**
  * @param {Object<string, string>} payload Object that needs to be converted to JSON
  * @return Stringified JSON Obj
@@ -209,11 +203,10 @@ assert.deepEqual(resp, expectedResp);
 ```
 
 ## JSON Deserialization
+
 Deserialize a JSON type by using the following function : 
 
 ```
-const oidcMsg = require('oidc-msg');
-
 /**
  * @param {JSON} jsonObj JSON Object that needs to be deserialized
  * @return The deserialized JSON Obj
@@ -294,9 +287,7 @@ OIC Responses
 * UserInfoErrorResponse
 
 
- AccessTokenResponse (to be removed after the assigned task is completed)
-
-URL Serialization
+## URL Serialization
  Serializes a claim to a url encoded string by using the following function : 
 const oidcMsg = require('oidc-msg');
 
@@ -314,7 +305,7 @@ ToURLEncoded ex
 const resp = ErrorResponse.toUrlEncoded({'error': 'barsoap'})
 ```
 
-Url Deserialization
+## Url Deserialization
 Deserialize a URL type by using the following function : 
 const oidcMsg = require('oidc-msg');
 
