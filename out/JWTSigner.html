@@ -48,10 +48,6 @@
 
 
 
-<div class="description">
-    JWTSigner
-</div>
-
 
 
 
@@ -93,7 +89,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="src_controllers_messageTypes_jwt_jsonwebtoken_sign.js.html">src/controllers/messageTypes/jwt/jsonwebtoken/sign.js</a>, <a href="src_controllers_messageTypes_jwt_jsonwebtoken_sign.js.html#line18">line 18</a>
+        <a href="src_oicMsg_jose_jwt_sign.js.html">src/oicMsg/jose/jwt/sign.js</a>, <a href="src_oicMsg_jose_jwt_sign.js.html#line15">line 15</a>
     </li></ul></dd>
     
 
@@ -158,7 +154,7 @@
     
 
     
-    <h4 class="name" id=".jwtSigner.sign"><span class="type-signature">(static) </span>jwtSigner.sign<span class="signature">(tokenProfile, secretOrPublicKey, options, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="checkOptions"><span class="type-signature"></span>checkOptions<span class="signature">(tokenProfileKnownClaims, options, payload, failure)</span><span class="type-signature"></span></h4>
     
 
     
@@ -166,7 +162,7 @@
 
 
 <div class="description">
-    Signs JWT and checks for valid input
+    Check if the payload and options have a duplicate property
 </div>
 
 
@@ -202,10 +198,15 @@
 
         <tr>
             
-                <td class="name"><code>tokenProfile</code></td>
+                <td class="name"><code>tokenProfileKnownClaims</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">dictionary</span>
+
+
             
             </td>
 
@@ -213,25 +214,7 @@
 
             
 
-            <td class="description last">contains the token properties,required, optional and verification claims</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>secretOrPublicKey</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">is a string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA</td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -243,23 +226,33 @@
 
             <td class="type">
             
+                
+<span class="param-type">dictionary</span>
+
+
+            
             </td>
 
             
 
             
 
-            <td class="description last">consists of other inputs that are not part of the payload, for ex : 'algorithm'</td>
+            <td class="description last"></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>payload</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">dictionary</span>
+
+
             
             </td>
 
@@ -267,8 +260,30 @@
 
             
 
-            <td class="description last">is called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it 
-    will be called with the error. When supplied, the function acts asynchronously.</td>
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>failure</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -286,6 +301,11 @@
 
     
 
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="MessageSigner.html#checkOptions">MessageSigner#checkOptions</a>
+    </li></ul></dd>
     
 
     
@@ -309,7 +329,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="src_controllers_messageTypes_jwt_jsonwebtoken_sign.js.html">src/controllers/messageTypes/jwt/jsonwebtoken/sign.js</a>, <a href="src_controllers_messageTypes_jwt_jsonwebtoken_sign.js.html#line32">line 32</a>
+        <a href="src_oicMsg_msgSigner.js.html">src/oicMsg/msgSigner.js</a>, <a href="src_oicMsg_msgSigner.js.html#line264">line 264</a>
     </li></ul></dd>
     
 
@@ -330,18 +350,335 @@
 
 
 
-<h5>Throws:</h5>
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="validate"><span class="type-signature"></span>validate<span class="signature">(schema, allowUnknown, object, parameterName)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Check if the input format type matches the schema.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
 
         
 
-    <div class="param-desc">
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
     
-        JsonWebToken error if options does not match expected claims.
+
+        <tr>
+            
+                <td class="name"><code>schema</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
     
-    </div>
+
+        <tr>
+            
+                <td class="name"><code>allowUnknown</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>object</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parameterName</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
+
+
+
+
+<dl class="details">
+
     
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="MessageSigner.html#validate">MessageSigner#validate</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_oicMsg_msgSigner.js.html">src/oicMsg/msgSigner.js</a>, <a href="src_oicMsg_msgSigner.js.html#line83">line 83</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="validatePayload"><span class="type-signature"></span>validatePayload<span class="signature">(payload)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Checks format type of payload values
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>payload</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">dictionary</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="MessageSigner.html#validatePayload">MessageSigner#validatePayload</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_oicMsg_msgSigner.js.html">src/oicMsg/msgSigner.js</a>, <a href="src_oicMsg_msgSigner.js.html#line115">line 115</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -365,13 +702,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="AccessTokenRequest.html">AccessTokenRequest</a></li><li><a href="AccessTokenResponse.html">AccessTokenResponse</a></li><li><a href="ASConfigurationResponse.html">ASConfigurationResponse</a></li><li><a href="AuthorizationErrorResponse.html">AuthorizationErrorResponse</a></li><li><a href="AuthorizationRequest.html">AuthorizationRequest</a></li><li><a href="AuthorizationResponse.html">AuthorizationResponse</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="CCAccessTokenRequest.html">CCAccessTokenRequest</a></li><li><a href="CheckIdRequest.html">CheckIdRequest</a></li><li><a href="CheckSessionRequest.html">CheckSessionRequest</a></li><li><a href="ClaimsRequest.html">ClaimsRequest</a></li><li><a href="ClientRegistrationErrorResponse.html">ClientRegistrationErrorResponse</a></li><li><a href="DiscoveryRequest.html">DiscoveryRequest</a></li><li><a href="EndSessionRequest.html">EndSessionRequest</a></li><li><a href="EndSessionResponse.html">EndSessionResponse</a></li><li><a href="ErrorResponse.html">ErrorResponse</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JRD.html">JRD</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="Message.html">Message</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="MessageWithIdToken.html">MessageWithIdToken</a></li><li><a href="NoneResponse.html">NoneResponse</a></li><li><a href="OpenIdRequest.html">OpenIdRequest</a></li><li><a href="ProviderConfigurationResponse.html">ProviderConfigurationResponse</a></li><li><a href="RefreshAccessTokenRequest.html">RefreshAccessTokenRequest</a></li><li><a href="RefreshSessionRequest.html">RefreshSessionRequest</a></li><li><a href="RefreshSessionResponse.html">RefreshSessionResponse</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RegistrationRequest.html">RegistrationRequest</a></li><li><a href="RegistrationResponse.html">RegistrationResponse</a></li><li><a href="ResourceRequest.html">ResourceRequest</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ROPCAccessTokenRequest.html">ROPCAccessTokenRequest</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li><li><a href="Token.html">Token</a></li><li><a href="TokenErrorResponse.html">TokenErrorResponse</a></li><li><a href="UserInfoErrorResponse.html">UserInfoErrorResponse</a></li><li><a href="UserInfoRequest.html">UserInfoRequest</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Feb 07 2018 18:44:47 GMT-0800 (PST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed May 02 2018 10:39:29 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>

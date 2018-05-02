@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: oic/init.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: oic/init.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+var SINGLE_OPTIONAL_STRING = require('../OAuth2/init').SINGLE_OPTIONAL_STRING;
+var SINGLE_REQUIRED_IDTOKEN = require('../OAuth2/init').SINGLE_REQUIRED_IDTOKEN;
+var OPTIONAL_LIST_OF_STRINGS = require('../OAuth2/init').OPTIONAL_LIST_OF_STRINGS;
+var SINGLE_OPTIONAL_DICT = require('../OAuth2/init').SINGLE_OPTIONAL_DICT;
+
+var Message = require('../message');
+
+class AddressClaim extends Message {
+  constructor() {
+    super();
+    this.cParam = {
+      'formatted': SINGLE_OPTIONAL_STRING,
+      'street_address': SINGLE_OPTIONAL_STRING,
+      'locality': SINGLE_OPTIONAL_STRING,
+      'region': SINGLE_OPTIONAL_STRING,
+      'postal_code': SINGLE_OPTIONAL_STRING,
+      'country': SINGLE_OPTIONAL_STRING
+    };
+  }
+}
+
+class MessageWithIdToken extends Message {
+  constructor() {
+    super();
+    this.cParam = {'id_token': SINGLE_REQUIRED_IDTOKEN};
+  }
+
+  verify() {}
+}
+
+class LINK extends Message {
+  constructor(dict) {
+    super();
+    this.cParam = {
+      'rel': {'type': String, 'required': true},
+      'type': {'type': String, 'required': false},
+      'href': {'type': String, 'required': false},
+      'titles': {'type': String, 'required': false},
+      'properties': {'type': String, 'required': false},
+    };
+    return dict;
+  }
+}
+
+let REQUIRED_LINKS = [[LINK], true, this.msgSer, this.linkDeser, false];
+
+function linkDeser(val, sformat) {
+  sformat = sformat || 'urlencoded';
+  let sformats = ['dict', 'json'];
+  if (val instanceof lINK) {
+    return val;
+  } else if (sformats.indexOf(sformat) !== -1) {
+    if (!(val instanceof String)) {
+      val = JSON.dumps(val);
+      sformat = 'json';
+    }
+  }
+  return LINK().deserialize(val, sformat);
+}
+
+function msgSer(inst, sformat, lev = 0) {
+  let formats = ['urlencoded', 'json'];
+  let res;
+  if (formats.indexOf(sformat) !== -1) {
+    if (inst instanceof Object) {
+      if (sformat === 'json') {
+        res = JSON.dumps(inst);
+      } else {
+        for (let i = 0; i &lt; Object.keys(inst).length; i++) {
+          let key = Object.keys(inst)[i];
+          let val = inst[key];
+          //res = urlencode([(key, val)]);
+        }
+      }
+    } else if (inst instanceof LINK) {
+      res = inst.serialize(sformat, lev);
+    } else {
+      res = inst;
+    }
+  } else if (sformat === 'dict') {
+    if (typeof inst === LINK) {
+      res = inst.serialize(sformat, lev);
+    } else if (typeof inst === Object) {
+      res = inst;
+    } else if (typeof inst === String) {
+      res = inst;
+    } else {
+      throw new Error('Wrong type');
+    }
+  } else {
+    throw new Error('Unknown sformat');
+  }
+  return res;
+}
+
+/** JSON Resource Descriptor https://tools.ietf.org/html/rfc7033#section-4.4 **/
+class JRD extends Message {
+  constructor(dict) {
+    super();
+    this.claim = {
+      'subject': SINGLE_OPTIONAL_STRING,
+      'aliases': OPTIONAL_LIST_OF_STRINGS,
+      'properties': SINGLE_OPTIONAL_DICT,
+      'links': REQUIRED_LINKS
+    };
+    return dict;
+  }
+}
+
+module.exports.MessageWithIdToken = MessageWithIdToken;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="AccessTokenRequest.html">AccessTokenRequest</a></li><li><a href="AccessTokenResponse.html">AccessTokenResponse</a></li><li><a href="ASConfigurationResponse.html">ASConfigurationResponse</a></li><li><a href="AuthorizationErrorResponse.html">AuthorizationErrorResponse</a></li><li><a href="AuthorizationRequest.html">AuthorizationRequest</a></li><li><a href="AuthorizationResponse.html">AuthorizationResponse</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="CCAccessTokenRequest.html">CCAccessTokenRequest</a></li><li><a href="CheckIdRequest.html">CheckIdRequest</a></li><li><a href="CheckSessionRequest.html">CheckSessionRequest</a></li><li><a href="ClaimsRequest.html">ClaimsRequest</a></li><li><a href="ClientRegistrationErrorResponse.html">ClientRegistrationErrorResponse</a></li><li><a href="DiscoveryRequest.html">DiscoveryRequest</a></li><li><a href="EndSessionRequest.html">EndSessionRequest</a></li><li><a href="EndSessionResponse.html">EndSessionResponse</a></li><li><a href="ErrorResponse.html">ErrorResponse</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JRD.html">JRD</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="Message.html">Message</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="MessageWithIdToken.html">MessageWithIdToken</a></li><li><a href="NoneResponse.html">NoneResponse</a></li><li><a href="OpenIdRequest.html">OpenIdRequest</a></li><li><a href="ProviderConfigurationResponse.html">ProviderConfigurationResponse</a></li><li><a href="RefreshAccessTokenRequest.html">RefreshAccessTokenRequest</a></li><li><a href="RefreshSessionRequest.html">RefreshSessionRequest</a></li><li><a href="RefreshSessionResponse.html">RefreshSessionResponse</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RegistrationRequest.html">RegistrationRequest</a></li><li><a href="RegistrationResponse.html">RegistrationResponse</a></li><li><a href="ResourceRequest.html">ResourceRequest</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ROPCAccessTokenRequest.html">ROPCAccessTokenRequest</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li><li><a href="Token.html">Token</a></li><li><a href="TokenErrorResponse.html">TokenErrorResponse</a></li><li><a href="UserInfoErrorResponse.html">UserInfoErrorResponse</a></li><li><a href="UserInfoRequest.html">UserInfoRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed May 02 2018 10:31:25 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

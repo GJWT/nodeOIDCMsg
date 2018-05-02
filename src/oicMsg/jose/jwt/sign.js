@@ -1,7 +1,6 @@
 var jws = require('../jws');
 var once = require('lodash.once');
 var MessageSigner = require('../../msgSigner');
-const await = require('asyncawait/await');
 
 /**
  * @fileoverview Handles common signing functionality for JWT message type

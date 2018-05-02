@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: oauth2/responses.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: oauth2/responses.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Message = require('../message');
+const SINGLE_REQUIRED_STRING = require('./init').SINGLE_REQUIRED_STRING;
+const SINGLE_OPTIONAL_STRING = require('./init').SINGLE_OPTIONAL_STRING;
+const OPTIONAL_LIST_OF_SP_SEP_STRINGS =
+    require('./init').OPTIONAL_LIST_OF_SP_SEP_STRINGS;
+const REQUIRED_LIST_OF_STRINGS = require('./init').REQUIRED_LIST_OF_STRINGS;
+const OPTIONAL_LIST_OF_STRINGS = require('./init').OPTIONAL_LIST_OF_STRINGS;
+const SINGLE_OPTIONAL_INT = require('./init').SINGLE_OPTIONAL_INT;
+
+/**
+ * @fileoverview Contains all the OIC request classes
+ */
+
+/**
+ * ErrorResponse
+ * @class
+ * @constructor
+ * @extends Message
+ * The basic error response
+ */
+class ErrorResponse extends Message {
+  constructor() {
+    super();
+    this.cParam = {
+      'error': SINGLE_REQUIRED_STRING,
+      'error_description': SINGLE_OPTIONAL_STRING,
+      'error_uri': SINGLE_OPTIONAL_STRING,
+    };
+  }
+}
+
+/**
+ * AuthorizationErrorResponse
+ * @class
+ * @constructor
+ * @extends Message
+ * Authorization error response
+ */
+class AuthorizationErrorResponse extends Message {
+  constructor() {
+    super();
+    this.cParam = ErrorResponse.cParam;
+    this.cParam.update({'state': SINGLE_OPTIONAL_STRING});
+    this.cAllowedValues = ErrorResponse.c_allowed_values;
+    this.cAllowedValues.update({
+      'error': [
+        'invalid_request', 'unauthorized_client', 'access_denied',
+        'unsupported_response_type', 'invalid_scope', 'server_error',
+        'temporarily_unavailable'
+      ]
+    });
+  }
+}
+
+/**
+ * TokenErrorResponse
+ * @class
+ * @constructor
+ * @extends Message
+ * Error response from the token endpoint
+ */
+class TokenErrorResponse extends Message {
+  constructor() {
+    super();
+    this.cAllowedValues = {
+      'error': [
+        'invalid_request', 'invalid_client', 'invalid_grant',
+        'unauthorized_client', 'unsupported_grant_type', 'invalid_scope'
+      ]
+    };
+  }
+}
+
+/**
+ * AuthorizationResponse
+ * @class
+ * @constructor
+ * @extends Message
+ *  An authorization response.
+ *  If *client_id* is returned in the response it will be checked against
+ *  a client_id value provided when calling the verify method.
+ *  The same with *iss* (issuer).
+ */
+class AuthorizationResponse extends Message {
+  constructor(code, state, accessToken, tokenType, idToken) {
+    super();
+    this.cParam = {
+      'code': SINGLE_REQUIRED_STRING,
+      'state': SINGLE_OPTIONAL_STRING,
+      'iss': SINGLE_OPTIONAL_STRING,
+      'client_id': SINGLE_OPTIONAL_STRING
+    };
+
+    const dict = {};
+    if (code) {
+      dict['code'] = code;
+      this.code = code;
+    }
+    if (state) {
+      dict['state'] = state;
+      this.state = state;
+    }
+    if (accessToken) {
+      dict['access_token'] = accessToken;
+    }
+    if (tokenType) {
+      dict['token_type'] = tokenType;
+    }
+    if (idToken) {
+      dict['id_token'] = idToken;
+    }
+    return dict;
+  }
+
+  verify(kwargs) {
+    // Token.call(AuthorizationResponse).verify(kwargs);
+    if (this.client_id) {
+      try {
+        if (this.clientId !== kwargs['clientId']) {
+          console.log('client id mismatch');
+        }
+      } catch (err) {
+        throw new Error('No client_id to verify against');
+      }
+    }
+    if (this.iss) {
+      try {
+        if (this.iss !== kwargs['iss']) {
+          console.log('Issuer mismatch');
+        }
+      } catch (err) {
+        throw new Error('No issuer set in the Client config');
+      }
+    }
+    return true;
+  }
+}
+
+/**
+ * AccessTokenResponse
+ * @class
+ * @constructor
+ * @extends Message
+ */
+class AccessTokenResponse extends Message {
+  constructor(args) {
+    super();
+    this.cParam = {
+      'access_token': SINGLE_REQUIRED_STRING,
+      'token_type': SINGLE_REQUIRED_STRING,
+      'expires_in': SINGLE_OPTIONAL_INT,
+      'refresh_token': SINGLE_OPTIONAL_STRING,
+      'scope': OPTIONAL_LIST_OF_SP_SEP_STRINGS,
+      'state': SINGLE_OPTIONAL_STRING
+    };
+    return args;
+  }
+}
+
+/**
+ * ASConfigurationResponse
+ * @class
+ * @constructor
+ * @extends Message
+ */
+class ASConfigurationResponse extends Message {
+  constructor() {
+    super();
+    this.cParam = {
+      'issuer': SINGLE_REQUIRED_STRING,
+      'authorization_endpoint': SINGLE_OPTIONAL_STRING,
+      'token_endpoint': SINGLE_OPTIONAL_STRING,
+      'jwks_uri': SINGLE_OPTIONAL_STRING,
+      'registration_endpoint': SINGLE_OPTIONAL_STRING,
+      'scopes_supported': OPTIONAL_LIST_OF_STRINGS,
+      'response_types_supported': REQUIRED_LIST_OF_STRINGS,
+      'response_modes_supported': OPTIONAL_LIST_OF_STRINGS,
+      'grant_types_supported': REQUIRED_LIST_OF_STRINGS,
+      'token_endpoint_auth_methods_supported': OPTIONAL_LIST_OF_STRINGS,
+      'token_endpoint_auth_signing_alg_values_supported':
+          OPTIONAL_LIST_OF_STRINGS,
+      'service_documentation': SINGLE_OPTIONAL_STRING,
+      'ui_locales_supported': OPTIONAL_LIST_OF_STRINGS,
+      'op_policy_uri': SINGLE_OPTIONAL_STRING,
+      'op_tos_uri': SINGLE_OPTIONAL_STRING,
+      'revocation_endpoint': SINGLE_OPTIONAL_STRING,
+      'introspection_endpoint': SINGLE_OPTIONAL_STRING,
+    };
+    this.cDefault = {'version': '3.0'};
+  }
+}
+
+/**
+ * NoneResponse
+ * @class
+ * @constructor
+ * @extends Message
+ */
+class NoneResponse extends Message {
+  constructor() {
+    super();
+    this.cParam = { 'state': SINGLE_OPTIONAL_STRING };
+  }
+}
+
+module.exports.ErrorResponse = ErrorResponse;
+module.exports.AuthorizationErrorResponse = AuthorizationErrorResponse;
+module.exports.TokenErrorResponse = TokenErrorResponse;
+module.exports.AuthorizationResponse = AuthorizationResponse;
+module.exports.AccessTokenResponse = AccessTokenResponse;
+module.exports.NoneResponse = NoneResponse;
+module.exports.ASConfigurationResponse = ASConfigurationResponse;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="AccessTokenRequest.html">AccessTokenRequest</a></li><li><a href="AccessTokenResponse.html">AccessTokenResponse</a></li><li><a href="ASConfigurationResponse.html">ASConfigurationResponse</a></li><li><a href="AuthorizationErrorResponse.html">AuthorizationErrorResponse</a></li><li><a href="AuthorizationRequest.html">AuthorizationRequest</a></li><li><a href="AuthorizationResponse.html">AuthorizationResponse</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="CCAccessTokenRequest.html">CCAccessTokenRequest</a></li><li><a href="CheckIdRequest.html">CheckIdRequest</a></li><li><a href="CheckSessionRequest.html">CheckSessionRequest</a></li><li><a href="ClaimsRequest.html">ClaimsRequest</a></li><li><a href="ClientRegistrationErrorResponse.html">ClientRegistrationErrorResponse</a></li><li><a href="DiscoveryRequest.html">DiscoveryRequest</a></li><li><a href="EndSessionRequest.html">EndSessionRequest</a></li><li><a href="EndSessionResponse.html">EndSessionResponse</a></li><li><a href="ErrorResponse.html">ErrorResponse</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JRD.html">JRD</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="Message.html">Message</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="MessageWithIdToken.html">MessageWithIdToken</a></li><li><a href="NoneResponse.html">NoneResponse</a></li><li><a href="OpenIdRequest.html">OpenIdRequest</a></li><li><a href="ProviderConfigurationResponse.html">ProviderConfigurationResponse</a></li><li><a href="RefreshAccessTokenRequest.html">RefreshAccessTokenRequest</a></li><li><a href="RefreshSessionRequest.html">RefreshSessionRequest</a></li><li><a href="RefreshSessionResponse.html">RefreshSessionResponse</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RegistrationRequest.html">RegistrationRequest</a></li><li><a href="RegistrationResponse.html">RegistrationResponse</a></li><li><a href="ResourceRequest.html">ResourceRequest</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ROPCAccessTokenRequest.html">ROPCAccessTokenRequest</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li><li><a href="Token.html">Token</a></li><li><a href="TokenErrorResponse.html">TokenErrorResponse</a></li><li><a href="UserInfoErrorResponse.html">UserInfoErrorResponse</a></li><li><a href="UserInfoRequest.html">UserInfoRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed May 02 2018 10:31:25 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

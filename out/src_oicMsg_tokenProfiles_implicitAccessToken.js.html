@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/oicMsg/tokenProfiles/implicitAccessToken.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/oicMsg/tokenProfiles/implicitAccessToken.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+const AccessToken = require('./accessToken');
+const Token = require('./token');
+
+/**
+ * @fileoverview
+ * ImplicitAccessToken
+ * Required claims : iss, sub, iat
+ * Optional claims : aud
+ */
+/**
+ * ImplicitAccessToken
+ * Init token using required claims
+ * @class
+ * @constructor
+ * @extends AccessToken
+ * @param {*} iss
+ * @param {*} sub
+ * @param {*} iat
+ */
+class ImplicitAccessToken extends AccessToken {
+  constructor({iss, sub, iat}={}) {
+    super({iss, sub, iat});
+
+    /** Required claims */
+    this.optionsToPayload = {
+      iss: 'iss',
+      sub: 'sub',
+      iat: 'iat',
+    };
+
+    /** Other option values */
+    this.optionsForObjects = [
+      'expiresIn',
+      'notBefore',
+      'noTimestamp',
+      'audience',
+      'issuer',
+      'subject',
+      'jwtid',
+    ];
+
+    /** Known optional claims that need to be verified */
+    this.knownOptionalClaims = {
+      aud: 'aud',
+    };
+
+    /** Required claims that need to be verified */
+    this.claimsForVerification = {
+      iss: 'iss',
+      sub: 'sub',
+      maxAge: 'maxAge',
+    };
+  }
+
+  static init(payload, options){
+    const implicitAccessToken = new ImplicitAccessToken(payload);
+    let optionalClaims = {};
+    Object.keys(implicitAccessToken.knownOptionalClaims).forEach(key => {
+      if (payload[key]){
+        optionalClaims[key] = payload[key];
+      }
+    });
+    implicitAccessToken.addOptionalClaims(optionalClaims);
+    if (options &amp;&amp; Object.keys(options).indexOf('algorithm')!== -1 &amp;&amp; options['algorithm'] === 'none'){
+      implicitAccessToken.setNoneAlgorithmAttr(true);
+    }
+    return implicitAccessToken;
+  }
+
+  static toJWT(payload, key, options){
+    let implicitAccessToken = this.init(payload, options);
+    return implicitAccessToken.toJWT(key, options);
+  }
+
+  static fromJWT(jwt, key, verificationClaims, options){
+    let token = new Token();
+    let decodedPayload = token.decode(jwt, options);
+    let implicitAccessToken = this.init(decodedPayload);
+    decodedPayload = implicitAccessToken.verify(decodedPayload, verificationClaims, options);
+    return decodedPayload;
+  }
+}
+
+module.exports = ImplicitAccessToken;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="AccessTokenRequest.html">AccessTokenRequest</a></li><li><a href="AccessTokenResponse.html">AccessTokenResponse</a></li><li><a href="ASConfigurationResponse.html">ASConfigurationResponse</a></li><li><a href="AuthorizationErrorResponse.html">AuthorizationErrorResponse</a></li><li><a href="AuthorizationRequest.html">AuthorizationRequest</a></li><li><a href="AuthorizationResponse.html">AuthorizationResponse</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="CCAccessTokenRequest.html">CCAccessTokenRequest</a></li><li><a href="CheckIdRequest.html">CheckIdRequest</a></li><li><a href="CheckSessionRequest.html">CheckSessionRequest</a></li><li><a href="ClaimsRequest.html">ClaimsRequest</a></li><li><a href="ClientRegistrationErrorResponse.html">ClientRegistrationErrorResponse</a></li><li><a href="DiscoveryRequest.html">DiscoveryRequest</a></li><li><a href="EndSessionRequest.html">EndSessionRequest</a></li><li><a href="EndSessionResponse.html">EndSessionResponse</a></li><li><a href="ErrorResponse.html">ErrorResponse</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JRD.html">JRD</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="Message.html">Message</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="MessageWithIdToken.html">MessageWithIdToken</a></li><li><a href="NoneResponse.html">NoneResponse</a></li><li><a href="OpenIdRequest.html">OpenIdRequest</a></li><li><a href="ProviderConfigurationResponse.html">ProviderConfigurationResponse</a></li><li><a href="RefreshAccessTokenRequest.html">RefreshAccessTokenRequest</a></li><li><a href="RefreshSessionRequest.html">RefreshSessionRequest</a></li><li><a href="RefreshSessionResponse.html">RefreshSessionResponse</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RegistrationRequest.html">RegistrationRequest</a></li><li><a href="RegistrationResponse.html">RegistrationResponse</a></li><li><a href="ResourceRequest.html">ResourceRequest</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ROPCAccessTokenRequest.html">ROPCAccessTokenRequest</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li><li><a href="Token.html">Token</a></li><li><a href="TokenErrorResponse.html">TokenErrorResponse</a></li><li><a href="UserInfoErrorResponse.html">UserInfoErrorResponse</a></li><li><a href="UserInfoRequest.html">UserInfoRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed May 02 2018 10:39:28 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

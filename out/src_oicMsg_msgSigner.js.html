@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/oicMsg/msgSigner.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/oicMsg/msgSigner.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const timespan = require('./lib/timespan');
+const xtend = require('xtend');
+const includes = require('lodash.includes');
+const isBoolean = require('lodash.isboolean');
+const isInteger = require('lodash.isinteger');
+const isNumber = require('lodash.isnumber');
+const isPlainObject = require('lodash.isplainobject');
+const isString = require('lodash.isstring');
+
+/**
+ * @fileoverview Handles the common signing functionality for all message
+ * protocols
+ */
+const signOptionsSchema = {
+  expiresIn: {
+    isValid(value) {
+      return isInteger(value) || isString(value);
+    },
+    message:
+        '"expiresIn" should be a number of seconds or string representing a timespan'
+  },
+  notBefore: {
+    isValid(value) {
+      return isInteger(value) || isString(value);
+    },
+    message:
+        '"notBefore" should be a number of seconds or string representing a timespan'
+  },
+  audience: {
+    isValid(value) {
+      return isString(value) || Array.isArray(value);
+    },
+    message: '"audience" must be a string or array'
+  },
+  algorithm: {
+    isValid: includes.bind(
+        null,
+        [
+          'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'HS256',
+          'HS384', 'HS512', 'none'
+        ]),
+    message: '"algorithm" must be a valid string enum value'
+  },
+  header: {isValid: isPlainObject, message: '"header" must be an object'},
+  encoding: {isValid: isString, message: '"encoding" must be a string'},
+  issuer: {isValid: isString, message: '"issuer" must be a string'},
+  subject: {isValid: isString, message: '"subject" must be a string'},
+  jwtid: {isValid: isString, message: '"jwtid" must be a string'},
+  noTimestamp: {isValid: isBoolean, message: '"noTimestamp" must be a boolean'},
+  keyid: {isValid: isString, message: '"keyid" must be a string'},
+  baseEncoding: {isValid: isString, message: '"baseEncoding" must be a string'},
+};
+
+const registeredClaimsSchema = {
+  iat: {isValid: isNumber, message: '"iat" should be a number of seconds'},
+  exp: {isValid: isNumber, message: '"exp" should be a number of seconds'},
+  nbf: {isValid: isNumber, message: '"nbf" should be a number of seconds'},
+  aud: {
+    isValid(value) {
+      return isString(value) || Array.isArray(value);
+    },
+    message: '"audience" must be a string or array'
+  },
+  sub: {isValid: isString, message: '"subject" must be a string'},
+  jti: {isValid: isString, message: '"jwtid" must be a string'},
+};
+
+/**
+ * MessageSigner
+ * @class
+ * @constructor
+ */
+class MessageSigner {
+  constructor() {}
+  /**
+   * Check if the input format type matches the schema.
+   * @memberof MessageSigner
+   * @param schema
+   * @param allowUnknown
+   * @param object
+   * @param parameterName
+   * */
+  validate(schema, allowUnknown, object, parameterName) {
+    if (!isPlainObject(object)) {
+      throw new Error(`Expected "${parameterName}" to be a plain object.`);
+    }
+    Object.keys(object).forEach(key => {
+      const validator = schema[key];
+      if (!validator) {
+        if (!allowUnknown) {
+          throw new Error(`"${key}" is not allowed in "${parameterName}"`);
+        }
+        return;
+      }
+      if (!validator.isValid(object[key])) {
+        throw new Error(validator.message);
+      }
+    });
+  }
+
+  /**
+   * Checks format type of other options
+   * @param {dictionary} options
+   * @memberof MessageSigner.prototype
+   */
+  validateOptions(options) {
+    return this.validate(signOptionsSchema, false, options, 'options');
+  }
+
+  /**
+   * Checks format type of payload values
+   * @param {dictionary} payload
+   * @memberof MessageSigner
+   */
+  validatePayload(payload) {
+    return this.validate(registeredClaimsSchema, true, payload, 'payload');
+  }
+
+  /**
+   * Signs message and checks for valid input.
+   *
+   * @param {Token} tokenProfile - Contains the token properties, required, optional and verification claims.
+   * @param {string} secretOrPublicKey - String or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
+   * @param {dictionary} options - Consists of other inputs that are not part of the payload, for ex : 'algorithm'.
+      will be called with the error. When supplied, the function acts
+   asynchronously.
+   * @returns {dictionary} - Contains the header, payload and options info.
+   * @throws JsonWebToken error if options does not match expected claims.
+   * @memberof MessageSigner.prototype
+   */
+  sign(tokenProfile, secretOrPrivateKey, options) {
+    let payload = Object.assign(
+        {}, tokenProfile.getRequiredClaims(), tokenProfile.getOptionalClaims());
+
+    options = options || {};
+
+    if (options) {
+      var isObjectPayload =
+          typeof payload === 'object' &amp;&amp; !Buffer.isBuffer(payload);
+    }
+
+    // Init header
+    const header = xtend(
+        {
+          alg: options.algorithm || 'HS256',
+          typ: isObjectPayload ? 'JWT' : undefined,
+          kid: options.keyid
+        },
+        options.header);
+
+    /** Check for undefined payload or invalid options */
+    if (typeof payload === 'undefined') {
+      throw new Error('payload is required');
+    } else if (isObjectPayload) {
+      try {
+        this.validatePayload(payload);
+      } catch (error) {
+        throw error;
+      }
+      payload = xtend(payload);
+    } else {
+      const invalidOptions =
+          optionsForObjects.filter(opt => typeof options[opt] !== 'undefined');
+
+      if (invalidOptions.length > 0) {
+        throw new Error(`invalid ${
+                                   invalidOptions.join(',')
+                                 } option for ${typeof payload} payload`);
+      }
+    }
+
+    try {
+      this.validateOptions(options);
+    } catch (error) {
+      throw error;
+    }
+
+    payload = this.checkOtherOptions(
+        secretOrPrivateKey, options, tokenProfile, payload);
+    payload =
+        this.checkOptions(tokenProfile.optionsToPayload, options, payload);
+    payload =
+        this.checkOptions(tokenProfile.knownOptionalClaims, options, payload);
+
+    const messageInfo = {
+      'header': header,
+      'payload': payload,
+      'options': options
+    };
+    return messageInfo;
+  }
+
+  /**
+   * Check for other options values and for duplicates
+   *
+   * @param {string} secretOrPublicKey A string or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA.
+   * @param {dictionary} options Other inputs that are not part of the payload, for ex : 'algorithm'.
+   * @param {Token} tokenProfile Contains the token properties, required, optional and verification claim.
+   * @param {dictionary} payload Could be an object literal, buffer or string, containing claims. Please note that exp is only set if the payload is an object literal.
+   * @returns {dictionary} payload
+   * @throws Error if duplicate options values provided or does not match
+   * expected value.
+   * @memberof MessageSigner.prototype
+   */
+  checkOtherOptions(
+      secretOrPrivateKey, options, tokenProfile, payload) {
+    const timestamp = payload.iat || Math.floor(Date.now() / 1000);
+
+    if (!options.noTimestamp) {
+      payload.iat = timestamp;
+    } else {
+      delete payload.iat;
+    }
+
+    if (!secretOrPrivateKey &amp;&amp; options.algorithm !== 'none') {
+      throw new Error('secretOrPrivateKey must have a value');
+    }
+
+    // Check none algorithm status
+    if (options.algorithm === 'none' &amp;&amp;
+        tokenProfile.getNoneAlgorithm() === false) {
+      throw new Error('Cannot use none algorithm unless specified');
+    }
+
+    if (typeof payload.exp !== 'undefined' &amp;&amp;
+        typeof options.expiresIn !== 'undefined') {
+      throw new Error(
+          'Bad "options.expiresIn" option the payload already has an "exp" property.');
+    }
+
+    if (typeof payload.nbf !== 'undefined' &amp;&amp;
+        typeof options.notBefore !== 'undefined') {
+      throw new Error(
+          'Bad "options.notBefore" option the payload already has an "nbf" property.');
+    }
+
+    if (typeof options.notBefore !== 'undefined') {
+      payload.nbf = timespan(options.notBefore);
+      if (typeof payload.nbf === 'undefined') {
+        throw new Error(
+            '"notBefore" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60');
+      }
+    }
+
+    if (typeof options.expiresIn !== 'undefined' &amp;&amp;
+        typeof payload === 'object') {
+      payload.exp = timespan(options.expiresIn, timestamp);
+      if (typeof payload.exp === 'undefined') {
+        throw new Error(
+            '"expiresIn" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60');
+      }
+    }
+
+    return payload;
+  }
+
+  /**
+   * Check if the payload and options have a duplicate property
+   * @param {dictionary} tokenProfileKnownClaims
+   * @param {dictionary} options
+   * @param {dictionary} payload
+   * @param {function} failure
+   * */
+  checkOptions(tokenProfileKnownClaims, options, payload) {
+    Object.keys(tokenProfileKnownClaims).forEach(key => {
+      const claim = tokenProfileKnownClaims[key];
+      if (typeof options[key] !== 'undefined') {
+        if (typeof payload[claim] !== 'undefined') {
+          throw new Error(
+              `Bad "options.${
+                              key
+                            }" option. The payload already has an "${
+                                                                     claim
+                                                                   }" property.`);
+        }
+        payload[claim] = options[key];
+      }
+    });
+    return payload;
+  }
+}
+
+module.exports = MessageSigner;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AccessToken.html">AccessToken</a></li><li><a href="AccessTokenRequest.html">AccessTokenRequest</a></li><li><a href="AccessTokenResponse.html">AccessTokenResponse</a></li><li><a href="ASConfigurationResponse.html">ASConfigurationResponse</a></li><li><a href="AuthorizationErrorResponse.html">AuthorizationErrorResponse</a></li><li><a href="AuthorizationRequest.html">AuthorizationRequest</a></li><li><a href="AuthorizationResponse.html">AuthorizationResponse</a></li><li><a href="BasicIdToken.html">BasicIdToken</a></li><li><a href="CCAccessTokenRequest.html">CCAccessTokenRequest</a></li><li><a href="CheckIdRequest.html">CheckIdRequest</a></li><li><a href="CheckSessionRequest.html">CheckSessionRequest</a></li><li><a href="ClaimsRequest.html">ClaimsRequest</a></li><li><a href="ClientRegistrationErrorResponse.html">ClientRegistrationErrorResponse</a></li><li><a href="DiscoveryRequest.html">DiscoveryRequest</a></li><li><a href="EndSessionRequest.html">EndSessionRequest</a></li><li><a href="EndSessionResponse.html">EndSessionResponse</a></li><li><a href="ErrorResponse.html">ErrorResponse</a></li><li><a href="ExtendedIdToken.html">ExtendedIdToken</a></li><li><a href="FacebookIdToken.html">FacebookIdToken</a></li><li><a href="GoogleIdToken.html">GoogleIdToken</a></li><li><a href="ImplicitAccessToken.html">ImplicitAccessToken</a></li><li><a href="JRD.html">JRD</a></li><li><a href="JWTDecoder.html">JWTDecoder</a></li><li><a href="JWTSigner.html">JWTSigner</a></li><li><a href="JWTVerifier.html">JWTVerifier</a></li><li><a href="KeyBundle.html">KeyBundle</a></li><li><a href="KeyJar.html">KeyJar</a></li><li><a href="Message.html">Message</a></li><li><a href="MessageSigner.html">MessageSigner</a></li><li><a href="MessageVerifier.html">MessageVerifier</a></li><li><a href="MessageWithIdToken.html">MessageWithIdToken</a></li><li><a href="NoneResponse.html">NoneResponse</a></li><li><a href="OpenIdRequest.html">OpenIdRequest</a></li><li><a href="ProviderConfigurationResponse.html">ProviderConfigurationResponse</a></li><li><a href="RefreshAccessTokenRequest.html">RefreshAccessTokenRequest</a></li><li><a href="RefreshSessionRequest.html">RefreshSessionRequest</a></li><li><a href="RefreshSessionResponse.html">RefreshSessionResponse</a></li><li><a href="RefreshToken.html">RefreshToken</a></li><li><a href="RegistrationRequest.html">RegistrationRequest</a></li><li><a href="RegistrationResponse.html">RegistrationResponse</a></li><li><a href="ResourceRequest.html">ResourceRequest</a></li><li><a href="RiscToken.html">RiscToken</a></li><li><a href="ROPCAccessTokenRequest.html">ROPCAccessTokenRequest</a></li><li><a href="ScopedAccessToken.html">ScopedAccessToken</a></li><li><a href="Token.html">Token</a></li><li><a href="TokenErrorResponse.html">TokenErrorResponse</a></li><li><a href="UserInfoErrorResponse.html">UserInfoErrorResponse</a></li><li><a href="UserInfoRequest.html">UserInfoRequest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed May 02 2018 10:39:28 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
