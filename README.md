@@ -9,6 +9,30 @@ The OpenID Connect and OAuth2 standards both define multiple messages - requests
 This is a lower level layer module that implements serialization and deserialization of the
 protocol messages in OAuth2 and OpenID Connect, including validation both ways.
 
+## Intro : 
+The OpenID Connect and OAuth2 standards both defines lots of messages. Requests that are sent from clients to servers and responses from servers to clients.
+
+For each of these messages a number of parameters (claims) are listed, some of them required and some optional. Each parameter are also assigned a data type.
+
+What is also defined in the standard is the on-the-wire representation of these messages. Like if they are the fragment component of a redirect URI or a JSON document transferred in the body of a response.
+
+The Message class is supposed to capture all of this.
+
+Using this class you should be able to:
+
+* build a message,
+* verify that a message’s parameters are correct, that all that are marked as required are present and all (required and optional) are of the right type
+* serialize the message into the correct on-the-wire representation
+* deserialize a received message from the on-the-wire representation into a oidcmsg.message.Message instance.
+
+The Message class is the base class the oidcmsg package contains subclasses representing all the messages defined in OpenID Connect and OAuth2.
+
+What oidcmsg also contains are tools for handling keys.
+
+There is the KeyBundle class that can handle keys that have the same origin. That for instance comes from one file or has been fetched from a web site.
+
+The KeyJar class stores keys from many issuers. Where the keys for each issuer is kept in one or more KeyBundle instances.
+
 ### Message types
 The serialization and deserialization formats supported are:
 * JSON
