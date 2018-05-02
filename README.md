@@ -192,7 +192,7 @@ Serialize a JSON type by using the following function :
  * @return Stringified JSON Obj
 
  */
-  <type>.toJSON(payload);
+ <type>.toJSON(payload);
 
 Usage examples : 
 const resp = Message.toJSON({'foo': 'bar'})
@@ -238,8 +238,8 @@ assert.deepEqual(resp['dummy'], 'foo');
 ## URL Type
 Included URLEncoded types:
 
-* [TokenRequest](http://openid.net/specs/openid-connect-core-1_0.html#TokenRequest)
 OAuth2 Requests
+* [TokenRequest](http://openid.net/specs/openid-connect-core-1_0.html#TokenRequest)
 * AccessTokenRequest 
 * AuthorizationRequest
 * ROPCAccessTokenRequest
