@@ -1,6 +1,6 @@
 'use strict';
-const jwtDecoder = require('../oicMsg/jose/jwt/decode');
-const jwtSigner = require('../oicMsg/jose/jwt/sign');
+const JWTDecoder = require('../oicMsg/jose/jwt/decode');
+const JWTSigner = require('../oicMsg/jose/jwt/sign');
 
 /**
  * @fileoverview
@@ -22,9 +22,9 @@ const jwtSigner = require('../oicMsg/jose/jwt/sign');
  */
 class Message {
   constructor(claims) {
-    if (claims){
+    if (claims) {
       this.claims = claims;
-    }else{
+    } else {
       this.claims = {};
     }
     
@@ -77,19 +77,19 @@ class Message {
   addOptionalClaims(optionalClaims) {
     this.optionalClaims = optionalClaims;
     this.optionalVerificationClaims = {};
-    for (var i = 0; i < optionalClaims.length; i++){
+    for (let i = 0; i < Object.keys(optionalClaims).length; i++){
       let key = optionalClaims[i];
       if (key) {
         this.optionalVerificationClaims[key] = key;
       }
     };
   }
-
+  
   /** Check for missing required claims */
   validateRequiredFields() {
-    for (var i = 0; i < this.optionsToPayload.length; i++){
+    for (let i = 0; i < this.optionsToPayload.length; i++){
       let key = this.optionsToPayload[i];
-      if (!this[key]) {
+      if (!this[key] === undefined) {
         throw new Error('You are missing a required parameter');
       }
     };
@@ -98,13 +98,12 @@ class Message {
   /** Fetch Required claims */
   getRequiredClaims() {
     this.requiredClaims = {};
-    for (var i = 0; i < this.optionsToPayload.length; i++){
+    for (let i = 0; i < this.optionsToPayload.length; i++){
       let key = this.optionsToPayload[i];
       this.requiredClaims[key] = this[key];
     }
     return this.requiredClaims;
   }
-
 
   /**
    * Fetch optional claims
@@ -141,7 +140,7 @@ class Message {
    * @param {?Object<string, string>} claimsToVerify Claims that need to be verified
    * */
   validateRequiredVerificationClaims(claimsToVerify) {
-    for (var i = 0; i < this.claimsForVerification.length; i++){
+    for (let i = 0; i < this.claimsForVerification.length; i++){
       let key = this.claimsForVerification[i];
       if (!claimsToVerify[key]) {
         throw new Error(`Missing required verification claim: ${key}`);
@@ -187,7 +186,7 @@ class Message {
    be called with the error. When supplied, the function acts asynchronously.
    **/
   toJWT(secretOrPrivateKey, options, callback) {
-    return jwtSigner.prototype.sign(
+    return JWTSigner.prototype.sign(
         this, secretOrPrivateKey, options, callback);
   }
 
@@ -205,7 +204,7 @@ class Message {
   fromJWT(signedJWT, secretOrPrivateKey, claimsToVerify, options, callback) {
     this.validateRequiredVerificationClaims(claimsToVerify);
     this.validateOptionalVerificationClaims(claimsToVerify);
-    return jwtDecoder.prototype.decode(
+    return JWTDecoder.prototype.decode(
         signedJWT, secretOrPrivateKey, this, options, callback);
   }
 
@@ -241,13 +240,15 @@ class Message {
     }
     const str = [];
     for (const p in obj)
-      str.push(`${encodeURIComponent(p)}=${encodeURIComponent(obj[p])}`);
+      if (obj.hasOwnProperty(p)){
+        str.push(`${encodeURIComponent(p)}=${encodeURIComponent(obj[p])}`);        
+      }
     return str.join('&');
   }
 
   /**
    * Deserialization of URL Encoded string
-   * @param {string} obj Url encoded string that needs to be deserialized
+   * @param {string} urlEncodedString encoded string that needs to be deserialized
    * */
   static fromUrlEncoded(urlEncodedString) {
     if (typeof urlEncodedString === 'string') {
