@@ -30,7 +30,7 @@ describe('Asymmetric Algorithms', function() {
       var clockTimestamp = 1000000000;
 
       describe(
-          'when signing a token with a known non standard claim', function() {
+          'when signing a facebook token with a known non standard claim', function() {
             var facebookIdToken = new FacebookIdToken(
                 {userId: 'userId', appId: 'appId', iat: clockTimestamp});
             facebookIdToken.addOptionalClaims(
@@ -41,7 +41,8 @@ describe('Asymmetric Algorithms', function() {
 
               facebookIdToken.toJWT('shhhh')
                   .then(function(signedJWT) {
-                    facebookIdToken
+                    try{
+                    let decodedPayload = facebookIdToken
                         .fromJWT(
                             signedJWT, 'shhhh', {
                               'userId': 'userId',
@@ -49,21 +50,21 @@ describe('Asymmetric Algorithms', function() {
                               'maxAge': '1d',
                               'clockTolerance': 10
                             },
-                            {'clockTimestamp': clockTimestamp})
-                        .then(function(decodedPayload) {
-                          assert.isNotNull(decodedPayload);
-                        });
-                  })
-                  .catch(function(err) {
-                    assert.isNull(err);
-                  });
-              done();
+                            {'clockTimestamp': clockTimestamp});
+
+                          }catch(err){
+                            assert.isNull(err);
+                            done();
+                          }
+                done();
+              });
             });
 
             it('should throw when invalid known non standard claim',
                function(done) {
                  facebookIdToken.toJWT('shhhh').then(function(signedJWT) {
-                   facebookIdToken
+                  try{
+                    let decodedPayload = facebookIdToken
                        .fromJWT(
                            signedJWT, 'shhhh', {
                              'userId': 'userId',
@@ -71,10 +72,11 @@ describe('Asymmetric Algorithms', function() {
                              'maxAge': '1d',
                              'clockTolerance': 10
                            },
-                           {'clockTimestamp': clockTimestamp})
-                       .catch(function(err) {
-                         assert.isNotNull(err);
-                       });
+                           {'clockTimestamp': clockTimestamp});
+                  }catch(err){
+                    assert.isNull(err);
+                    done();
+                  }                    
                    done();
                  });
                });

@@ -1,8 +1,14 @@
 
 var SINGLE_OPTIONAL_STRING = require('../OAuth2/init').SINGLE_OPTIONAL_STRING;
+var SINGLE_OPTIONAL_BOOLEAN = require('../OAuth2/init').SINGLE_OPTIONAL_BOOLEAN;
 var SINGLE_REQUIRED_IDTOKEN = require('../OAuth2/init').SINGLE_REQUIRED_IDTOKEN;
+var SINGLE_REQUIRED_STRING = require('../OAuth2/init').SINGLE_REQUIRED_STRING;
 var OPTIONAL_LIST_OF_STRINGS = require('../OAuth2/init').OPTIONAL_LIST_OF_STRINGS;
 var SINGLE_OPTIONAL_DICT = require('../OAuth2/init').SINGLE_OPTIONAL_DICT;
+var SINGLE_OPTIONAL_INT = require('../OAuth2/init').SINGLE_OPTIONAL_INT;
+var OPTIONAL_ADDRESS = require('../OAuth2/init').OPTIONAL_ADDRESS;
+var OPTIONAL_MESSAGE = require('../OAuth2/init').OPTIONAL_MESSAGE;
+var ResponseMessage = require('../oauth2/responses').ResponseMessage;
 
 var Message = require('../message');
 
@@ -17,6 +23,42 @@ class AddressClaim extends Message {
       'postal_code': SINGLE_OPTIONAL_STRING,
       'country': SINGLE_OPTIONAL_STRING
     };
+  }
+}
+
+class OpenIDSchema extends ResponseMessage{
+  constructor(claims){
+    super(claims);
+    if (claims){
+      this.claims = claims;
+    }else{
+      this.claims = {};
+    }
+    this.cParam = {
+      "sub": SINGLE_REQUIRED_STRING,
+      "name": SINGLE_OPTIONAL_STRING,
+      "given_name": SINGLE_OPTIONAL_STRING,
+      "family_name": SINGLE_OPTIONAL_STRING,
+      "middle_name": SINGLE_OPTIONAL_STRING,
+      "nickname": SINGLE_OPTIONAL_STRING,
+      "preferred_username": SINGLE_OPTIONAL_STRING,
+      "profile": SINGLE_OPTIONAL_STRING,
+      "picture": SINGLE_OPTIONAL_STRING,
+      "website": SINGLE_OPTIONAL_STRING,
+      "email": SINGLE_OPTIONAL_STRING,
+      "email_verified": SINGLE_OPTIONAL_BOOLEAN,
+      "gender": SINGLE_OPTIONAL_STRING,
+      "birthdate": SINGLE_OPTIONAL_STRING,
+      "zoneinfo": SINGLE_OPTIONAL_STRING,
+      "locale": SINGLE_OPTIONAL_STRING,
+      "phone_number": SINGLE_OPTIONAL_STRING,
+      "phone_number_verified": SINGLE_OPTIONAL_BOOLEAN,
+      "address": OPTIONAL_ADDRESS,
+      "updated_at": SINGLE_OPTIONAL_INT,
+      "_claim_names": OPTIONAL_MESSAGE,
+      "_claim_sources": OPTIONAL_MESSAGE
+    };
+    return this;
   }
 }
 
@@ -109,3 +151,4 @@ class JRD extends Message {
 }
 
 module.exports.MessageWithIdToken = MessageWithIdToken;
+module.exports.OpenIDSchema = OpenIDSchema;

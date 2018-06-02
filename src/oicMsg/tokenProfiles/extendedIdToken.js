@@ -27,15 +27,14 @@ class ExtendedIdToken extends GoogleIdToken {
   constructor({name, email, picture, iss, sub, iat}={}) {
     super({name, email, picture, iss, sub, iat});
 
-    /** Required claims */
-    this.optionsToPayload = {
-      name: 'name',
-      email: 'email',
-      picture: 'picture',
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-    };
+    this.optionsToPayload = [
+      'name',
+      'email',
+      'picture',
+      'iss',
+      'sub',
+      'iat',
+    ];
 
     /** Other options values */
     this.optionsForObjects = [
@@ -48,22 +47,22 @@ class ExtendedIdToken extends GoogleIdToken {
       'jwtid',
     ];
 
-    /** Known optional claims to be verified */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-      exp: 'exp',
-      nbf: 'nbf',
-    };
+     /** Known optional claims to be verified */
+     this.knownOptionalClaims = [
+      'aud',
+      'exp',
+      'nbf',
+     ];
 
     /** Required claims to be verified */
-    this.claimsForVerification = {
-      name: 'name',
-      email: 'email',
-      picture: 'picture',
-      iss: 'iss',
-      sub: 'sub',
-      maxAge: 'maxAge',
-    };
+    this.claimsForVerification = [
+      'name',
+      'email',
+      'picture',
+      'iss',
+      'sub',
+      'maxAge',
+    ];
   }
 
   static init(payload, options){

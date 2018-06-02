@@ -224,6 +224,8 @@ describe('verify', function() {
       basicIdToken.addOptionalClaims(
           {'foo': 'bar', 'aud': 'audience', 'exp': 1437018587000 + 5});
       basicIdToken.setNoneAlgorithm(true);
+        
+      
       var token = basicIdToken.toJWT(key);
 
       [String('3s'), '3s', 3].forEach(function(maxAge) {
@@ -233,7 +235,7 @@ describe('verify', function() {
                                                                       } type)`,
            function(done) {
              clock = sinon.useFakeTimers(1437018587000);  // iat + 5s, exp - 5s
-
+             basicIdToken.toJWT(key).then(function(token){
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -245,8 +247,10 @@ describe('verify', function() {
                      'jti': 'jti'
                    },
                    options);
-               done();
              } catch (err) {
+               console.log(err)
+               console.log(maxAge)
+               console.log("=======================================");
                assert.equal(err.name, 'TokenExpiredError');
                assert.equal(err.message, 'maxAge exceeded');
                assert.equal(err.expiredAt.constructor.name, 'Date');
@@ -254,14 +258,16 @@ describe('verify', function() {
                assert.isUndefined(result);
                done();
              }
+             done();
            });
+          });
       });
 
       [String('5s'), '5s', 5].forEach(function(maxAge) {
         it(`should not error for claims issued before a certain timespan but still inside clockTolerance timespan (${
                                                                                                                      typeof
                                                                                                                          maxAge
-                                                                                                                   } type)`,
+                                                                                                        } type)`,
            function(done) {
              clock =
                  sinon.useFakeTimers(1437018587500);  // iat + 5.5s, exp - 4.5s
@@ -270,7 +276,8 @@ describe('verify', function() {
                maxAge: maxAge,
                clockTolerance: 1
              };
-
+             basicIdToken.toJWT(key).then(function(token){
+              
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -285,8 +292,11 @@ describe('verify', function() {
              } catch (err) {
                assert.isNull(err);
                assert.equal(result.foo, 'bar');
+               done();
              }
+
              done();
+            });
            });
       });
 
@@ -296,7 +306,8 @@ describe('verify', function() {
              clock =
                  sinon.useFakeTimers(1437018587500);  // iat + 5.5s, exp - 4.5s
              options = {algorithms: ['HS256'], maxAge: maxAge};
-
+             basicIdToken.toJWT(key).then(function(token){
+              
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -311,8 +322,10 @@ describe('verify', function() {
              } catch (err) {
                assert.isNull(err);
                assert.equal(result.foo, 'bar');
+               done();
              }
              done();
+            });
            });
       });
 
@@ -322,7 +335,8 @@ describe('verify', function() {
              clock =
                  sinon.useFakeTimers(1437018591900);  // iat + 9.9s, exp - 0.1s
              options = {algorithms: ['HS256'], maxAge: maxAge};
-
+             basicIdToken.toJWT(key).then(function(token){
+              
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -340,8 +354,10 @@ describe('verify', function() {
                assert.equal(err.expiredAt.constructor.name, 'Date');
                assert.equal(Number(err.expiredAt), 1437018586998000);
                assert.isUndefined(result);
+               done();
              }
              done();
+            });
            });
       });
 
@@ -350,7 +366,8 @@ describe('verify', function() {
            function(done) {
              clock = sinon.useFakeTimers(1437018593000);  // iat + 11s, exp + 1s
              options = {algorithms: ['HS256'], maxAge: '12s'};
-
+             basicIdToken.toJWT(key).then(function(token){
+              
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -368,8 +385,10 @@ describe('verify', function() {
                assert.equal(err.expiredAt.constructor.name, 'Date');
                assert.equal(Number(err.expiredAt), 1437018586998000);
                assert.isUndefined(result);
+               done();
              }
              done();
+            });
 
            });
       });
@@ -384,7 +403,8 @@ describe('verify', function() {
            function(done) {
              clock = sinon.useFakeTimers(1437018587000);  // iat + 5s, exp - 5s
              options = {algorithms: ['HS256'], maxAge: maxAge};
-
+             basicIdToken.toJWT(key).then(function(token){
+              
              try {
                var result = basicIdToken.fromJWT(
                    token, key, {
@@ -402,15 +422,18 @@ describe('verify', function() {
                    err.message,
                    '"maxAge" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60');
                assert.isUndefined(result);
+               done();
              }
              done();
+            });
            });
       });
 
       it('should error if maxAge is specified but there is no iat claim',
          function(done) {
            options = {algorithms: ['HS256'], maxAge: '1s'};
-
+           basicIdToken.toJWT(key).then(function(token){
+            
            try {
              var result = basicIdToken.fromJWT(
                  token, key, {
@@ -426,8 +449,10 @@ describe('verify', function() {
              assert.equal(err.name, 'JsonWebTokenError');
              assert.equal(err.message, 'iat required when maxAge is specified');
              assert.isUndefined(result);
+             done();
            }
            done();
+          });
          });
 
     });
@@ -446,7 +471,8 @@ describe('verify', function() {
            basicIdToken.addOptionalClaims(
                {'foo': 'bar', 'aud': 'audience', 'exp': clockTimestamp + 1});
            basicIdToken.setNoneAlgorithm(true);
-           var token = basicIdToken.toJWT(key);
+           basicIdToken.toJWT(key).then(function(token){
+            
 
            try {
              var result = basicIdToken.fromJWT(
@@ -463,8 +489,10 @@ describe('verify', function() {
              assert.equal(err.name, 'JsonWebTokenError');
              assert.equal(err.message, 'iat required when maxAge is specified');
              assert.isUndefined(result);
+             done();
            }
            done();
+          });
          });
       it('should error on expired token relative to user-provided clockTimestamp',
          function(done) {
@@ -477,7 +505,8 @@ describe('verify', function() {
            basicIdToken.addOptionalClaims(
                {'foo': 'bar', 'aud': 'audience', 'exp': clockTimestamp + 1});
            basicIdToken.setNoneAlgorithm(true);
-           var token = basicIdToken.toJWT(key);
+           basicIdToken.toJWT(key).then(function(token){
+            
 
            try {
              var result = basicIdToken.fromJWT(
@@ -496,8 +525,10 @@ describe('verify', function() {
              assert.equal(err.expiredAt.constructor.name, 'Date');
              assert.equal(Number(err.expiredAt), (clockTimestamp + 1) * 1000);
              assert.isUndefined(result);
+             done();
            }
            done();
+          });
          });
 
 
@@ -507,7 +538,8 @@ describe('verify', function() {
         basicIdToken.addOptionalClaims(
             {'foo': 'bar', 'aud': 'audience', 'exp': clockTimestamp + 1});
         basicIdToken.setNoneAlgorithm(true);
-        var token = basicIdToken.toJWT(key);
+        basicIdToken.toJWT(key).then(function(token){
+          
 
         try {
           var result = basicIdToken.fromJWT(
@@ -524,8 +556,10 @@ describe('verify', function() {
           assert.equal(err.name, 'JsonWebTokenError');
           assert.equal(err.message, 'clockTimestamp must be a number');
           assert.isUndefined(result);
+          done();
         }
         done();
+      });
       });
 
       it('should verify valid token with nbf', function(done) {
@@ -538,7 +572,8 @@ describe('verify', function() {
           'nbf': clockTimestamp + 1
         });
         basicIdToken.setNoneAlgorithm(true);
-        var token = basicIdToken.toJWT(key);
+        basicIdToken.toJWT(key).then(function(token){
+          
 
         try {
           basicIdToken.fromJWT(
@@ -553,8 +588,10 @@ describe('verify', function() {
               {clockTimestamp: clockTimestamp + 1});
         } catch (err) {
           assert.isNull(err);
+          done();
         }
         done();
+      });
 
       });
 
@@ -568,7 +605,7 @@ describe('verify', function() {
           'nbf': clockTimestamp + 1
         });
         basicIdToken.setNoneAlgorithm(true);
-        var token = basicIdToken.toJWT(key);
+        basicIdToken.toJWT(key).then(function(token){
 
         try {
           basicIdToken.fromJWT(
@@ -583,8 +620,10 @@ describe('verify', function() {
               {clockTimestamp: clockTimestamp});
         } catch (err) {
           assert.isNull(err);
+          done();
         }
         done();
+      });
 
       });
     });
@@ -605,7 +644,8 @@ describe('verify', function() {
              clockTimestamp: clockTimestamp,
              maxAge: '1m'
            };
-
+           basicIdToken.toJWT(key).then(function(token){
+            
            try {
              var result = basicIdToken.fromJWT(
                  token, key, {
@@ -623,8 +663,10 @@ describe('verify', function() {
              assert.equal(err.expiredAt.constructor.name, 'Date');
              assert.equal(Number(err.expiredAt), 1437018642000);
              assert.isUndefined(result);
+             done();
            }
            done();
+          });
          });
 
       it('should not error for claims issued before a certain timespan but still inside clockTolerance timespan',
@@ -646,8 +688,9 @@ describe('verify', function() {
            basicIdToken.addOptionalClaims(
                {'foo': 'bar', 'aud': 'audience', 'exp': clockTimestamp + 10});
            basicIdToken.setNoneAlgorithm(true);
-           token = basicIdToken.toJWT(key);
-
+           //token = basicIdToken.toJWT(key);
+           basicIdToken.toJWT(key).then(function(token){
+            
            try {
              var result = basicIdToken.fromJWT(
                  token, key, {
@@ -662,8 +705,10 @@ describe('verify', function() {
            } catch (err) {
              assert.isNull(err);
              assert.equal(result.foo, 'bar');
+             done();
            }
            done();
+          });
          });
 
       it('should not error if within maxAge timespan', function(done) {
@@ -673,7 +718,8 @@ describe('verify', function() {
           clockTimestamp: clockTimestamp,
           maxAge: '6s'
         };
-
+        basicIdToken.toJWT(key).then(function(token){
+          
         try {
           basicIdToken.fromJWT(
               token, key, {
@@ -687,8 +733,10 @@ describe('verify', function() {
               options);
         } catch (err) {
           assert.isNull(err);
+          done();
         }
         done();
+      });
       });
 
       it('can be more restrictive than expiration', function(done) {
@@ -707,8 +755,7 @@ describe('verify', function() {
         });
         basicIdToken.addOptionalClaims({'foo': 'bar', 'aud': 'audience'});
         basicIdToken.setNoneAlgorithm(true);
-       token = basicIdToken.toJWT(key);
-
+       basicIdToken.toJWT(key).then(function(token){
         try {
           var result = basicIdToken.fromJWT(
               token, key, {
@@ -725,8 +772,10 @@ describe('verify', function() {
           assert.equal(err.expiredAt.constructor.name, 'Date');
           assert.equal(Number(err.expiredAt), 1437018587000);
           assert.isUndefined(result);
+          done();
         }
         done();
+      });
       });
 
       it('cannot be more permissive than expiration', function(done) {
@@ -736,7 +785,8 @@ describe('verify', function() {
           clockTimestamp: clockTimestamp,
           maxAge: '1000y'
         };
-
+        basicIdToken.toJWT(key).then(function(token){
+          
         try {
           var result = basicIdToken.fromJWT(
               token, key, {
@@ -756,8 +806,10 @@ describe('verify', function() {
           assert.equal(err.expiredAt.constructor.name, 'Date');
           assert.equal(Number(err.expiredAt), 1437018800000);
           assert.isUndefined(result);
+          done();
         }
         done();
+      });
       });
 
       it('should error if maxAge is specified but there is no iat claim',
@@ -770,7 +822,7 @@ describe('verify', function() {
            };
            var refreshToken = new RefreshToken(
                {refreshToken: 'refreshToken', accessToken: 'accessToken'});
-           refreshToken.toJWT(key, {noTimestamp: true});
+           refreshToken.toJWT(key, {noTimestamp: true}).then(function(token){
            try {
              var result = refreshToken.fromJWT(
                  token, key, {
@@ -783,8 +835,10 @@ describe('verify', function() {
              assert.equal(err.name, 'JsonWebTokenError');
              assert.equal(err.message, 'iat required when maxAge is specified');
              assert.isUndefined(result);
+             done();
            }
            done();
+          });
          });
     });
   });

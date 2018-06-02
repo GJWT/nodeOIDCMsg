@@ -78,7 +78,7 @@ class KeyJar {
 
     //_key = b64e(as_bytes(key));
     if (usage == null) {
-      this.issuerKeys[owner] +=
+      this.issuerKeys[owner] =
           new this.keyBundleCls([{'kty': 'oct', 'k': key}]);
     } else {
       for (const use of usage) {

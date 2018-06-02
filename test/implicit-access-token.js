@@ -30,7 +30,7 @@ describe('Asymmetric Algorithms', function() {
       var clockTimestamp = 1000000000;
 
       describe(
-          'when signing a token with a known non standard claim', function() {
+          'when signing an implicit access token with a known non standard claim', function() {
             var implicitAccessToken = new ImplicitAccessToken(
                 {iss: 'issuer', sub: 'subject', iat: clockTimestamp});
             implicitAccessToken.addOptionalClaims({'aud': 'audience'});

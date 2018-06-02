@@ -23,11 +23,11 @@ class ImplicitAccessToken extends AccessToken {
     super({iss, sub, iat});
 
     /** Required claims */
-    this.optionsToPayload = {
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-    };
+    this.optionsToPayload = [
+      'iss',
+      'sub',
+      'iat',
+    ];
 
     /** Other option values */
     this.optionsForObjects = [
@@ -41,16 +41,16 @@ class ImplicitAccessToken extends AccessToken {
     ];
 
     /** Known optional claims that need to be verified */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-    };
+    this.knownOptionalClaims = [
+      'aud',
+    ];
 
     /** Required claims that need to be verified */
-    this.claimsForVerification = {
-      iss: 'iss',
-      sub: 'sub',
-      maxAge: 'maxAge',
-    };
+    this.claimsForVerification = [
+      'iss',
+      'sub',
+      'maxAge',
+    ];
   }
 
   static init(payload, options){

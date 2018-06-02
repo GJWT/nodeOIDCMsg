@@ -31,7 +31,7 @@ describe('Asymmetric Algorithms', function() {
       var clockTimestamp = 1000000000;
 
       describe(
-          'when signing a token with a known non standard claim', function() {
+          'when signing a scoped access token with a known non standard claim', function() {
             var scopedAccessToken = new ScopedAccessToken({
               iss: 'issuer',
               sub: 'subject',

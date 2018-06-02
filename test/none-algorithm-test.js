@@ -3,7 +3,7 @@ var BasicIdToken = require('../src/oicMsg/tokenProfiles/basicIdToken');
 
 describe('Asymmetric Algorithms', function() {
 
-  describe('when signing a token with none algorithm', function() {
+  describe('when signing a basic id token with none algorithm', function() {
     var clockTimestamp = 1000000000;
 
     var basicIdToken = new BasicIdToken({
@@ -17,7 +17,8 @@ describe('Asymmetric Algorithms', function() {
     it('should check if explicitly set', function(done) {
       basicIdToken.toJWT('shhhh', {algorithm: 'none'})
           .then(function(signedJWT) {
-            basicIdToken
+            try{
+            let decodedPayload = basicIdToken
                 .fromJWT(
                     signedJWT, 'shhhh', {
                       'iss': 'issuer',
@@ -26,13 +27,10 @@ describe('Asymmetric Algorithms', function() {
                       'clockTolerance': 10,
                       'jti': 'jti'
                     },
-                    {}, {algorithms: ['none']})
-                .then(function(decodedPayload) {
-                  assert.isNotNull(decodedPayload);
-                })
-                .catch(function(err) {
+                    {}, {algorithms: ['none']});
+                  }catch(err){
                   assert.isNotNull(err);
-                });
+                };
             done();
           });
     });

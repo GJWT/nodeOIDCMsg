@@ -26,12 +26,11 @@ class FacebookIdToken extends Message {
     this.iat = iat;
     this.validateRequiredFields();
 
-    /** Required claims */
-    this.optionsToPayload = {
-      userId: 'userId',
-      appId: 'appId',
-      iat: 'iat',
-    };
+    this.optionsToPayload = [
+      'userId',
+      'appId',
+      'iat',
+    ]
 
     /** Other option values */
     this.optionsForObjects = [
@@ -45,16 +44,16 @@ class FacebookIdToken extends Message {
     ];
 
     /** Required verification claims */
-    this.claimsForVerification = {
-      userId: 'userId',
-      appId: 'appId',
-      maxAge: 'maxAge',
-    };
+    this.claimsForVerification = [
+      'userId',
+      'appId',
+      'maxAge',
+    ];
 
     /** Known optional claims */
-    this.knownOptionalClaims = {
-      expiredAt: 'expiredAt',
-    };
+    this.knownOptionalClaims = [
+      'expiredAt',
+    ];
   }
 
   static init(payload, options){

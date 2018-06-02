@@ -1,8 +1,6 @@
 'use strict';
-
-const jwtDecoder = require('../oicMsg/jose/jwt/decode');
-const jwtSigner = require('../oicMsg/jose/jwt/sign');
-const jwtVerifier = require('../oicMsg/jose/jwt/verify');
+const JWTDecoder = require('../oicMsg/jose/jwt/decode');
+const JWTSigner = require('../oicMsg/jose/jwt/sign');
 
 /**
  * @fileoverview
@@ -24,6 +22,12 @@ const jwtVerifier = require('../oicMsg/jose/jwt/verify');
  */
 class Message {
   constructor(claims) {
+    if (claims) {
+      this.claims = claims;
+    } else {
+      this.claims = {};
+    }
+    
     this.initData();
 
     /** Provided required claims */
@@ -42,16 +46,16 @@ class Message {
     this.noneAlgorithm = false;
 
     /** Required claims */
-    this.optionsToPayload = {};
+    this.optionsToPayload = [];
 
     /** Other option values */
     this.optionsForObjects = [];
 
     /** Known required claims */
-    this.knownOptionalClaims = {};
+    this.knownOptionalClaims = [];
 
     /** Required verification claims */
-    this.claimsForVerification = {};
+    this.claimsForVerification = []
 
     /** Key value map of claims that make up the payload of a Message */
     this.cParam = {};
@@ -59,7 +63,7 @@ class Message {
     /** Map of allowed values for each claim of Message */
     this.cAllowedValues = {};
 
-    return claims;
+    return this;
   }
 
   initData() {
@@ -73,28 +77,31 @@ class Message {
   addOptionalClaims(optionalClaims) {
     this.optionalClaims = optionalClaims;
     this.optionalVerificationClaims = {};
-    Object.keys(optionalClaims).forEach(key => {
-      if (this.knownOptionalClaims[key]) {
-        this.optionalVerificationClaims[key] = optionalClaims[key];
+    for (let i = 0; i < Object.keys(optionalClaims).length; i++){
+      let key = optionalClaims[i];
+      if (key) {
+        this.optionalVerificationClaims[key] = key;
       }
-    });
+    };
   }
-
+  
   /** Check for missing required claims */
   validateRequiredFields() {
-    Object.keys(this.optionsToPayload).forEach(key => {
-      if (!this[key]) {
+    for (let i = 0; i < this.optionsToPayload.length; i++){
+      let key = this.optionsToPayload[i];
+      if (!this[key] === undefined) {
         throw new Error('You are missing a required parameter');
       }
-    });
+    };
   }
 
   /** Fetch Required claims */
   getRequiredClaims() {
     this.requiredClaims = {};
-    Object.keys(this.optionsToPayload).forEach(key => {
+    for (let i = 0; i < this.optionsToPayload.length; i++){
+      let key = this.optionsToPayload[i];
       this.requiredClaims[key] = this[key];
-    });
+    }
     return this.requiredClaims;
   }
 
@@ -133,14 +140,15 @@ class Message {
    * @param {?Object<string, string>} claimsToVerify Claims that need to be verified
    * */
   validateRequiredVerificationClaims(claimsToVerify) {
-    Object.keys(this.claimsForVerification).forEach(key => {
+    for (let i = 0; i < this.claimsForVerification.length; i++){
+      let key = this.claimsForVerification[i];
       if (!claimsToVerify[key]) {
         throw new Error(`Missing required verification claim: ${key}`);
       }
-    });
+    };
     this.verificationClaims = claimsToVerify;
   }
-
+  
   /**
    * Throws error if required non Required verification claims are not present
    * @param {?Object<string, string>} claimsToVerify Claims that need to be verified
@@ -160,23 +168,10 @@ class Message {
       throw new Error(`Missing required verification claim: ${key}`);
     } else {
       this.verificationClaims[key] = claimsToVerify[key];
-      if (key === 'aud') {
+      if (key == 'aud') {
         this.claimsForVerification['aud'] = 'aud';
       }
     }
-  }
-
-  decode(signedJWT, secretOrPrivateKey, options) {
-    return jwtDecoder.prototype.decode(
-        signedJWT, secretOrPrivateKey, this, options);
-  }
-
-  verify(payload, verificationClaims, otherOptions) {
-    this.validateRequiredVerificationClaims(verificationClaims);
-    this.validateOptionalVerificationClaims(verificationClaims);
-    payload =
-        jwtVerifier.prototype.verifyPayload(payload, this, otherOptions);
-    return payload;
   }
 
   /**
@@ -186,11 +181,13 @@ class Message {
    for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
    * @param options consists of other inputs that are not part of the payload,
    for ex : 'algorithm'
+   * @param callback is called with the decoded payload if the signature is
+   valid and optional expiration, audience, or issuer are valid. If not, it will
+   be called with the error. When supplied, the function acts asynchronously.
    **/
-  toJWT(secretOrPrivateKey, options) {
-    const signedToken =
-        jwtSigner.prototype.sign(this, secretOrPrivateKey, options);
-    return signedToken;
+  toJWT(secretOrPrivateKey, options, callback) {
+    return JWTSigner.prototype.sign(
+        this, secretOrPrivateKey, options, callback);
   }
 
   /**
@@ -200,32 +197,28 @@ class Message {
    * @param {*} secretOrPublicKey String or buffer containing either the secret for HMAC algorithms, or the PEM encoded public key for RSA and ECDSA
    * @param {?Object<string, string>} claimsToVerify Dictionary contains claims that need to be verified
    * @param {?Object<string, string>} options Consists of other inputs that are not part of the payload, for ex : 'algorithm'
+   * @param {*} callback Called with the decoded payload if the signature is valid and optional expiration, audience, or issuer are valid. If not, it
+      will be called with the error. When supplied, the function acts
+   asynchronously.
    **/
-  fromJWT(signedJWT, secretOrPrivateKey, claimsToVerify, options) {
-    return new Promise((resolve, reject) => {
-      try {
-        let decoded = jwtDecoder.prototype.decode(
-            signedJWT, secretOrPrivateKey, this, options);
-        this.validateRequiredVerificationClaims(claimsToVerify);
-        this.validateOptionalVerificationClaims(claimsToVerify);
-        decoded = jwtVerifier.prototype.verifyPayload(decoded, this, options);
-        resolve(decoded);
-      } catch (err) {
-        reject(err);
-      }
-    });
+  fromJWT(signedJWT, secretOrPrivateKey, claimsToVerify, options, callback) {
+    this.validateRequiredVerificationClaims(claimsToVerify);
+    this.validateOptionalVerificationClaims(claimsToVerify);
+    return JWTDecoder.prototype.decode(
+        signedJWT, secretOrPrivateKey, this, options, callback);
   }
 
-  /**
+   /**
    * Serialization of JSON type
    * @param {?Object<string, string>} obj Object that needs to be converted to JSON
    */
   static toJSON(obj) {
-    if (!obj) {
-      obj =
-          Object.assign({}, this.getRequiredClaims(), this.getOptionalClaims());
+    if (obj) {
+      this.claims = JSON.stringify(obj);
+    }else if (typeof this.claims !== String){
+      this.claims = JSON.stringify(this.claims);
     }
-    return JSON.stringify(obj);
+    return this.claims;
   }
 
   /**
@@ -247,13 +240,15 @@ class Message {
     }
     const str = [];
     for (const p in obj)
-      str.push(`${encodeURIComponent(p)}=${encodeURIComponent(obj[p])}`);
+      if (obj.hasOwnProperty(p)){
+        str.push(`${encodeURIComponent(p)}=${encodeURIComponent(obj[p])}`);        
+      }
     return str.join('&');
   }
 
   /**
    * Deserialization of URL Encoded string
-   * @param {string} obj Url encoded string that needs to be deserialized
+   * @param {string} urlEncodedString encoded string that needs to be deserialized
    * */
   static fromUrlEncoded(urlEncodedString) {
     if (typeof urlEncodedString === 'string') {
@@ -266,29 +261,6 @@ class Message {
       return urlEncodedString;
     }
   }
-
-  /**
-   * @param {*} location A URL
-   * @param {*} inFragment Whether the information should be placed in a fragment (true) or in a query part (false)
-   */
-  request(location, inFragment) {}
-
-  /**
-   * Convert this instance to another representation. Which representation
-   * is given by the choice of serialization method.
-   * @param {*} method A serialization method. Presently 'urlencoded', 'json',
-      'jwt' and 'dict' is supported.
-   * @param {*} lev
-   * @return The content of this message serialized using a chosen method
-   */
-  serialize(method, lev) {}
-
-  /**
-   * Convert from an external representation to an internal.
-   * @param {*} info Information that needs to be deserialized
-   * @param {*} method Deserialization method
-   */
-  deserialize(info, method) {}
 }
 
 module.exports = Message;

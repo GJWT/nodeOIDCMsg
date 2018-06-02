@@ -141,19 +141,21 @@ describe('iat', function() {
        });
        basicIdToken.setNoneAlgorithm(true);
        var signedJWT = basicIdToken.toJWT('shhhh');
-       basicIdToken
+       try{
+          let decodedPayload = basicIdToken
            .fromJWT(
                signedJWT, 'shhhh', {
                  'iss': 'issuer',
                  'sub': 'subject',
                  'aud': 'audience',
                  'clockTolerance': 10,
+                 'maxAge': '1d',
                  'jti': 'jti'
                },
                {'clockTimestamp': clockTimestamp})
-           .catch(function(err) {
-             assert.isNotNull(err);
-           });
+        }catch(err) {
+          assert.isNotNull(err);
+        }
        done();
      });
 });

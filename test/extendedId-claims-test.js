@@ -30,7 +30,7 @@ describe('Asymmetric Algorithms', function() {
       var clockTimestamp = 1000000000;
 
       describe(
-          'when signing a token with a known non standard claim', function() {
+          'when signing an extendedId token with a known non standard claim', function() {
             var extendedIdToken = new ExtendedIdToken({
               name: 'name',
               email: 'email@google.com',

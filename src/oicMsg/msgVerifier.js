@@ -37,33 +37,33 @@ class MessageVerifier {
           typeof options.clockTimestamp !== 'number') {
         reject(
             new JSError('clockTimestamp must be a number'),
-            'JSONWebTokenError');
+            'JsonWebTokenError');
       }
 
       if (!jwtString) {
-        reject(new JSError('jwt must be provided', 'JSONWebTokenError'));
+        reject(new JSError('jwt must be provided', 'JsonWebTokenError'));
       }
 
       if (typeof jwtString !== 'string') {
-        reject(new JSError('jwt must be a string', 'JSONWebTokenError'));
+        reject(new JSError('jwt must be a string', 'JsonWebTokenError'));
       }
 
       const parts = jwtString.split('.');
 
       if (parts.length !== 3) {
-        reject(new JSError('jwt malformed', 'JSONWebTokenError'));
+        reject(new JSError('jwt malformed', 'JsonWebTokenError'));
       }
 
       const hasSignature = parts[2].trim() !== '';
 
 
       if (!hasSignature && secretOrPublicKey) {
-        reject(new JSError('jwt signature is required', 'JSONWebTokenError'));
+        reject(new JSError('jwt signature is required', 'JsonWebTokenError'));
       }
 
       if (hasSignature && !secretOrPublicKey) {
         reject(new JSError(
-            'secret or public key must be provided', 'JSONWebTokenError'));
+            'secret or public key must be provided', 'JsonWebTokenError'));
       }
 
       if (options && !hasSignature && !options.algorithms) {
@@ -110,7 +110,7 @@ class MessageVerifier {
     return new Promise((resolve, reject) => {
       if (typeof payload.nbf !== 'undefined' && !otherOptions.ignoreNotBefore) {
         if (typeof payload.nbf !== 'number') {
-          reject(new JSError('invalid nbf value', 'JSONWebTokenError'));
+          reject(new JSError('invalid nbf value', 'JsonWebTokenError'));
         }
         if (payload.nbf > clockTimestamp + (options.clockTolerance || 0)) {
           reject(new JSError(
@@ -122,15 +122,28 @@ class MessageVerifier {
       if (typeof payload.exp !== 'undefined' &&
           !otherOptions.ignoreExpiration) {
         if (typeof payload.exp !== 'number') {
-          reject(new JSError('invalid exp value', 'JSONWebTokenError'));
+          reject(new JSError('invalid exp value', 'JsonWebTokenError'));
         }
         if (clockTimestamp >= payload.exp + (options.clockTolerance || 0)) {
           reject(new JSError(
-              'jwt expired', 'JSONWebTokenError',
+              'jwt expired', 'JsonWebTokenError',
               new Date(payload.exp * 1000)));
         }
       }
 
+      for (var i = 0; i < tokenProfile.claimsForVerification.length; i++){
+        let key = tokenProfile.claimsForVerification[i];
+        if (options[key] && key !== 'maxAge' && key !== 'clockTolerance' &&
+            key !== 'aud') {
+          if (payload[key] !== options[key]) {
+            reject(new JSError(
+                `jwt option invalid. expected: ${options[key]}`,
+                'JsonWebTokenError'));
+          }
+        }
+      }
+
+      /*
       Object.keys(tokenProfile.claimsForVerification).forEach(key => {
         const claim = tokenProfile.claimsForVerification[key];
         if (options[key] && key !== 'maxAge' && key !== 'clockTolerance' &&
@@ -138,10 +151,10 @@ class MessageVerifier {
           if (payload[claim] !== options[key]) {
             reject(new JSError(
                 `jwt option invalid. expected: ${options[key]}`,
-                'JSONWebTokenError'));
+                'JsonWebTokenError'));
           }
         }
-      });
+      });*/
 
       if (options.aud) {
         const audiences =
@@ -157,7 +170,7 @@ class MessageVerifier {
         if (!match)
           reject(new JSError(
               `jwt audience invalid. expected: ${audiences.join(' or ')}`,
-              'JSONWebTokenError'));
+              'JsonWebTokenError'));
       }
 
       /*
@@ -183,21 +196,21 @@ class MessageVerifier {
         if (payload.jti !== otherOptions.jwtid) {
           reject(new JSError(
               `jwt jwtid invalid. expected: ${otherOptions.jwtid}`,
-              'JSONWebTokenError'));
+              'JsonWebTokenError'));
         }
       }
 
       if (options.maxAge) {
         if (typeof payload.iat !== 'number') {
           reject(new JSError(
-              'iat required when maxAge is specified', 'JSONWebTokenError'));
+              'iat required when maxAge is specified', 'JsonWebTokenError'));
         }
 
         const maxAgeTimestamp = timespan(options.maxAge, payload.iat);
         if (typeof maxAgeTimestamp === 'undefined') {
           reject(new JSError(
               '"maxAge" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60',
-              'JSONWebTokenError'));
+              'JsonWebTokenError'));
         }
         if (clockTimestamp >= maxAgeTimestamp + (options.clockTolerance || 0)) {
           reject(new JSError(

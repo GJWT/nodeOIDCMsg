@@ -1,23 +1,22 @@
 const OAuth2 = require('../OAuth2/init.js');
 const OAuth2TokenErrorResponse =
     require('../OAuth2/responses').TokenErrorResponse;
+const OAuth2RefreshAccessTokenRequest =
+    require('../OAuth2/requests').RefreshAccessTokenRequest;
 const OAuth2AccessTokenResponse =
     require('../OAuth2/responses').AccessTokenResponse;
 const OAuth2AuthorizationResponse =
     require('../OAuth2/responses').AuthorizationResponse;
 const OAuth2AuthorizationErrorResponse =
     require('../OAuth2/responses').AuthorizationErrorResponse;
+const OAuth2AuthorizationRequest =
+    require('../OAuth2/requests').AuthorizationRequest;
+const OAuth2AccessTokenRequest =
+    require('../OAuth2/requests').AccessTokenRequest;
 const OAuth2ErrorResponse = require('../OAuth2/responses').ErrorResponse;
 const SINGLE_OPTIONAL_STRING = require('../OAuth2/init').SINGLE_OPTIONAL_STRING;
-const Message = require('../message');
-const OPTIONAL_LIST_OF_STRINGS = require('../OAuth2/init').OPTIONAL_LIST_OF_STRINGS;
-const SINGLE_OPTIONAL_BOOLEAN = require('../OAuth2/init').SINGLE_OPTIONAL_BOOLEAN;
-const SINGLE_REQUIRED_STRING = require('../OAuth2/init').SINGLE_REQUIRED_STRING;
-const SINGLE_OPTIONAL_INT = require('../OAuth2/init').SINGLE_OPTIONAL_INT;
-const REQUIRED_LIST_OF_STRINGS = require('../OAuth2/init').REQUIRED_LIST_OF_STRINGS;
 const SINGLE_OPTIONAL_IDTOKEN = require('../OAuth2/init').SINGLE_OPTIONAL_IDTOKEN;
-const SINGLE_REQUIRED_IDTOKEN = require('../OAuth2/init').SINGLE_REQUIRED_IDTOKEN;
-const Token = require('../tokenProfiles/token');
+const Message = require('../message');
 
 /**
  * @fileoverview Contains all the OIC response classes
@@ -42,34 +41,45 @@ class TokenErrorResponse extends OAuth2TokenErrorResponse {
  * @extends OAuth2AccessTokenResponse
  */
 class AccessTokenResponse extends OAuth2AccessTokenResponse {
-  constructor() {
-    super();
-    this.cParam = OAuth2.AccessTokenResponse.cParam;
+  constructor(claims) {
+    super(claims);
+    if (claims){
+      this.claims = claims;
+    }else{
+      this.claims = {};
+    }
     this.cParam =
         Object.assign(this.cParam, {'id_token': SINGLE_OPTIONAL_STRING});
+    return this;
   }
 
-  verify(kwargs) {
+  verify(params) {
+    if (!params){
+      params = this.claims;
+    }
     // super();
-    if (Object.keys(this.cParam).indexOf('id_token')) {
-      const args = {};
+    if (Object.keys(this.claims).indexOf('id_token')) {
+      let args = {};
       const argsArray = ['key', 'keyjar', 'algs', 'sender'];
       for (var i = 0; i < argsArray.length; i++) {
-        const arg = argsArray[i];
-        if (kwargs[arg]) {
-          args[arg] = kwargs[arg];
+        let arg = argsArray[i];
+        if (params[arg]) {
+          args[arg] = params[arg];
         }
       }
-      
-      const idt = new Token().fromJWT(this.cParam['id_token'], args);
-      if (!idt.verify(kwargs)){
+
+      if (this.claims['id_token']){
+        const idt = new Message().fromJWT(this.claims['id_token'], 'shhh', {}, {algorithm: 'HS256'});
+        /*if (!idt.verify(params)){
           return false;
+        }*/
+        this.claims['verified_id_token'] = idt;
       }
-      this.cParam['verified_id_token'] = idt;
     }
     return true;
   }
 }
+
 
 /**
  * AuthorizationResponse
@@ -78,18 +88,26 @@ class AccessTokenResponse extends OAuth2AccessTokenResponse {
  * @extends OAuth2AuthorizationResponse
  */
 class AuthorizationResponse extends OAuth2AuthorizationResponse {
-  constructor() {
-    super();
-    this.cParam = OAuth2.AuthorizationResponse.c_param.copy();
-    this.cParam.update(OAuth2.AccessTokenResponse.c_param);
-    this.cParam.update({
+  constructor(claims) {
+    super(claims);
+    if (claims){
+      this.claims = claims;
+    }else{
+      this.claims = {};
+    }
+    this.cParam = OAuth2AuthorizationResponse.cParam;
+    //this.cParam = Object.assign(OAuth2AccessTokenResponse.cParam, this.cParam);
+    this.cParam = Object.assign({
       'code': SINGLE_OPTIONAL_STRING,
       'nonce': SINGLE_OPTIONAL_STRING,
       'access_token': SINGLE_OPTIONAL_STRING,
       'token_type': SINGLE_OPTIONAL_STRING,
       'id_token': SINGLE_OPTIONAL_IDTOKEN
-    });
+    }, this.cParam);
+    return this;
   }
+
+  verify(params) {}
 }
 
 /**
@@ -101,7 +119,7 @@ class AuthorizationResponse extends OAuth2AuthorizationResponse {
 class AuthorizationErrorResponse extends OAuth2AuthorizationErrorResponse {
   constructor() {
     super();
-    this.cAllowedValues = OAuth2AuthorizationErrorResponse.cAllowedValues;
+    this.cAllowedValues = responses.AuthorizationErrorResponse.cAllowedValues;
     this.cAllowedValues['error'].extend([
       'interaction_required', 'login_required', 'session_selection_required',
       'consent_required', 'invalid_request_uri', 'invalid_request_object',
@@ -128,8 +146,10 @@ class RegistrationResponse extends Message {
       'registration_client_uri': SINGLE_OPTIONAL_STRING,
       'client_id_issued_at': SINGLE_OPTIONAL_INT,
       'client_secret_expires_at': SINGLE_OPTIONAL_INT,
-    };
+    }
   }
+
+  verify() {}
 }
 
 /**
@@ -199,8 +219,13 @@ class EndSessionResponse extends Message {
  * @extends Message
  */
 class ProviderConfigurationResponse extends Message {
-  constructor() {
-    super();
+  constructor(claims) {
+    super(claims);
+    if (claims){
+      this.claims = claims;
+    }else{
+      this.claims = {};
+    }
     this.cParam = {
       'issuer': SINGLE_REQUIRED_STRING,
       'authorization_endpoint': SINGLE_REQUIRED_STRING,
@@ -249,13 +274,16 @@ class ProviderConfigurationResponse extends Message {
     this.cDefault = {
       'version': '3.0',
       'token_endpoint_auth_methods_supported': ['client_secret_basic'],
-      'claims_parameter_supported': false,
-      'request_parameter_supported': false,
-      'request_uri_parameter_supported': true,
-      'require_request_uri_registration': true,
+      'claims_parameter_supported': False,
+      'request_parameter_supported': False,
+      'request_uri_parameter_supported': True,
+      'require_request_uri_registration': True,
       'grant_types_supported': ['authorization_code', 'implicit']
     };
+    return this;
   }
+
+  verify(params) {}
 }
 
 /**
@@ -275,3 +303,8 @@ class UserInfoErrorResponse extends OAuth2ErrorResponse {
     };
   }
 }
+
+module.exports.AuthorizationResponse = AuthorizationResponse;
+module.exports.AccessTokenResponse = AccessTokenResponse;
+module.exports.ProviderConfigurationResponse = ProviderConfigurationResponse;
+module.exports.RegistrationResponse = RegistrationResponse;

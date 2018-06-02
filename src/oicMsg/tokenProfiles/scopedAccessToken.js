@@ -29,12 +29,12 @@ class ScopedAccessToken extends Message {
     this.validateRequiredFields();
 
     /** optional claims */
-    this.optionsToPayload = {
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-      scope: 'scope',
-    };
+    this.optionsToPayload = [
+      'iss',
+      'sub',
+      'iat',
+      'scope',
+    ];
 
     /** Other option values */
     this.optionsForObjects = [
@@ -48,18 +48,18 @@ class ScopedAccessToken extends Message {
     ];
 
     /** Known optional claims */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-      exp: 'exp',
-    };
+    this.knownOptionalClaims = [
+      'aud',
+      'exp',
+    ];
 
     /** optional verification claims */
-    this.claimsForVerification = {
-      iss: 'iss',
-      sub: 'sub',
-      scope: 'scope',
-      maxAge: 'maxAge',
-    };
+    this.claimsForVerification = [
+      'iss',
+      'sub',
+      'scope',
+      'maxAge',
+    ];
   }
 
   static init(payload, options){

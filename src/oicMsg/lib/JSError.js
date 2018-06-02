@@ -1,6 +1,6 @@
 
 var Type = {
-  JSONWebTokenError: 'JSONWebTokenError',
+  JsonWebTokenError: 'JsonWebTokenError',
   TokenExpiredError: 'TokenExpiredError',
   NotBeforeError: 'NotBeforeError',
 };
@@ -12,8 +12,8 @@ const JSError = function(message, type, error) {
     Error.captureStackTrace(this, this.constructor);
   }
   switch (type) {
-    case Type.JSONWebTokenError:
-      this.name = Type.JSONWebTokenError;
+    case Type.JsonWebTokenError:
+      this.name = Type.JsonWebTokenError;
       break;
     case Type.TokenExpiredError:
       this.name = Type.TokenExpiredError;

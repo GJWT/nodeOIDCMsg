@@ -4,7 +4,7 @@ var BasicIdToken = require('../src/oicMsg/tokenProfiles/basicIdToken');
 
 var clockTimestamp = 1000000000;
 
-describe('when signing a token with a known non standard claim', function() {
+describe('when keyid signing a token with a known non standard claim', function() {
 
 
   var basicIdToken = new BasicIdToken(

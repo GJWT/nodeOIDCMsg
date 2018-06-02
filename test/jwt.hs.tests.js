@@ -136,7 +136,8 @@ describe('HS256', function() {
     });
 
     it('should throw when verifying null', function(done) {
-      basicIdToken
+      try{
+        let decoded = basicIdToken
           .fromJWT(
               null, secret, {
                 'iss': 'issuer',
@@ -146,13 +147,11 @@ describe('HS256', function() {
                 'clockTolerance': 10,
                 'jti': 'jti'
               },
-              {'clockTimestamp': clockTimestamp})
-          .then(function(decoded) {
-            assert.isUndefined(decoded);
-          })
-          .catch(function(err) {
-            assert.isNotNull(err);
-          });
+              {'clockTimestamp': clockTimestamp});
+        }catch(err){
+          assert.isNotNull(err);
+          
+        }
       done();
     });
 

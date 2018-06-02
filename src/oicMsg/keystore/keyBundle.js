@@ -24,12 +24,88 @@ const getPem = require('rsa-pem-from-mod-exp');
 
 /**
  * KeyBundle
+ * 
+ * Contains a set of keys that have a common origin.
+ * The sources can be several:
+ * - A dictionary provided at the initialization, see keys below.
+ * - A list of dictionaries provided at initialization
+ * - A file containing one of: JWKS, DER encoded key
+ * - A URL pointing to a webpages from which an JWKS can be downloaded
+ *
+ * @param {dictionary} keys A dictionary or a list of dictionaries with the keys ['kty',
+   'key', 'alg', 'use', 'kid']
+ * @param {string} source Where the key set can be fetch from
+ * @param {string} verifySSL Verify the SSL cert used by the server
+ * @param {string} fileFormat For a local file either 'jwk' or 'der'
+ * @param {string} keyType Iff local file and 'der' format what kind of key it is.
+ * @param {string} keyUsage What the key loaded from file should be used for.
+ *
  * @class
  * @constructor
  */
 class KeyBundle {
-  constructor() {
-    console.log('test');
+  constructor(keys, source, fileFormat, keyUsage, cacheTime, verifySSL, keyType) {
+      console.log('constructor');
+      fileFormat = fileFormat || 'jwk';
+      keyUsage = keyUsage || 'None';
+      cacheTime = cacheTime || 300;
+      verifySSL = keyUsage || 'None';
+      keyType = keyType || 'RSA';
+      source = source || '';
+      this.keys = [];
+      this.remote = false;
+      this.verifySSL = verifySSL;
+      this.cacheTime = cacheTime;
+      this.timeOut = 0;
+      this.etag = '';
+      this.source = null;
+      this.fileFormat = fileFormat.toLowerCase();
+      this.keyType = keyType;
+      this.keyUsage = keyUsage;
+      this.impJwks = null;
+      this.lastUpdated = 0;
+      this.formattedKeysList = [];
+      let self = this;
+    
+      let result = null;
+      if (keys) {
+        if (typeof keys === 'object' && keys !== null && !(keys instanceof Array) &&
+            !(keys instanceof Date)) {
+          this.doKeys([keys]);
+        } else {
+          this.doKeys(keys);
+        }
+      } else {
+        if (source.startsWith('file://')) {
+          this.source = source.substring(7);
+        } else if (source.startsWith('http://') || source.startsWith('https://')) {
+          this.source = source;
+          this.remote = true;
+        } else if (source === '') {
+          return;
+        } else {
+          const formatArr = ['rsa', 'der', 'jwks'];
+          if (formatArr.includes(fileFormat.toLowerCase())) {
+            if (fs.lstatSync(source).isFile()) {
+              this.source = source;
+            } else {
+              console.log('No such file');
+            }
+          } else {
+            console.log('Unknown source');
+          }
+        }
+        if (!this.remote) {
+          const formatArr = ['jwks', 'jwk'];
+          if (formatArr.includes(this.fileFormat)) {
+            result = awaitFunc(self.doLocalJwk(self.source));
+    
+          } else if (this.fileFormat === 'der') {
+            result = this.doLocalDer(this.source, this.keyType, this.keyUsage);
+          }
+        }
+      }
+      return result;
   }
 
   getCurrentTime() {
@@ -40,11 +116,15 @@ class KeyBundle {
     if (!this.keys) {
       this.keys = [];
     }
+    let usage = ['sig', 'enc'];
     if (typeof keyData === 'string') {
       this.keys.push(keyData);
     } else {
-      for (const i = 0; i < keyData.length; i++) {
-        this.keys.push(keyData[i]);
+      for (var i = 0; i < usage.length; i++){
+        for (var j = 0; j < keyData.length; j++) {
+          let keyDataCpy = Object.assign({use: usage[i]}, keyData[j]);
+          this.keys.push(keyDataCpy);
+        }
       }
     }
   }
@@ -521,89 +601,6 @@ class KeyBundle {
     }
   }
 }
-
-/**
- * Contains a set of keys that have a common origin.
- * The sources can be several:
- * - A dictionary provided at the initialization, see keys below.
- * - A list of dictionaries provided at initialization
- * - A file containing one of: JWKS, DER encoded key
- * - A URL pointing to a webpages from which an JWKS can be downloaded
- *
- * @param {dictionary} keys A dictionary or a list of dictionaries with the keys ['kty',
-   'key', 'alg', 'use', 'kid']
- * @param {string} source Where the key set can be fetch from
- * @param {string} verifySSL Verify the SSL cert used by the server
- * @param {string} fileFormat For a local file either 'jwk' or 'der'
- * @param {string} keyType Iff local file and 'der' format what kind of key it is.
- * @param {string} keyUsage What the key loaded from file should be used for.
- *
- * @memberof KeyBundle
- */
-KeyBundle.prototype.init = async(function(
-    keys, source, fileFormat, keyUsage, cacheTime, verifySSL, keyType) {
-  console.log('constructor');
-  fileFormat = fileFormat || 'jwk';
-  keyUsage = keyUsage || 'None';
-  cacheTime = cacheTime || 300;
-  verifySSL = keyUsage || 'None';
-  keyType = keyType || 'RSA';
-  source = source || '';
-  this.keys = [];
-  this.remote = false;
-  this.verifySSL = verifySSL;
-  this.cacheTime = cacheTime;
-  this.timeOut = 0;
-  this.etag = '';
-  this.source = null;
-  this.fileFormat = fileFormat.toLowerCase();
-  this.keyType = keyType;
-  this.keyUsage = keyUsage;
-  this.impJwks = null;
-  this.lastUpdated = 0;
-  this.formattedKeysList = [];
-  const self = this;
-
-  const result = null;
-  if (keys) {
-    if (typeof keys === 'object' && keys !== null && !(keys instanceof Array) &&
-        !(keys instanceof Date)) {
-      this.doKeys([keys]);
-    } else {
-      this.doKeys(keys);
-    }
-  } else {
-    if (source.startsWith('file://')) {
-      this.source = source.substring(7);
-    } else if (source.startsWith('http://') || source.startsWith('https://')) {
-      this.source = source;
-      this.remote = true;
-    } else if (source === '') {
-      return;
-    } else {
-      const formatArr = ['rsa', 'der', 'jwks'];
-      if (formatArr.includes(fileFormat.toLowerCase())) {
-        if (fs.lstatSync(source).isFile()) {
-          this.source = source;
-        } else {
-          console.log('No such file');
-        }
-      } else {
-        console.log('Unknown source');
-      }
-    }
-    if (!this.remote) {
-      const formatArr = ['jwks', 'jwk'];
-      if (formatArr.includes(this.fileFormat)) {
-        result = awaitFunc(self.doLocalJwk(self.source));
-
-      } else if (this.fileFormat === 'der') {
-        result = this.doLocalDer(this.source, this.keyType, this.keyUsage);
-      }
-    }
-  }
-  return result;
-});
 
 const MAP = {
   'dec': 'enc',

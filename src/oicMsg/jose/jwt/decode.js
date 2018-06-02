@@ -40,7 +40,7 @@ class JWTDecoder {
     var done = this.initCallback(callback);
 
     if (!decoded) {
-      throw new JSError('invalid token', 'JSONWebTokenError');
+      throw new JSError('invalid token', 'JsonWebTokenError');
     }
     const header = decoded.header;
 
@@ -48,7 +48,7 @@ class JWTDecoder {
 
     this.verifyHeaderAlgorithm(otherOptions, header, done)
 
-        const baseEncoding = otherOptions.baseEncoding || 'base64';
+    const baseEncoding = otherOptions.baseEncoding || 'base64';
 
     this.validateJws(jwtSig, header.alg, secretOrPublicKey, baseEncoding, done)
 
@@ -56,8 +56,8 @@ class JWTDecoder {
     this.parsePayload(payload);
 
     // verify payload values matches expected values
-    // var payload =  jwtVerifier.prototype.verifyPayload(payload,
-    // tokenProfile,otherOptions, callback);
+    var payload =  jwtVerifier.prototype.verifyPayload(payload,
+      tokenProfile,otherOptions, callback);
 
     // return header if `complete` option is enabled.  header includes claims
     // such as `kid` and `alg` used to select the key within a JWKS needed to
@@ -100,14 +100,14 @@ class JWTDecoder {
   verifyHeaderAlgorithm(otherOptions, header, done) {
     if (otherOptions && otherOptions.algorithms) {
       if (!~otherOptions.algorithms.indexOf(header.alg)) {
-        throw new JSError('invalid algorithm', 'JSONWebTokenError');
+        throw new JSError('invalid algorithm', 'JsonWebTokenError');
       }
 
       if (otherOptions.algorithms.includes('none') &&
           tokenProfile.getNoneAlgorithm() == false) {
         throw new JSError(
             'Cannot use none algorithm unless explicitly set',
-            'JSONWebTokenError');
+            'JsonWebTokenError');
       }
     }
   }

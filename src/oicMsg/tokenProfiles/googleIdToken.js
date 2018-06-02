@@ -33,15 +33,31 @@ class GoogleIdToken extends Message {
     this.iat = iat;
     this.validateRequiredFields();
 
-    /** Required claims */
-    this.optionsToPayload = {
-      name: 'name',
-      email: 'email',
-      picture: 'picture',
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-    };
+     /** Required claims */
+    this.optionsToPayload = [
+      'name',
+      'email',
+      'picture',
+      'iss',
+      'sub',
+      'iat',
+    ];
+
+    /** Known optional claims */
+    this.knownOptionalClaims = [
+      'exp',
+      'aud',
+    ];
+
+    /** Required claims that need to be verified */
+    this.claimsForVerification = [
+      'name',
+      'email',
+      'picture',
+      'iss',
+      'sub',
+      'maxAge',
+    ];
 
     /** Other option values */
     this.optionsForObjects = [
@@ -53,22 +69,6 @@ class GoogleIdToken extends Message {
       'subject',
       'jwtid',
     ];
-
-    /** Known optional claims */
-    this.knownOptionalClaims = {
-      exp: 'exp',
-      aud: 'aud',
-    };
-
-    /** Required claims that need to be verified */
-    this.claimsForVerification = {
-      name: 'name',
-      email: 'email',
-      picture: 'picture',
-      iss: 'iss',
-      sub: 'sub',
-      maxAge: 'maxAge',
-    };
   }
 
   static init(payload, options){

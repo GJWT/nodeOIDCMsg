@@ -15,10 +15,11 @@ const Token = require('./token');
  * @class
  * @constructor
  * @extends Message
- * @param {*} iss
- * @param {*} sub
- * @param {*} iat
- * @param {*} jti
+ * @param {Object} claims Standard claims for BasicIdToken
+ * @param {string} claims.iss Issuer
+ * @param {string} claims.sub Subject
+ * @param {string} claims.iat Issued at
+ * @param {string} claims.jti JWT Id
  */
 class BasicIdToken extends Message {
   constructor({iss, sub, iat, jti}={}) {
@@ -41,29 +42,28 @@ class BasicIdToken extends Message {
     ];
 
     /** Known required claims */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-      exp: 'exp',
-      nbf: 'nbf',
-    };
+    this.knownOptionalClaims = [
+      'aud',
+      'exp',
+      'nbf',
+    ];
 
     /** Required verification claims */
-    this.claimsForVerification = {
-      iss: 'iss',
-      sub: 'sub',
-      maxAge: 'maxAge',
-      jti: 'jti',
-    };
+    this.claimsForVerification = [
+      'iss',
+      'sub',
+      'maxAge',
+      'jti',
+    ];
 
     /** Required claims */
-    this.optionsToPayload = {
-      'iss': 'iss',
-      'sub': 'sub',
-      'iat': 'iat',
-      'jti': 'jti',
-    };
+    this.optionsToPayload = [
+      'iss',
+      'sub',
+      'iat',
+      'jti',
+    ];
   }
-  
   
   static init(payload, options){
     const basicIdToken = new BasicIdToken(payload);

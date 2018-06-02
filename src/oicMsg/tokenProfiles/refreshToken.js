@@ -25,10 +25,10 @@ class RefreshToken extends Message {
     this.validateRequiredFields();
 
     /** Required claims */
-    this.optionsToPayload = {
-      refreshToken: 'refreshToken',
-      accessToken: 'accessToken',
-    };
+    this.optionsToPayload = [
+      'refreshToken',
+      'accessToken',
+    ];
 
     /** Other option values */
     this.optionsForObjects = [
@@ -42,15 +42,15 @@ class RefreshToken extends Message {
     ];
 
     /** Known optional claims that need to be verified */
-    this.knownOptionalClaims = {
-      knownOptionalClaim: 'knownOptionalClaim',
-    };
-
+    this.knownOptionalClaims = [
+      'knownOptionalClaim',
+    ];
+    
     /** Required claims to be verified */
-    this.claimsForVerification = {
-      refreshToken: 'refreshToken',
-      accessToken: 'accessToken',
-    };
+    this.claimsForVerification = [
+      'refreshToken',
+      'accessToken',
+    ];
   }
 
   static init(payload, options){

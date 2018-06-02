@@ -1,6 +1,7 @@
 const Message = require('../message');
-const SINGLE_REQUIRED_STRING = require('./init').SINGLE_REQUIRED_STRING;
-const SINGLE_OPTIONAL_STRING = require('./init').SINGLE_OPTIONAL_STRING;
+const AccessToken = require('../tokenProfiles/accessToken');
+const SINGLE_REQUIRED_STRING = require('./init').SINGLE_REQUIRED_STRING
+const SINGLE_OPTIONAL_STRING = require('./init').SINGLE_OPTIONAL_STRING
 const REQUIRED_LIST_OF_SP_SEP_STRINGS =
     require('./init').REQUIRED_LIST_OF_SP_SEP_STRINGS;
 const OPTIONAL_LIST_OF_SP_SEP_STRINGS =
@@ -20,6 +21,11 @@ const OPTIONAL_LIST_OF_SP_SEP_STRINGS =
 class AccessTokenRequest extends Message {
   constructor(args) {
     super(args);
+    if (args){
+      this.claims = args;
+    }else{
+      this.claims = {};
+    }
     this.cParam = {
       'grant_type': SINGLE_REQUIRED_STRING,
       'code': SINGLE_REQUIRED_STRING,
@@ -29,7 +35,7 @@ class AccessTokenRequest extends Message {
       'state': SINGLE_OPTIONAL_STRING
     };
     this.cDefault = {'grant_type': 'authorization_code'};
-    return args;
+    return this;
   }
 }
 
@@ -43,6 +49,11 @@ class AccessTokenRequest extends Message {
 class AuthorizationRequest extends Message {
   constructor(reqArgs) {
     super(reqArgs);
+    if (reqArgs){
+      this.claims = reqArgs;
+    }else{
+      this.claims = {};
+    }
     this.cParam = {
       'response_type': REQUIRED_LIST_OF_SP_SEP_STRINGS,
       'client_id': SINGLE_REQUIRED_STRING,
@@ -50,9 +61,9 @@ class AuthorizationRequest extends Message {
       'redirect_uri': SINGLE_OPTIONAL_STRING,
       'state': SINGLE_OPTIONAL_STRING,
     };
-    return reqArgs;
+    return this;
   }
-}
+};
 
 /**
  * ROPCAccessTokenRequest
@@ -69,9 +80,9 @@ class ROPCAccessTokenRequest extends Message {
       'username': SINGLE_OPTIONAL_STRING,
       'password': SINGLE_OPTIONAL_STRING,
       'scope': OPTIONAL_LIST_OF_SP_SEP_STRINGS
-    };
+    }
   }
-}
+};
 
 /**
  * CCAccessTokenRequest
@@ -87,11 +98,15 @@ class CCAccessTokenRequest extends Message {
       'grant_type': SINGLE_REQUIRED_STRING,
       'scope': OPTIONAL_LIST_OF_SP_SEP_STRINGS
     };
-    this.cDefault = {'grant_type': 'client_credentials'};
-    this.cAllowedValues = {'grant_type': ['client_credentials']};
+    this.cDefault = {
+      'grant_type': 'client_credentials'
+    };
+    this.cAllowedValues = {
+      'grant_type': ['client_credentials']
+    };
     return args;
   }
-}
+};
 
 /**
  * RefreshAccessTokenRequest
@@ -100,8 +115,8 @@ class CCAccessTokenRequest extends Message {
  * @extends Message
  */
 class RefreshAccessTokenRequest extends Message {
-  constructor() {
-    super();
+  constructor(claims) {
+    super(claims);
     this.cParam = {
       'grant_type': SINGLE_REQUIRED_STRING,
       'refresh_token': SINGLE_REQUIRED_STRING,
@@ -109,7 +124,7 @@ class RefreshAccessTokenRequest extends Message {
       'client_id': SINGLE_OPTIONAL_STRING,
       'client_secret': SINGLE_OPTIONAL_STRING
     };
-    this.cDefault = {'grant_type': 'refresh_token'};
+    this.claims = {'grant_type': 'refresh_token'};
     this.cAllowedValues = {'grant_type': ['refresh_token']};
   }
 }
@@ -123,8 +138,13 @@ class RefreshAccessTokenRequest extends Message {
 class ResourceRequest extends Message {
   constructor(args) {
     super(args);
+    if (args){
+      this.claims = args;
+    }else{
+      this.claims = {}
+    }
     this.cParam = {'access_token': SINGLE_OPTIONAL_STRING};
-    return args;
+    return this;
   }
 }
 

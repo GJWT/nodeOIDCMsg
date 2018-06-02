@@ -507,8 +507,8 @@ describe('Asymmetric Algorithms', function() {
             {iss: 'issuer', sub: 'subject', iat: clockTimestamp, jti: 'jwtid'});
 
         it('should throw', function(done) {
-
-          basicIdToken
+          try{
+            let decoded = basicIdToken
               .fromJWT(
                   'fruit.fruit.fruit', pub, {
                     'foo': 'bar',
@@ -520,13 +520,11 @@ describe('Asymmetric Algorithms', function() {
                     'jti': 'jwtid'
                   },
                   {'clockTimestamp': clockTimestamp, jwtid: 'jwtid'})
-              .then(function(decoded) {
-                assert.isUndefined(decoded);
-              })
-              .catch(function(err) {
-                assert.isNotNull(err);
-                assert.equal(err.name, 'JsonWebTokenError');
-              });
+              
+              }catch(err) {
+              assert.isNotNull(err);
+              assert.equal(err.name, 'JsonWebTokenError');
+            };
           done();
         });
       });
@@ -576,7 +574,8 @@ describe('Asymmetric Algorithms', function() {
             {iss: 'issuer', sub: 'subject', iat: clockTimestamp, jti: 'jwtid'});
 
         it('should return null', function(done) {
-          basicIdToken
+          try{
+          let decoded = basicIdToken
               .fromJWT(
                   'whatever.token', pub, {
                     'foo': 'bar',
@@ -588,13 +587,10 @@ describe('Asymmetric Algorithms', function() {
                     'jti': 'jwtid'
                   },
                   {'clockTimestamp': clockTimestamp, jwtid: 'jwtid'})
-              .then(function(decoded) {
-                assert.isUndefined(decoded);
-              })
-              .catch(function(err) {
+            }catch(err) {
                 assert.isNotNull(err);
                 assert.equal(err.name, 'JsonWebTokenError');
-              });
+            };
           done();
         });
       });

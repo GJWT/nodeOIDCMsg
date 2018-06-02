@@ -28,12 +28,12 @@ class AccessToken extends Message {
     this.iat = iat;
     this.validateRequiredFields();
 
-    /** Required claims */
-    this.optionsToPayload = {
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-    };
+     /** Required claims */
+     this.optionsToPayload = [
+      'iss',
+      'sub',
+      'iat',
+     ];
 
     /** Other option values */
     this.optionsForObjects = [
@@ -47,10 +47,10 @@ class AccessToken extends Message {
     ];
 
     /** Known optional claims */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-      exp: 'exp',
-    };
+    this.knownOptionalClaims = [
+      'aud',
+      'exp',
+    ];
   }
 
   /** Validate required claims */

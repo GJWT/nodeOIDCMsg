@@ -29,14 +29,13 @@ class RiscToken extends Message {
     this.iat = iat;
     this.validateRequiredFields();
 
-    /** Required claims */
-    this.optionsToPayload = {
-      jti: 'jti',
-      iss: 'iss',
-      sub: 'sub',
-      iat: 'iat',
-    };
-
+    this.optionsToPayload = [
+      'jti',
+      'iss',
+      'sub',
+      'iat',
+    ];
+    
     /** Other option values */
     this.optionsForObjects = [
       'expiresIn',
@@ -48,20 +47,18 @@ class RiscToken extends Message {
       'jwtid',
     ];
 
-    /** Required known optional claims */
-    this.knownOptionalClaims = {
-      aud: 'aud',
-      nbf: 'nbf',
-      exp: 'exp',
-    };
+    this.knownOptionalClaims = [
+      'aud',
+      'nbf',
+      'exp',
+    ];
 
-    /** Required claims that need to be verified */
-    this.claimsForVerification = {
-      jti: 'jti',
-      iss: 'iss',
-      sub: 'sub',
-      maxAge: 'maxAge',
-    };
+    this.claimsForVerification = [
+      'jti',
+      'iss',
+      'sub',
+      'maxAge',
+    ];
   }
 
   static init(payload, options){
